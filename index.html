@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Brief Template</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 13px; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #f7f7f5;
+  color: #1a1a18;
+  min-height: 100vh;
+}
+
+/* ─── CSS VARS ──────────────────────────────────── */
+:root {
+  --green-900: #0f3d0f;
+  --green-700: #1d6b1d;
+  --green-500: #2d9e2d;
+  --green-300: #6dcb6d;
+  --green-100: #d4f0d4;
+  --green-50:  #f0fbf0;
+  --amber-500: #d97706;
+  --amber-100: #fef3c7;
+  --amber-50:  #fffbeb;
+  --red-500:   #dc2626;
+  --red-50:    #fef2f2;
+  --gray-900:  #111110;
+  --gray-700:  #3d3d3a;
+  --gray-500:  #6b6b67;
+  --gray-300:  #b8b8b3;
+  --gray-100:  #e8e8e5;
+  --gray-50:   #f7f7f5;
+  --white:     #ffffff;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+/* ─── LAYOUT ────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ─── TOP BAR ───────────────────────────────────── */
+.topbar {
+  background: var(--green-700);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 44px;
+  position: sticky; top: 0; z-index: 200;
+  gap: 12px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.topbar-logo { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+.topbar-badge {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.85); font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px;
+}
+.topbar-tabs { display: flex; gap: 2px; flex: 1; justify-content: center; }
+.tab-btn {
+  background: none; border: none; color: rgba(255,255,255,0.65);
+  font-family: inherit; font-size: 12px; font-weight: 500;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s;
+}
+.tab-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.tab-btn.active { background: rgba(255,255,255,0.18); color: #fff; }
+.topbar-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-ghost {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; font-family: inherit; font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.2); }
+.btn-primary {
+  background: #fff; border: none;
+  color: var(--green-700); font-family: inherit; font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary:hover { background: var(--green-100); }
+
+/* ─── PANELS ────────────────────────────────────── */
+.panels { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 44px); }
+.panel-form { width: 52%; overflow-y: auto; border-right: 1px solid var(--gray-100); background: var(--white); }
+.panel-preview { width: 48%; overflow-y: auto; background: var(--gray-50); }
+
+/* ─── FORM PANEL ────────────────────────────────── */
+.form-inner { padding: 20px 20px 40px; }
+
+.form-section { margin-bottom: 24px; }
+.form-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--green-700);
+  margin-bottom: 12px; padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--green-100);
+  display: flex; align-items: center; gap: 6px;
+}
+.form-section-title .icon { font-size: 13px; }
+
+.field { margin-bottom: 12px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--gray-700); margin-bottom: 4px;
+}
+.field label .req { color: var(--red-500); margin-left: 2px; }
+.field label .hint { font-weight: 400; color: var(--gray-300); font-size: 10px; margin-left: 4px; }
+
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%;
+  font-family: inherit; font-size: 12.5px; color: var(--gray-900);
+  background: var(--gray-50); border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-sm); padding: 7px 10px;
+  outline: none; transition: border-color 0.15s, background 0.15s;
+  -webkit-appearance: none;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+  border-color: var(--green-300); background: var(--white);
+  box-shadow: 0 0 0 3px rgba(109,203,109,0.12);
+}
+textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
+select { cursor: pointer; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* Size input group */
+.size-group {
+  display: flex; align-items: center; gap: 6px;
+}
+.size-group input { flex: 1; }
+.size-sep { color: var(--gray-300); font-size: 14px; font-weight: 300; flex-shrink: 0; }
+.size-unit { font-size: 11px; color: var(--gray-500); flex-shrink: 0; padding: 0 4px; }
+
+/* Banner row */
+.banner-row {
+  background: var(--gray-50); border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.banner-row:focus-within { border-color: var(--green-300); }
+.banner-row-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.banner-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--green-700); color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.banner-row-title { font-size: 12px; font-weight: 600; color: var(--gray-700); flex: 1; }
+.remove-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--gray-300); font-size: 14px; padding: 2px 4px;
+  border-radius: 4px; transition: all 0.12s; line-height: 1;
+}
+.remove-btn:hover { color: var(--red-500); background: var(--red-50); }
+
+.add-btn {
+  width: 100%; background: none;
+  border: 1.5px dashed var(--green-300); border-radius: var(--radius-md);
+  color: var(--green-500); font-family: inherit; font-size: 12px; font-weight: 500;
+  padding: 8px; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.add-btn:hover { background: var(--green-50); border-color: var(--green-500); }
+
+/* Product tags */
+.product-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.product-tag {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--green-50); border: 1px solid var(--green-100);
+  border-radius: 20px; padding: 3px 8px 3px 10px;
+  font-size: 11.5px; color: var(--green-900);
+}
+.product-tag .del-tag {
+  background: none; border: none; cursor: pointer;
+  color: var(--green-300); font-size: 13px; line-height: 1;
+  padding: 0; display: flex; align-items: center;
+}
+.product-tag .del-tag:hover { color: var(--red-500); }
+.product-input-row { display: flex; gap: 6px; margin-top: 6px; }
+.product-input-row input { flex: 1; }
+.product-input-row button {
+  background: var(--green-700); border: none; color: #fff;
+  font-family: inherit; font-size: 11px; font-weight: 600;
+  padding: 0 12px; border-radius: var(--radius-sm); cursor: pointer;
+  white-space: nowrap; transition: background 0.15s;
+}
+.product-input-row button:hover { background: var(--green-900); }
+
+/* Color picker row */
+.color-swatches { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.swatch {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+  border: 2.5px solid transparent; transition: all 0.15s;
+  position: relative;
+}
+.swatch:hover { transform: scale(1.1); }
+.swatch.active { border-color: var(--gray-900); }
+.swatch.active::after {
+  content: '✓'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+
+/* ─── PREVIEW PANEL ─────────────────────────────── */
+.preview-inner { padding: 16px; }
+.preview-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md); overflow: hidden;
+}
+
+/* Preview: hero */
+.pv-hero {
+  padding: 18px 20px 16px;
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 55%, var(--green-500) 100%);
+  color: #fff;
+}
+.pv-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.8px; opacity: 0.6; margin-bottom: 5px; }
+.pv-title { font-size: 18px; font-weight: 700; line-height: 1.2; min-height: 22px; }
+.pv-sub { font-size: 11.5px; opacity: 0.8; margin-top: 4px; min-height: 16px; }
+.pv-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; min-height: 22px; }
+.pv-tag {
+  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 2px 9px; font-size: 10px;
+}
+
+/* Preview: summary bar */
+.pv-summary {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-bottom: 1px solid var(--gray-100);
+}
+.pv-sum-cell { padding: 10px 8px; text-align: center; border-right: 1px solid var(--gray-100); }
+.pv-sum-cell:last-child { border-right: none; }
+.pv-sum-num { font-size: 18px; font-weight: 700; color: var(--green-700); line-height: 1; }
+.pv-sum-lbl { font-size: 9px; color: var(--gray-300); margin-top: 2px; }
+
+/* Preview: section */
+.pv-sec {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px 6px;
+  background: var(--gray-50); border-top: 1px solid var(--gray-100);
+}
+.pv-sec-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--green-700); color: #fff;
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.pv-sec-title { font-size: 11.5px; font-weight: 700; color: var(--gray-900); }
+.pv-sec-badge {
+  margin-left: auto; font-size: 9.5px;
+  background: var(--white); border: 1px solid var(--gray-100);
+  border-radius: 5px; padding: 1px 7px; color: var(--gray-500);
+}
+
+.pv-body { padding: 10px 14px 12px; }
+
+/* Preview: banner chips */
+.pv-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.pv-chip { border: 1px solid var(--green-100); border-radius: 8px; overflow: hidden; min-width: 120px; }
+.pv-chip-head { background: var(--green-50); padding: 3px 9px; font-size: 9.5px; font-weight: 600; color: var(--green-700); border-bottom: 1px solid var(--green-100); }
+.pv-chip-val { padding: 4px 9px; font-size: 14px; font-weight: 700; color: var(--gray-900); }
+.pv-chip-note { padding: 0 9px 5px; font-size: 9.5px; color: var(--gray-300); }
+
+/* Preview: spec table */
+.pv-specs { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 8px; }
+.pv-specs tr { border-bottom: 1px solid var(--gray-100); }
+.pv-specs tr:last-child { border-bottom: none; }
+.pv-specs td { padding: 4px 2px; }
+.pv-specs td:first-child { color: var(--gray-500); width: 45%; }
+.pv-specs td:last-child { font-weight: 600; color: var(--gray-900); }
+
+/* Preview: alert */
+.pv-alert {
+  background: var(--amber-50); border: 1px solid #fcd34d;
+  border-radius: 6px; padding: 7px 10px;
+  font-size: 10.5px; color: #92400e; line-height: 1.5;
+}
+.pv-alert-green { background: var(--green-50); border-color: var(--green-300); color: var(--green-900); }
+
+/* Preview: products */
+.pv-prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 6px; }
+.pv-prod {
+  background: var(--white); border: 1px solid var(--green-100);
+  border-left: 3px solid var(--green-500);
+  border-radius: 6px; padding: 6px 8px;
+}
+.pv-prod-name { font-size: 11px; font-weight: 600; color: var(--green-900); }
+.pv-prod-detail { font-size: 9.5px; color: var(--gray-300); margin-top: 2px; }
+
+/* Preview: deliverables table */
+.pv-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+.pv-table th {
+  background: var(--green-50); padding: 5px 8px;
+  text-align: left; font-size: 9px; font-weight: 700;
+  color: var(--green-700); text-transform: uppercase; letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--green-100);
+}
+.pv-table td { padding: 5px 8px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+.pv-table tr:last-child td { border-bottom: none; }
+.pv-table .tot td { background: var(--green-50); font-weight: 700; color: var(--green-700); }
+.pv-badge {
+  display: inline-block; background: var(--green-100); border-radius: 4px;
+  padding: 1px 6px; font-size: 10px; font-weight: 700; color: var(--green-700);
+}
+code {
+  font-family: 'DM Mono', monospace; font-size: 9.5px;
+  background: var(--gray-100); border-radius: 3px; padding: 1px 4px; color: var(--gray-700);
+}
+
+/* Preview: notes */
+.pv-notes { list-style: none; }
+.pv-notes li {
+  display: flex; gap: 7px; font-size: 11px; color: var(--gray-700);
+  padding: 3px 0; border-bottom: 1px solid var(--gray-100); line-height: 1.5;
+}
+.pv-notes li:last-child { border-bottom: none; }
+.pv-notes li::before { content: '✓'; color: var(--green-500); font-weight: 700; flex-shrink: 0; }
+
+.pv-footer { text-align: center; padding: 10px; font-size: 9px; color: var(--gray-300); border-top: 1px solid var(--gray-100); }
+
+/* ─── EXPORT MODAL ──────────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 500;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--white); border-radius: var(--radius-lg);
+  width: 440px; max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+.modal-head {
+  background: var(--green-700); color: #fff;
+  padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h3 { font-size: 14px; font-weight: 700; }
+.modal-close { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 18px; cursor: pointer; line-height: 1; }
+.modal-body { padding: 18px; }
+.modal-step {
+  display: flex; gap: 12px; margin-bottom: 14px;
+}
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--green-700); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.step-content { flex: 1; }
+.step-title { font-size: 12.5px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
+.step-desc { font-size: 11.5px; color: var(--gray-500); line-height: 1.5; }
+.step-link { color: var(--green-700); text-decoration: underline; font-weight: 500; }
+.modal-code {
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gray-700);
+  margin-top: 5px; word-break: break-all;
+}
+.modal-footer { padding: 12px 18px 16px; display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid var(--gray-100); }
+.modal-btn-sec {
+  background: var(--gray-50); border: 1.5px solid var(--gray-100);
+  color: var(--gray-700); font-family: inherit; font-size: 12px; font-weight: 500;
+  padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer;
+}
+.modal-btn-pri {
+  background: var(--green-700); border: none;
+  color: #fff; font-family: inherit; font-size: 12px; font-weight: 600;
+  padding: 6px 16px; border-radius: var(--radius-sm); cursor: pointer;
+}
+.modal-btn-pri:hover { background: var(--green-900); }
+
+/* ─── SCROLLBAR ─────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-100); border-radius: 10px; }
+
+/* ─── TOAST ─────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: var(--green-900); color: #fff;
+  font-size: 12px; font-weight: 500; padding: 8px 16px; border-radius: 20px;
+  box-shadow: var(--shadow-md); z-index: 999;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  opacity: 0; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ─── PREVIEW-ONLY VIEW ──────────────────────────── */
+.preview-only .panel-form { display: none; }
+.preview-only .panel-preview { width: 100%; }
+.preview-only .preview-inner { padding: 20px; max-width: 760px; margin: 0 auto; }
+
+/* ─── EMPTY STATE ───────────────────────────────── */
+.empty { color: var(--gray-300); font-style: italic; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-logo">🌿 Brief Builder</span>
+    <span class="topbar-badge">Amazon · Storefront</span>
+  </div>
+  <div class="topbar-tabs">
+    <button class="tab-btn active" onclick="setMode('split')">Split View</button>
+    <button class="tab-btn" onclick="setMode('form')">Form</button>
+    <button class="tab-btn" onclick="setMode('preview')">Preview</button>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-ghost" onclick="resetForm()">↺ Reset</button>
+    <button class="btn-ghost" onclick="copyHTML()">Copy HTML</button>
+    <button class="btn-primary" onclick="openExport()">⬇ Export</button>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div class="panels" id="panels">
+
+  <!-- ── FORM PANEL ── -->
+  <div class="panel-form" id="panelForm">
+    <div class="form-inner">
+
+      <!-- 1. PROJECT INFO -->
+      <div class="form-section">
+        <div class="form-section-title"><span class="icon">📋</span> Thông tin dự án</div>
+
+        <div class="field">
+          <label>Tên chiến dịch / Campaign <span class="req">*</span></label>
+          <input type="text" id="campaignName" placeholder="VD: Spring Sales 2025" oninput="update()">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Platform <span class="req">*</span></label>
+            <select id="platform" onchange="update()">
+              <option value="Amazon">Amazon</option>
+              <option value="Shopee">Shopee</option>
+              <option value="Lazada">Lazada</option>
+              <option value="TikTok Shop">TikTok Shop</option>
+              <option value="Website">Website</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Theme / Chủ đề</label>
+            <input type="text" id="theme" placeholder="VD: Spring / Mùa xuân" oninput="update()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Mô tả ngắn <span class="hint">(optional)</span></label>
+          <textarea id="desc" placeholder="Mô tả ngắn về chiến dịch, mục tiêu, đối tượng..." oninput="update()" rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- 2. BANNER SPECS -->
+      <div class="form-section">
+        <div class="form-section-title"><span class="icon">🖼</span> Thông số Banner</div>
+
+        <div id="bannerList"></div>
+
+        <button class="add-btn" onclick="addBanner()">
+          <span>＋</span> Thêm loại banner
+        </button>
+      </div>
+
+      <!-- 3. PRODUCTS -->
+      <div class="form-section">
+        <div class="form-section-title"><span class="icon">🛒</span> Sản phẩm có deal</div>
+
+        <div class="product-input-row">
+          <input type="text" id="productInput" placeholder="Tên sản phẩm + quy cách, VD: Mango 250g" onkeydown="if(event.key==='Enter')addProduct()">
+          <button onclick="addProduct()">+ Thêm</button>
+        </div>
+        <div class="product-tags" id="productTags"></div>
+      </div>
+
+      <!-- 4. GLOBAL RULES -->
+      <div class="form-section">
+        <div class="form-section-title"><span class="icon">📐</span> Quy định chung</div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Kích thước tối đa / chiều</label>
+            <div class="size-group">
+              <input type="number" id="maxPx" value="5000" min="100" max="10000" oninput="update()">
+              <span class="size-unit">px</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Font tối thiểu (small banner)</label>
+            <div class="size-group">
+              <input type="number" id="minFont" value="14" min="8" max="72" oninput="update()">
+              <span class="size-unit">pt</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Màu chủ đạo</label>
+          <div class="color-swatches" id="colorSwatches">
+            <div class="swatch active" style="background:#2d9e2d" data-color="#2d9e2d" onclick="selectColor(this)" title="Green"></div>
+            <div class="swatch" style="background:#d97706" data-color="#d97706" onclick="selectColor(this)" title="Amber"></div>
+            <div class="swatch" style="background:#2563eb" data-color="#2563eb" onclick="selectColor(this)" title="Blue"></div>
+            <div class="swatch" style="background:#dc2626" data-color="#dc2626" onclick="selectColor(this)" title="Red"></div>
+            <div class="swatch" style="background:#9333ea" data-color="#9333ea" onclick="selectColor(this)" title="Purple"></div>
+            <div class="swatch" style="background:#0891b2" data-color="#0891b2" onclick="selectColor(this)" title="Cyan"></div>
+            <div class="swatch" style="background:#db2777" data-color="#db2777" onclick="selectColor(this)" title="Pink"></div>
+            <div class="swatch" style="background:#111110" data-color="#111110" onclick="selectColor(this)" title="Dark"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Quy định bổ sung <span class="hint">(mỗi dòng = 1 quy định)</span></label>
+          <textarea id="extraRules" placeholder="VD: Ảnh sản phẩm phải rõ nét&#10;Không dùng font nhỏ hơn 14pt" oninput="update()" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- 5. DEADLINE -->
+      <div class="form-section">
+        <div class="form-section-title"><span class="icon">📅</span> Deadline & Liên hệ</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Deadline nộp file</label>
+            <input type="text" id="deadline" placeholder="VD: 20/05/2025" oninput="update()">
+          </div>
+          <div class="field">
+            <label>Người phụ trách</label>
+            <input type="text" id="contact" placeholder="Tên / Email / Slack" oninput="update()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Ghi chú thêm <span class="hint">(optional)</span></label>
+          <textarea id="notes" placeholder="Bất kỳ lưu ý nào muốn gửi tới designer..." oninput="update()" rows="2"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /panel-form -->
+
+  <!-- ── PREVIEW PANEL ── -->
+  <div class="panel-preview" id="panelPreview">
+    <div class="preview-inner">
+      <div class="preview-card" id="previewCard">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panels -->
+</div><!-- /app -->
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⬇ Export & Embed vào Notion</h3>
+      <button class="modal-close" onclick="closeExport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Download file HTML</div>
+          <div class="step-desc">Nhấn nút <strong>Download HTML</strong> bên dưới để tải brief về máy.</div>
+        </div>
+      </div>
+      <div class="modal-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Host file lên Tiiny.host</div>
+          <div class="step-desc">Vào <a class="step-link" href="https://tiiny.host" target="_blank">tiiny.host</a> → kéo thả file HTML → nhận link public.</div>
+        </div>
+      </div>
+      <div class="modal-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Embed vào Notion</div>
+          <div class="step-desc">Trong Notion gõ <code>/embed</code> → paste link → kéo resize block chiều cao ~900px.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn-sec" onclick="closeExport()">Đóng</button>
+      <button class="modal-btn-pri" onclick="downloadHTML()">⬇ Download HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── STATE ──────────────────────────────────────── */
+let state = {
+  campaignName: 'Spring Sales 2025',
+  platform: 'Amazon',
+  theme: 'Spring / Mùa Xuân',
+  desc: '',
+  banners: [
+    { id: 1, label: 'Hero Banner — Desktop', icon: '🖥', w: 1464, h: 625, format: 'JPG / PNG', files: 1, note: 'Landscape · Thiết kế riêng với mobile' },
+    { id: 2, label: 'Hero Banner — Mobile',  icon: '📱', w: 463,  h: 625, format: 'JPG / PNG', files: 1, note: 'Portrait · Không crop từ desktop' },
+    { id: 3, label: 'Secondary Banner',       icon: '📐', w: 362,  h: 453, format: 'JPG / PNG', files: 1, note: 'Banner phụ, portrait' },
+    { id: 4, label: 'Product Frame',          icon: '🏷', w: 166,  h: 182, format: 'PNG',        files: 7, note: 'Thumbnail · 1 file / sản phẩm' },
+  ],
+  products: [
+    { name: 'Sugarcane Powder', detail: '600g' },
+    { name: 'Jackfruit',        detail: '250g' },
+    { name: 'Pineapple',        detail: 'Pack of 3' },
+    { name: 'Dragon Fruit',     detail: 'Pack of 3' },
+    { name: 'Mango',            detail: '250g' },
+    { name: 'Soursop',          detail: 'Pack of 5' },
+    { name: 'Mango No Sugar',   detail: 'Pack of 3' },
+  ],
+  maxPx: 5000,
+  minFont: 14,
+  color: '#2d9e2d',
+  extraRules: '',
+  deadline: '',
+  contact: '',
+  notes: '',
+};
+let bannerIdCounter = 5;
+let viewMode = 'split';
+
+/* ─── INIT ───────────────────────────────────────── */
+window.onload = () => {
+  // Populate form from state
+  document.getElementById('campaignName').value = state.campaignName;
+  document.getElementById('platform').value     = state.platform;
+  document.getElementById('theme').value        = state.theme;
+  document.getElementById('maxPx').value        = state.maxPx;
+  document.getElementById('minFont').value      = state.minFont;
+
+  renderBannerList();
+  renderProductTags();
+  update();
+};
+
+/* ─── READ FORM → STATE ──────────────────────────── */
+function readForm() {
+  state.campaignName = document.getElementById('campaignName').value.trim();
+  state.platform     = document.getElementById('platform').value;
+  state.theme        = document.getElementById('theme').value.trim();
+  state.desc         = document.getElementById('desc').value.trim();
+  state.maxPx        = parseInt(document.getElementById('maxPx').value) || 5000;
+  state.minFont      = parseInt(document.getElementById('minFont').value) || 14;
+  state.extraRules   = document.getElementById('extraRules').value.trim();
+  state.deadline     = document.getElementById('deadline').value.trim();
+  state.contact      = document.getElementById('contact').value.trim();
+  state.notes        = document.getElementById('notes').value.trim();
+
+  // Read banner fields
+  state.banners.forEach(b => {
+    const wEl = document.getElementById(`bw_${b.id}`);
+    const hEl = document.getElementById(`bh_${b.id}`);
+    const lEl = document.getElementById(`bl_${b.id}`);
+    const fEl = document.getElementById(`bf_${b.id}`);
+    const nEl = document.getElementById(`bn_${b.id}`);
+    const cEl = document.getElementById(`bc_${b.id}`);
+    if (wEl) b.w = parseInt(wEl.value) || b.w;
+    if (hEl) b.h = parseInt(hEl.value) || b.h;
+    if (lEl) b.label = lEl.value;
+    if (fEl) b.format = fEl.value;
+    if (nEl) b.files = parseInt(nEl.value) || 1;
+    if (cEl) b.note = cEl.value;
+  });
+}
+
+/* ─── RENDER BANNER LIST ─────────────────────────── */
+function renderBannerList() {
+  const container = document.getElementById('bannerList');
+  container.innerHTML = state.banners.map((b, i) => `
+    <div class="banner-row" id="brow_${b.id}">
+      <div class="banner-row-header">
+        <div class="banner-num">${i + 1}</div>
+        <input class="banner-row-title" type="text" id="bl_${b.id}"
+          value="${escHtml(b.label)}" placeholder="Tên loại banner"
+          style="background:none;border:none;padding:0;font-size:12px;font-weight:600;color:#3d3d3a;width:100%;outline:none;"
+          oninput="update()">
+        <button class="remove-btn" onclick="removeBanner(${b.id})" title="Xoá">✕</button>
+      </div>
+      <div class="field-row-3">
+        <div class="field" style="margin-bottom:0">
+          <label>Rộng (min px)</label>
+          <input type="number" id="bw_${b.id}" value="${b.w}" min="1" oninput="update()">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Cao (min px)</label>
+          <input type="number" id="bh_${b.id}" value="${b.h}" min="1" oninput="update()">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Số file</label>
+          <input type="number" id="bn_${b.id}" value="${b.files}" min="1" oninput="update()">
+        </div>
+      </div>
+      <div class="field-row" style="margin-top:8px">
+        <div class="field" style="margin-bottom:0">
+          <label>Format xuất</label>
+          <select id="bf_${b.id}" onchange="update()">
+            <option${b.format==='JPG / PNG'?' selected':''}>JPG / PNG</option>
+            <option${b.format==='PNG'?' selected':''}>PNG</option>
+            <option${b.format==='JPG'?' selected':''}>JPG</option>
+            <option${b.format==='WebP'?' selected':''}>WebP</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Ghi chú</label>
+          <input type="text" id="bc_${b.id}" value="${escHtml(b.note)}" placeholder="Lưu ý cho loại banner này" oninput="update()">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addBanner() {
+  const id = bannerIdCounter++;
+  state.banners.push({ id, label: `Banner ${state.banners.length + 1}`, icon: '🖼', w: 800, h: 600, format: 'JPG / PNG', files: 1, note: '' });
+  renderBannerList();
+  update();
+}
+
+function removeBanner(id) {
+  if (state.banners.length <= 1) { showToast('Cần ít nhất 1 banner'); return; }
+  state.banners = state.banners.filter(b => b.id !== id);
+  renderBannerList();
+  update();
+}
+
+/* ─── PRODUCTS ───────────────────────────────────── */
+function addProduct() {
+  const inp = document.getElementById('productInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  // Try to parse "Name Xg" or "Name Pack N"
+  const parts = val.split(/\s+/);
+  const last = parts[parts.length - 1];
+  const detail = (last.match(/^\d/) || last.toLowerCase().startsWith('pack')) ? parts.slice(-2).join(' ') : '';
+  const name = detail ? parts.slice(0, parts.length - (detail.includes(' ') ? 2 : 1)).join(' ') : val;
+  state.products.push({ name: name || val, detail });
+  inp.value = '';
+  renderProductTags();
+  update();
+}
+
+function removeProduct(i) {
+  state.products.splice(i, 1);
+  renderProductTags();
+  update();
+}
+
+function renderProductTags() {
+  document.getElementById('productTags').innerHTML = state.products.map((p, i) => `
+    <div class="product-tag">
+      <span>${escHtml(p.name)}${p.detail ? ` <span style="opacity:0.6;font-size:10px">${escHtml(p.detail)}</span>` : ''}</span>
+      <button class="del-tag" onclick="removeProduct(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+/* ─── COLOR ──────────────────────────────────────── */
+function selectColor(el) {
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  state.color = el.dataset.color;
+  update();
+}
+
+/* ─── VIEW MODE ──────────────────────────────────── */
+function setMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['split','form','preview'][i] === mode);
+  });
+  const pf = document.getElementById('panelForm');
+  const pp = document.getElementById('panelPreview');
+  const panels = document.getElementById('panels');
+  if (mode === 'split') {
+    pf.style.display = ''; pp.style.display = '';
+    pf.style.width = '52%'; pp.style.width = '48%';
+    panels.style.flexDirection = 'row';
+  } else if (mode === 'form') {
+    pf.style.display = ''; pp.style.display = 'none';
+    pf.style.width = '100%';
+  } else {
+    pf.style.display = 'none'; pp.style.display = '';
+    pp.style.width = '100%';
+  }
+}
+
+/* ─── UPDATE (main render loop) ─────────────────── */
+function update() {
+  readForm();
+  renderPreview();
+}
+
+/* ─── RENDER PREVIEW ─────────────────────────────── */
+function renderPreview() {
+  const s = state;
+  const totalFiles = s.banners.reduce((a, b) => a + b.files, 0);
+  const c = s.color;
+  const cDark = darken(c, 40);
+  const cLight = lighten(c, 85);
+  const cMid = lighten(c, 50);
+
+  const defaultRules = [
+    `Tất cả kích thước là <strong>tối thiểu</strong> — có thể làm lớn hơn, không được nhỏ hơn.`,
+    `Giới hạn tuyệt đối: <strong>không chiều nào vượt quá ${s.maxPx.toLocaleString()} px</strong>.`,
+    `Font tối thiểu cho banner nhỏ: <strong>${s.minFont}pt</strong>.`,
+    `PNG dùng khi cần nền trong suốt. JPG cho banner có nền màu hoặc ảnh đặc.`,
+    `Đặt tên file đúng chuẩn theo bảng Deliverables.`,
+  ];
+  const extraLines = s.extraRules ? s.extraRules.split('\n').filter(l => l.trim()) : [];
+  const allRules = [...defaultRules, ...extraLines.map(l => escHtml(l))];
+
+  // Sticky nav links
+  const navLinks = s.banners.map((b, i) =>
+    `<a href="#pvs${b.id}" style="color:rgba(255,255,255,0.75);font-size:10px;font-weight:500;text-decoration:none;padding:7px 11px;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap;display:inline-block;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">${b.label}</a>`
+  ).join('');
+
+  const html = `
+    <!-- STICKY NAV -->
+    <div style="position:sticky;top:0;z-index:50;background:${cDark};display:flex;align-items:center;overflow-x:auto;border-bottom:2px solid ${c};scrollbar-width:none;">
+      <span style="padding:7px 13px;color:#fff;font-size:11px;font-weight:700;letter-spacing:0.3px;border-right:1px solid rgba(255,255,255,0.2);flex-shrink:0;">🌿 ${escHtml(s.campaignName || 'Design Brief')}</span>
+      ${navLinks}
+      <a href="#pvs-deliv" style="color:rgba(255,255,255,0.75);font-size:10px;font-weight:500;text-decoration:none;padding:7px 11px;white-space:nowrap;display:inline-block;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">Deliverables</a>
+    </div>
+
+    <!-- HERO -->
+    <div style="padding:18px 20px 16px;background:linear-gradient(135deg,${cDark} 0%,${c} 55%,${cMid} 100%);color:#fff;">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.8px;opacity:0.6;margin-bottom:5px;">
+        ${escHtml(s.platform)} · Storefront Banner
+      </div>
+      <div style="font-size:18px;font-weight:700;line-height:1.2;">
+        ${escHtml(s.campaignName || '—')}${s.theme ? ` — ${escHtml(s.theme)}` : ''}
+      </div>
+      ${s.desc ? `<div style="font-size:11.5px;opacity:0.8;margin-top:4px;">${escHtml(s.desc)}</div>` : ''}
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">
+        <span style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:10px;">📦 ${escHtml(s.platform)}</span>
+        ${s.theme ? `<span style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:10px;">🌸 ${escHtml(s.theme)}</span>` : ''}
+        <span style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:10px;">📏 Max ${s.maxPx.toLocaleString()}px</span>
+        <span style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:10px;">🖼 ${s.banners.length} loại banner</span>
+        <span style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:10px;">📁 ${totalFiles} files</span>
+        ${s.deadline ? `<span style="background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:10px;">📅 ${escHtml(s.deadline)}</span>` : ''}
+      </div>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #eee;">
+      ${[
+        [s.banners.length, 'Loại banner'],
+        [s.products.length, 'Sản phẩm deal'],
+        [totalFiles, 'Files cần giao'],
+        [s.maxPx.toLocaleString()+'px', 'Max / chiều'],
+      ].map(([n,l]) => `
+        <div style="padding:10px 8px;text-align:center;border-right:1px solid #eee;">
+          <div style="font-size:18px;font-weight:700;color:${c};line-height:1;">${n}</div>
+          <div style="font-size:9px;color:#bbb;margin-top:2px;">${l}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- BANNER SECTIONS -->
+    ${s.banners.map((b, i) => {
+      const ratio = (b.w / b.h).toFixed(2);
+      const orient = b.w > b.h ? 'Landscape (ngang)' : b.w < b.h ? 'Portrait (dọc)' : 'Square';
+      const mW = Math.min(Math.round(b.w / b.h * 60), 160);
+      const mH = 60;
+      return `
+        <div id="pvs${b.id}" style="scroll-margin-top:38px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px 6px;background:#fafafa;border-top:1px solid #eee;">
+            <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+            <div style="font-size:11.5px;font-weight:700;color:#111;">${escHtml(b.label)}</div>
+            <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${b.files} file${b.files > 1 ? 's' : ''}</div>
+          </div>
+          <div style="padding:10px 14px 12px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <div style="border:1px solid ${cLight};border-radius:8px;overflow:hidden;min-width:115px;">
+                <div style="background:${cLight};padding:3px 9px;font-size:9.5px;font-weight:600;color:${cDark};border-bottom:1px solid ${cLight};">📐 Kích thước</div>
+                <div style="padding:4px 9px;font-size:15px;font-weight:700;color:#111;">${b.w} × ${b.h} px</div>
+                <div style="padding:0 9px 5px;font-size:9.5px;color:#bbb;">Tỉ lệ ~${ratio}:1 · ${orient}</div>
+              </div>
+              <div style="border:1px solid ${cLight};border-radius:8px;overflow:hidden;min-width:115px;">
+                <div style="background:${cLight};padding:3px 9px;font-size:9.5px;font-weight:600;color:${cDark};border-bottom:1px solid ${cLight};">📁 Format & Files</div>
+                <div style="padding:4px 9px;font-size:15px;font-weight:700;color:#111;">${escHtml(b.format)}</div>
+                <div style="padding:0 9px 5px;font-size:9.5px;color:#bbb;">${b.files} file cần giao</div>
+              </div>
+            </div>
+
+            <!-- Mockup visual -->
+            <div style="display:flex;gap:10px;align-items:flex-end;background:#f6f6f4;border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:10px;">
+              <div style="border:2px dashed ${cMid};border-radius:6px;width:${mW}px;height:${mH}px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px;background:${cLight}22;flex-shrink:0;">
+                <div style="font-size:9px;font-weight:600;color:${c};text-align:center;">${b.w}×${b.h}</div>
+              </div>
+              <div style="font-size:11px;color:#555;line-height:1.5;">
+                ${b.note ? escHtml(b.note) : `Kích thước tối thiểu ${b.w}×${b.h}px · Max < ${s.maxPx.toLocaleString()}px`}
+              </div>
+            </div>
+
+            <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;">
+              ${[
+                ['Chiều rộng (min)', `${b.w} px`],
+                ['Chiều cao (min)', `${b.h} px`],
+                ['Tối đa mỗi chiều', `< ${s.maxPx.toLocaleString()} px`],
+                ['Format xuất', b.format],
+                ['Số file cần giao', `${b.files} file${b.files > 1 ? `s${b.files === s.products.length ? ' (1 / sản phẩm)' : ''}` : ''}`],
+              ].map(([k,v]) => `
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:4px 2px;color:#888;width:45%;">${k}</td>
+                  <td style="padding:4px 2px;font-weight:600;color:#111;">${v}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('<div style="height:0;border-top:1px solid #eee;"></div>')}
+
+    <!-- PRODUCTS -->
+    ${s.products.length > 0 ? `
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px 6px;background:#fafafa;border-top:1px solid #eee;">
+        <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${s.banners.length + 1}</div>
+        <div style="font-size:11.5px;font-weight:700;color:#111;">Danh Sách Sản Phẩm Có Deal</div>
+        <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${s.products.length} SKU</div>
+      </div>
+      <div style="padding:10px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;">
+        ${s.products.map(p => `
+          <div style="background:#fff;border:1px solid ${cLight};border-left:3px solid ${c};border-radius:6px;padding:6px 8px;">
+            <div style="font-size:11px;font-weight:600;color:${cDark};">${escHtml(p.name)}</div>
+            ${p.detail ? `<div style="font-size:9.5px;color:#bbb;margin-top:2px;">${escHtml(p.detail)}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <!-- DELIVERABLES -->
+    <div id="pvs-deliv" style="border-top:1px solid #eee;scroll-margin-top:38px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px 6px;background:#fafafa;">
+        <div style="width:18px;height:18px;border-radius:50%;background:${cDark};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">✓</div>
+        <div style="font-size:11.5px;font-weight:700;color:#111;">Tổng Hợp Deliverables</div>
+        <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${totalFiles} files</div>
+      </div>
+      <div style="padding:0 0 0;">
+        <table style="width:100%;border-collapse:collapse;font-size:10.5px;">
+          <thead>
+            <tr>
+              ${['Loại Banner','Kích thước','Format','Files','Tên file'].map(h =>
+                `<th style="background:${cLight};padding:5px 10px;text-align:left;font-size:9px;font-weight:700;color:${cDark};text-transform:uppercase;letter-spacing:0.4px;border-bottom:1px solid ${cLight};">${h}</th>`
+              ).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${s.banners.map((b, i) => `
+              <tr style="${i % 2 === 1 ? `background:#fafafa;` : ''}">
+                <td style="padding:5px 10px;border-bottom:1px solid #f5f5f5;">${escHtml(b.label)}</td>
+                <td style="padding:5px 10px;border-bottom:1px solid #f5f5f5;font-weight:600;">${b.w} × ${b.h} px</td>
+                <td style="padding:5px 10px;border-bottom:1px solid #f5f5f5;">${escHtml(b.format)}</td>
+                <td style="padding:5px 10px;border-bottom:1px solid #f5f5f5;"><span style="background:${cLight};border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;color:${c};">${b.files}</span></td>
+                <td style="padding:5px 10px;border-bottom:1px solid #f5f5f5;font-family:monospace;font-size:9.5px;color:#666;">${slugName(b.label)}.${b.format.toLowerCase().split('/')[0].trim()}</td>
+              </tr>
+            `).join('')}
+            <tr style="background:${cLight};">
+              <td colspan="3" style="padding:6px 10px;font-weight:700;color:${cDark};">TỔNG CỘNG</td>
+              <td style="padding:6px 10px;"><span style="background:${c};border-radius:4px;padding:1px 8px;font-size:10px;font-weight:700;color:#fff;">${totalFiles}</span></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RULES -->
+    <div style="border-top:1px solid #eee;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px 6px;background:#fafafa;">
+        <div style="width:18px;height:18px;border-radius:50%;background:${cDark};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">!</div>
+        <div style="font-size:11.5px;font-weight:700;color:#111;">Quy Định Chung</div>
+      </div>
+      <div style="padding:10px 14px 4px;">
+        <ul style="list-style:none;">
+          ${allRules.map(r => `
+            <li style="display:flex;gap:7px;font-size:11px;color:#555;padding:3px 0;border-bottom:1px solid #f5f5f5;line-height:1.5;">
+              <span style="color:${c};font-weight:700;flex-shrink:0;">✓</span>
+              <span>${r}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+
+      ${(s.deadline || s.contact || s.notes) ? `
+        <div style="margin:8px 14px 14px;background:${cLight};border:1px solid ${cMid};border-radius:8px;padding:10px 12px;">
+          ${s.deadline ? `<div style="font-size:11px;color:${cDark};margin-bottom:4px;">📅 <strong>Deadline:</strong> ${escHtml(s.deadline)}</div>` : ''}
+          ${s.contact ? `<div style="font-size:11px;color:${cDark};margin-bottom:4px;">👤 <strong>Liên hệ:</strong> ${escHtml(s.contact)}</div>` : ''}
+          ${s.notes ? `<div style="font-size:11px;color:${cDark};">📝 <strong>Ghi chú:</strong> ${escHtml(s.notes)}</div>` : ''}
+        </div>
+      ` : ''}
+    </div>
+
+    <div style="text-align:center;padding:10px;font-size:9px;color:#ccc;border-top:1px solid #f0f0f0;">
+      ${escHtml(s.platform)} · ${escHtml(s.campaignName || 'Design Brief')} · Generated by Brief Builder
+    </div>
+  `;
+
+  document.getElementById('previewCard').innerHTML = html;
+}
+
+/* ─── HELPERS ────────────────────────────────────── */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function slugName(label) {
+  return 'banner_' + label.toLowerCase()
+    .replace(/[^a-z0-9\s]/g,'').trim()
+    .replace(/\s+/g,'_').slice(0, 30);
+}
+function darken(hex, pct) {
+  const n = parseInt(hex.slice(1),16);
+  const r = Math.max(0,((n>>16)&0xff) - pct);
+  const g = Math.max(0,((n>>8)&0xff) - pct);
+  const b = Math.max(0,(n&0xff) - pct);
+  return `rgb(${r},${g},${b})`;
+}
+function lighten(hex, pct) {
+  const n = parseInt(hex.slice(1),16);
+  const r = Math.min(255,((n>>16)&0xff) + pct);
+  const g = Math.min(255,((n>>8)&0xff) + pct);
+  const b = Math.min(255,(n&0xff) + pct);
+  return `rgb(${r},${g},${b})`;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ─── RESET ──────────────────────────────────────── */
+function resetForm() {
+  if (!confirm('Reset về mẫu Spring Sales mặc định?')) return;
+  location.reload();
+}
+
+/* ─── EXPORT ─────────────────────────────────────── */
+function openExport() { document.getElementById('exportModal').classList.add('show'); }
+function closeExport() { document.getElementById('exportModal').classList.remove('show'); }
+
+function getExportHTML() {
+  const card = document.getElementById('previewCard').innerHTML;
+  const s = state;
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escHtml(s.campaignName || 'Design Brief')}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:13px;scroll-behavior:smooth}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#fff;color:#1a1a18;line-height:1.55}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#e0e0e0;border-radius:10px}
+</style>
+</head>
+<body>
+<div style="max-width:100%;border-radius:0;overflow:hidden;border:1px solid #eee;">
+${card}
+</div>
+</body>
+</html>`;
+}
+
+function downloadHTML() {
+  const html = getExportHTML();
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.campaignName || 'design-brief').toLowerCase().replace(/\s+/g,'-') + '-brief.html';
+  a.click();
+  showToast('✓ Đã download file HTML!');
+  closeExport();
+}
+
+function copyHTML() {
+  const html = getExportHTML();
+  navigator.clipboard.writeText(html).then(() => {
+    showToast('✓ Đã copy HTML vào clipboard!');
+  }).catch(() => {
+    showToast('⚠ Không copy được — thử Download');
+  });
+}
+</script>
+</body>
+</html>
