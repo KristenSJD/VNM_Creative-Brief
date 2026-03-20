@@ -782,27 +782,49 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
 
 <!-- ════ NEW BRIEF MENU ════ -->
 <div class="overlay" id="newBriefMenu">
-  <div class="modal">
+  <div class="modal" style="width:520px;max-width:95vw">
     <div class="modal-h"><h3>＋ Tạo Brief mới</h3><button class="modal-x" onclick="closeOverlay('newBriefMenu')">✕</button></div>
-    <div class="modal-b" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div onclick="openForm('banner');closeOverlay('newBriefMenu')"
-        style="border:1.5px solid var(--line);border-radius:10px;padding:16px;cursor:pointer;text-align:center;transition:all .15s"
-        onmouseover="this.style.borderColor='#6dcb6d';this.style.background='#f0fbf0'"
-        onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
-        <div style="font-size:28px;margin-bottom:8px">🖼</div>
-        <div style="font-size:13px;font-weight:600;color:var(--ink)">Banner Brief</div>
-        <div style="font-size:11px;color:var(--ink3);margin-top:3px">Hero, Secondary, Frame, Brand Story...</div>
+    <div class="modal-b" style="padding:14px 16px">
+
+      <!-- Blank new -->
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink4);margin-bottom:8px">Tạo mới từ đầu</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div onclick="openForm('banner');closeOverlay('newBriefMenu')"
+          style="border:1.5px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;text-align:center;transition:all .15s;background:var(--white)"
+          onmouseover="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--g3');this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--g0')"
+          onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--white)'">
+          <div style="font-size:26px;margin-bottom:6px">🖼</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--ink)">Banner Brief</div>
+          <div style="font-size:10.5px;color:var(--ink3);margin-top:2px">Hero, Secondary, Frame, Brand Story...</div>
+        </div>
+        <div onclick="openForm('video');closeOverlay('newBriefMenu')"
+          style="border:1.5px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;text-align:center;transition:all .15s;background:var(--white)"
+          onmouseover="this.style.borderColor='#93c5fd';this.style.background='#eff6ff'"
+          onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--white)'">
+          <div style="font-size:26px;margin-bottom:6px">🎬</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--ink)">Video Brief</div>
+          <div style="font-size:10.5px;color:var(--ink3);margin-top:2px">TikTok, Reels, YouTube, Amazon Ads...</div>
+        </div>
       </div>
-      <div onclick="openForm('video');closeOverlay('newBriefMenu')"
-        style="border:1.5px solid var(--line);border-radius:10px;padding:16px;cursor:pointer;text-align:center;transition:all .15s"
-        onmouseover="this.style.borderColor='#60a5fa';this.style.background='#eff6ff'"
-        onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
-        <div style="font-size:28px;margin-bottom:8px">🎬</div>
-        <div style="font-size:13px;font-weight:600;color:var(--ink)">Video Brief</div>
-        <div style="font-size:11px;color:var(--ink3);margin-top:3px">TikTok, Reels, YouTube, Amazon Ads...</div>
+
+      <!-- From template -->
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink4);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <span>Dùng brief cũ làm template</span>
+        <span style="font-size:9px;font-weight:400;color:var(--ink4);text-transform:none;letter-spacing:0">Giữ nguyên specs, sản phẩm, assignee — chỉ đổi tên & deadline</span>
       </div>
+
+      <input type="text" id="tmplSearch" placeholder="🔍 Tìm brief theo tên, platform, order..."
+        oninput="renderTemplateList()"
+        style="margin-bottom:8px;font-size:12px">
+
+      <div id="tmplList" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:5px">
+        <!-- rendered by JS -->
+      </div>
+
     </div>
-    <div class="modal-f"><button class="btn-cancel" onclick="closeOverlay('newBriefMenu')">Huỷ</button></div>
+    <div class="modal-f" style="border-top:1px solid var(--line)">
+      <button class="btn-cancel" onclick="closeOverlay('newBriefMenu')">Huỷ</button>
+    </div>
   </div>
 </div>
 
@@ -1091,6 +1113,7 @@ function briefCardHTML(b){
           <option value="done"${status==='done'?' selected':''}>✅ Done</option>
         </select>
         <button class="bc-act-btn" onclick="event.stopPropagation();editBrief('${b.id}')">✏️ Edit</button>
+        <button class="bc-act-btn" onclick="event.stopPropagation();useAsTemplate('${b.id}')" title="Tạo brief mới từ template này">📋 Template</button>
         ${b.driveUrl?`<button class="bc-act-btn" onclick="event.stopPropagation();window.open('${b.driveUrl}','_blank')">📂 Drive</button>`:''}
         <button class="bc-act-btn" onclick="event.stopPropagation();exportCard('${b.id}')">📸 Export</button>
         <button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBrief('${b.id}')">🗑</button>
@@ -1150,6 +1173,146 @@ function closeForm(){
 
 function showNewBriefMenu(){
   document.getElementById('newBriefMenu').classList.add('show');
+  document.getElementById('tmplSearch').value = '';
+  renderTemplateList();
+}
+
+/* ── TEMPLATE LIST ── */
+function renderTemplateList(){
+  const el = document.getElementById('tmplList'); if(!el) return;
+  const q  = (document.getElementById('tmplSearch')?.value||'').toLowerCase().trim();
+
+  const sorted = [...briefs]
+    .sort((a,b) => b.updatedAt - a.updatedAt);
+
+  const filtered = q
+    ? sorted.filter(b =>
+        (b.name||'').toLowerCase().includes(q) ||
+        (b.platform||'').toLowerCase().includes(q) ||
+        (b.orderNum||'').toLowerCase().includes(q) ||
+        (b.assignTo||'').toLowerCase().includes(q))
+    : sorted;
+
+  if(!filtered.length){
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--ink4);font-size:12px">${
+      briefs.length === 0
+        ? 'Chưa có brief nào — tạo brief đầu tiên bên trên!'
+        : 'Không tìm thấy brief phù hợp'
+    }</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(b => {
+    const typeIcon  = b.type === 'video' ? '🎬' : '🖼';
+    const typeColor = b.type === 'video' ? '#93c5fd' : getComputedStyle(document.documentElement).getPropertyValue('--g3');
+    const specsText = (b.bannerSpecs||b.videoSpecs||[]).length
+      ? `${(b.bannerSpecs||b.videoSpecs).length} spec${(b.bannerSpecs||b.videoSpecs).length>1?'s':''}`
+      : '';
+    const prodsText = (b.products||[]).length
+      ? `${b.products.length} sản phẩm`
+      : '';
+    const updDate   = b.updatedAt
+      ? new Date(b.updatedAt).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'2-digit'})
+      : '';
+
+    return `
+      <div onclick="openFromTemplate('${b.id}')"
+        style="display:flex;align-items:center;gap:10px;padding:9px 11px;
+               border:1.5px solid var(--line);border-radius:var(--r-md);
+               cursor:pointer;background:var(--white);transition:all .15s"
+        onmouseover="this.style.borderColor='${typeColor}';this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--g0')"
+        onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--white)'">
+        <!-- Type icon -->
+        <div style="width:32px;height:32px;border-radius:8px;background:${typeColor}22;
+                    display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
+          ${typeIcon}
+        </div>
+        <!-- Info -->
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink4)">#${h(b.orderNum||'—')}</span>
+            <span style="font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${h(b.name||'Untitled')}</span>
+            <span style="font-size:10px;color:var(--ink3);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px;flex-shrink:0">${h(b.platform||'—')}</span>
+          </div>
+          <div style="display:flex;gap:8px;font-size:10.5px;color:var(--ink4)">
+            ${b.assignTo ? `<span>✏️ ${h(b.assignTo)}</span>` : ''}
+            ${specsText  ? `<span>📐 ${specsText}</span>`      : ''}
+            ${prodsText  ? `<span>🛒 ${prodsText}</span>`      : ''}
+            ${updDate    ? `<span>🕐 ${updDate}</span>`        : ''}
+          </div>
+        </div>
+        <!-- Clone arrow -->
+        <div style="font-size:14px;color:var(--ink4);flex-shrink:0">→</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── CLONE FROM TEMPLATE ── */
+function openFromTemplate(id){
+  const src = briefs.find(b => b.id === id);
+  if(!src){ toast('Brief không tìm thấy'); return; }
+
+  // Deep clone, strip identity fields
+  const clone = JSON.parse(JSON.stringify(src));
+  delete clone.id;            // new id will be generated on save
+  delete clone.driveUrl;      // no drive URL yet
+  delete clone.published;
+  clone.orderNum  = nextOrder();
+  clone.status    = 'todo';
+  clone.createdAt = Date.now();
+  clone.updatedAt = Date.now();
+  clone.name      = '';       // user must type new campaign name
+  clone.deadline  = '';       // user must set new deadline
+  clone.notes     = src.notes || '';
+  clone._fromTemplate = src.name; // track template origin
+
+  closeOverlay('newBriefMenu');
+
+  // Open form pre-filled, in "new" mode (editingId = null)
+  currentFormType = clone.type || 'banner';
+  editingId       = null;
+  formSpecs = clone.bannerSpecs || clone.videoSpecs || [];
+  formProds = clone.products    || [];
+  formImgs  = [];   // don't copy images — user uploads fresh refs
+
+  document.getElementById('fpTitle').innerHTML =
+    `📋 <span style="font-size:11px;font-weight:400;color:var(--ink3)">Clone từ:</span> ${h(src.name||'Brief')}`;
+
+  document.getElementById('fpBody').innerHTML =
+    clone.type === 'video' ? videoFormHTML(clone) : bannerFormHTML(clone);
+
+  // Show "from template" banner at top of form
+  const fpBody = document.getElementById('fpBody');
+  fpBody.insertAdjacentHTML('afterbegin', `
+    <div style="background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--r-md);
+                padding:9px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px">📋</span>
+      <div>
+        <div style="font-size:11.5px;font-weight:600;color:var(--g7)">Clone từ template: <em>${h(src.name||'Brief')}</em></div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:2px">
+          Specs, sản phẩm và assignee đã được điền sẵn.
+          Hãy nhập <strong>Tên campaign</strong> và <strong>Deadline</strong> mới.
+        </div>
+      </div>
+    </div>`);
+
+  renderFormSpecs();
+  renderFormProds();
+  renderFormImgs();
+
+  document.getElementById('formOverlay').classList.add('show');
+
+  // Auto-focus campaign name
+  setTimeout(() => {
+    const nameEl = document.getElementById('f-name');
+    if(nameEl){ nameEl.focus(); nameEl.select(); }
+  }, 100);
+}
+
+/* ── USE AS TEMPLATE (from card) ── */
+function useAsTemplate(id){
+  closeOverlay('newBriefMenu'); // just in case
+  openFromTemplate(id);
 }
 
 /* ── BANNER FORM HTML ── */
