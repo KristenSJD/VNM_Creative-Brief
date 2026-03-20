@@ -2125,160 +2125,308 @@ function confirmDelete(){
   toast('Đã xoá brief');
 }
 
+
 async function exportCard(id){
   const b = briefs.find(x=>x.id===id);
   if(!b){ toast('Brief not found'); return; }
-  toast('Đang tạo ảnh...');
-  // Create temp card element
-  const tmp=document.createElement('div');
-  tmp.style.cssText='position:fixed;left:-9999px;top:0;width:700px;background:#fff;padding:20px;font-family:DM Sans,sans-serif;';
-  tmp.innerHTML=buildExportHTML(b);
-  document.body.appendChild(tmp);
-  try{
-    const blob=await domtoimage.toBlob(tmp,{scale:2,bgcolor:'#fff'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;
-    a.download=`brief_${(b.orderNum||b.id)}_${(b.name||'untitled').replace(/\s+/g,'-').toLowerCase()}.png`;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),5000);
-    toast('Đã tải PNG!');
-  }catch(e){toast(''+e.message);}
-  finally{document.body.removeChild(tmp);}
+
+  const htmlContent = buildExportHTML(b);
+  const blob = new Blob([htmlContent], {type:'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'brief_'+(b.orderNum||b.id)+'_'+(b.name||'untitled').replace(/\s+/g,'-').toLowerCase()+'.html';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('Đã xuất brief HTML!');
 }
+
+
 
 
 function buildExportHTML(b){
-  const color   = (typeof customColors!=='undefined'&&customColors?.g7)  ? customColors.g7  : '#1a6b1a';
-  const colorDk = (typeof customColors!=='undefined'&&customColors?.g9)  ? customColors.g9  : '#0a3d0a';
-  const colorMd = (typeof customColors!=='undefined'&&customColors?.g5)  ? customColors.g5  : '#2a9e2a';
-  const colorLt = (typeof customColors!=='undefined'&&customColors?.g1)  ? customColors.g1  : '#d4f0d4';
-  const colorBg = (typeof customColors!=='undefined'&&customColors?.g0)  ? customColors.g0  : '#f0fbf0';
-  const specs   = b.type==='video' ? (b.videoSpecs||[]) : (b.bannerSpecs||[]);
-  const totalFiles = specs.reduce((s,x)=>s+(+x.files||1),0);
-  const ts = new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  // Colors from current theme
+  const C  = (typeof customColors!=='undefined'&&customColors) ? customColors : {};
+  const c7 = C.g7||'#2d8c2d', c9=C.g9||'#1d5c1d', c5=C.g5||'#4aab4a';
+  const c1 = C.g1||'#c8e8c8', c0=C.g0||'#f0f9f0';
 
-  function ratioBox(w,h_){
-    const maxW=150,maxH=80,ratio=w/h_;
-    let bw=Math.min(maxW,ratio*maxH),bh=bw/ratio;
+  const specs      = b.type==='video' ? (b.videoSpecs||[]) : (b.bannerSpecs||[]);
+  const totalFiles = specs.reduce(function(s,x){ return s+(+(x.files)||1); },0);
+  const prods      = b.products||[];
+  const ts         = new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const typeLabel  = b.type==='video' ? 'Video Brief' : 'Storefront Banner';
+
+  // ── CSS embedded ──────────────────────────────────────────
+  var css = [
+    '*{box-sizing:border-box;margin:0;padding:0}',
+    'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1a1a1a;background:#f8f8f5;padding:24px 16px}',
+    '.container{max-width:860px;margin:0 auto}',
+    // Header
+    '.header{background:linear-gradient(135deg,'+c9+' 0%,'+c7+' 60%,'+c5+' 100%);color:#fff;padding:28px 24px;border-radius:16px;margin-bottom:20px}',
+    '.brand{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;opacity:.75;margin-bottom:6px}',
+    '.title-main{font-size:24px;font-weight:700}',
+    '.title-sub{font-size:13px;opacity:.85;margin-top:5px}',
+    '.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}',
+    '.tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 11px;font-size:11.5px}',
+    // Who/when strip
+    '.meta-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}',
+    '.meta-card{background:#fff;border:1px solid #e5ece5;border-radius:10px;padding:10px 13px}',
+    '.meta-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}',
+    '.meta-val{font-size:13px;font-weight:600;color:#1a1a1a}',
+    // Section title
+    '.section-title{font-size:11px;font-weight:700;color:'+c7+';text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;margin-top:20px;display:flex;align-items:center;gap:8px}',
+    '.section-title::after{content:"";flex:1;height:1px;background:#e0e8e0}',
+    // Card
+    '.card{background:#fff;border-radius:12px;border:1px solid #e5ece5;overflow:hidden;margin-bottom:14px}',
+    '.card-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f3f8f3;border-bottom:1px solid #e5ece5}',
+    '.num-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background:'+c9+'}',
+    '.card-title{font-size:14px;font-weight:600;flex:1}',
+    '.type-badge{font-size:11px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:2px 9px;color:#666}',
+    '.card-body{padding:14px}',
+    // Size chips
+    '.size-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}',
+    '.size-chip{border:1px solid #e0ece0;border-radius:10px;overflow:hidden;min-width:130px}',
+    '.size-chip-head{background:#f3f8f3;padding:5px 11px;font-size:11px;font-weight:600;color:'+c7+';border-bottom:1px solid #e0ece0}',
+    '.size-chip-val{padding:6px 11px;font-size:17px;font-weight:700;color:#1a3a1a}',
+    '.size-chip-note{padding:0 11px 7px;font-size:11px;color:#888}',
+    // Mockup
+    '.mockup-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;padding:12px;background:#f7fbf7;border-radius:10px}',
+    '.mockup-box{border:2px dashed '+c1+';border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:5px;background:'+c0+'}',
+    '.mockup-label{font-size:10px;color:'+c7+';font-weight:600;text-align:center}',
+    '.mockup-size{font-size:9px;color:#888;margin-top:1px;text-align:center}',
+    '.mockup-note{font-size:12px;color:#555;max-width:200px;line-height:1.5}',
+    // Specs table
+    '.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}',
+    '.specs{width:100%;border-collapse:collapse;font-size:12.5px}',
+    '.specs tr{border-bottom:1px solid #f0f0f0}',
+    '.specs tr:last-child{border-bottom:none}',
+    '.specs td{padding:5px 3px}',
+    '.specs td:first-child{color:#666;width:45%}',
+    '.specs td:last-child{font-weight:500;color:#1a1a1a}',
+    '.specs-note{font-size:10.5px;color:#999;font-weight:400}',
+    // Alert
+    '.alert{background:#fff8e8;border:1px solid #f5d97a;border-radius:8px;padding:9px 11px;font-size:11.5px;color:#7a5c00;margin-top:10px;line-height:1.5}',
+    // Products
+    '.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}',
+    '.product-card{background:#fff;border:1px solid #e0ece0;border-left:3px solid '+c5+';border-radius:8px;padding:9px 11px}',
+    '.product-name{font-size:12.5px;font-weight:600;color:#1a3a1a;margin-bottom:3px}',
+    '.product-detail{font-size:11px;color:#888}',
+    // Deliverables
+    '.deliv-table{width:100%;border-collapse:collapse;font-size:12.5px}',
+    '.deliv-table th{text-align:left;padding:7px 9px;background:#f3f8f3;font-size:10px;font-weight:700;color:'+c7+';text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e0ece0}',
+    '.deliv-table td{padding:7px 9px;border-bottom:1px solid #f5f5f5;vertical-align:middle}',
+    '.deliv-table tr:last-child td{border-bottom:none}',
+    '.deliv-table .total-row td{background:'+c0+';font-weight:600;color:'+c9+'}',
+    '.deliv-num{display:inline-block;background:'+c0+';border-radius:6px;padding:2px 8px;font-size:11.5px;font-weight:600;color:'+c9+'}',
+    // Notes
+    '.notes-box{background:#fff;border:1px solid #e0ece0;border-radius:10px;padding:14px}',
+    '.note-item{display:flex;gap:9px;font-size:12.5px;color:#444;padding:4px 0;line-height:1.5}',
+    'code{background:#f0f0f0;border-radius:4px;padding:1px 5px;font-family:monospace;font-size:10.5px;color:#333}',
+    '.divider{height:1px;background:#e5ece5;margin:16px 0}',
+  ].join('\n');
+
+  // ── MOCKUP BOX helper ────────────────────────────────────
+  function mockupBox(w,hh,label){
+    var maxW=160,maxH=90,ratio=w/hh;
+    var bw=Math.min(maxW,ratio*maxH),bh=bw/ratio;
     if(bh>maxH){bh=maxH;bw=bh*ratio;}
-    bw=Math.round(bw);bh=Math.round(bh);
-    return '<div style="width:'+bw+'px;height:'+bh+'px;border:2px dashed '+colorMd+';border-radius:5px;background:'+colorBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:9px;font-weight:600;color:'+color+'">'+w+'x'+h_+'</span></div>';
+    bw=Math.round(bw); bh=Math.round(bh);
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">'
+      +'<div class="mockup-box" style="width:'+bw+'px;height:'+bh+'px">'
+      +'<div class="mockup-label">'+h_(label)+'</div>'
+      +'<div class="mockup-size">'+w+'×'+hh+'</div>'
+      +'</div></div>';
   }
 
-  const specsHTML = specs.map(function(s,i){
-    const w=+(s.w||s.width||0),hh=+(s.h||s.height||0);
-    const hasRef=b.refImgs&&b.refImgs.length>0;
-    const svgSize='<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M2 6h12M6 2v12"/></svg>';
-    const svgFmt='<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M6 6h4M6 8.5h4M6 11h2"/></svg>';
-    const svgFile='<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round"><path d="M3 4h10v8H3z"/><path d="M7 4v8"/></svg>';
-    const specCards=[
-      [svgSize,'Kích thước',w&&hh?w+' \xd7 '+hh+' px':'—'],
-      [svgFmt,'Format',s.fmt||'—'],
-      [svgFile,'Files',String(s.files||1)],
-    ].map(function(sc){
-      return '<div style="background:'+colorBg+';border:1px solid '+colorLt+';border-radius:8px;padding:8px 12px;min-width:90px">'
-        +'<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">'+sc[0]
-        +'<span style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.5px">'+sc[1]+'</span></div>'
-        +'<div style="font-size:16px;font-weight:700;color:#111;letter-spacing:-.3px">'+h_(sc[2])+'</div></div>';
-    }).join('');
-    const refZone=hasRef&&i===0
-      ?'<div style="border:1.5px solid '+colorLt+';border-radius:8px;padding:8px;background:#fff">'
-        +'<div style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Reference ('+b.refImgs.length+')</div>'
+  // ── Each spec section ────────────────────────────────────
+  var badgeColors = [c9, c7, c5, '#7DC87D'];
+  var specsHTML = specs.map(function(s,i){
+    var w=+(s.w||0), hh=+(s.h||0);
+    var fmt=s.fmt||'—', files=+(s.files||1), note=s.note||'';
+    var badgeColor = badgeColors[Math.min(i,3)];
+    var badgeTextColor = i>=2 ? '#1a3a1a' : '#fff';
+
+    // Size chips — split desktop/mobile if name contains both (e.g. Hero Banner)
+    var sizeChips = '<div class="size-chip">'
+      +'<div class="size-chip-head">Kích thước</div>'
+      +'<div class="size-chip-val">'+w+' &times; '+hh+' px</div>'
+      +'<div class="size-chip-note">'+ratioLabel(w,hh)+'</div>'
+      +'</div>'
+      +'<div class="size-chip">'
+      +'<div class="size-chip-head">Format</div>'
+      +'<div class="size-chip-val" style="font-size:15px">'+h_(fmt)+'</div>'
+      +'</div>'
+      +'<div class="size-chip">'
+      +'<div class="size-chip-head">Số lượng</div>'
+      +'<div class="size-chip-val" style="font-size:15px">'+files+' file'+(files>1?'s':'')+'</div>'
+      +'</div>';
+
+    // Mockup
+    var mockup = w&&hh ? mockupBox(w,hh,s.label||'Banner') : '';
+    var noteText = note || (w&&hh ? 'Min '+w+'×'+hh+'px' : '');
+
+    // Specs table
+    var specsTable = '<div class="two-col">'
+      +'<table class="specs">'
+      +'<tr><td>Chiều rộng</td><td>'+w+' px <span class="specs-note">(tối thiểu)</span></td></tr>'
+      +'<tr><td>Chiều cao</td><td>'+hh+' px <span class="specs-note">(tối thiểu)</span></td></tr>'
+      +'<tr><td>Giới hạn tối đa</td><td>&lt; 5000 px</td></tr>'
+      +'</table>'
+      +'<table class="specs">'
+      +'<tr><td>Format xuất</td><td>'+h_(fmt)+'</td></tr>'
+      +'<tr><td>Số lượng file</td><td>'+files+' file'+(files>1?' ('+files+' SKU)':'')+'</td></tr>'
+      +(s.note?'<tr><td>Ghi chú</td><td>'+h_(s.note)+'</td></tr>':'')
+      +'</table>'
+      +'</div>';
+
+    // Reference images
+    var refHTML = '';
+    if(b.refImgs && b.refImgs.length > 0){
+      refHTML = '<div style="margin-top:10px;padding:10px;background:'+c0+';border:1px solid '+c1+';border-radius:8px">'
+        +'<div style="font-size:10px;font-weight:700;color:'+c7+';text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Reference ('+b.refImgs.length+')</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-        +(b.refImgs||[]).slice(0,4).map(function(img){return '<div style="border-radius:6px;overflow:hidden;border:1px solid '+colorLt+'"><img src="'+img.data+'" style="width:72px;height:56px;object-fit:cover;display:block"></div>';}).join('')
-        +'</div></div>'
-      :'<div style="border:1.5px dashed '+colorMd+';border-radius:8px;padding:9px 14px;text-align:center;color:'+color+';font-size:11.5px;font-weight:500;background:'+colorBg+'">Chưa có reference</div>';
-    return '<div style="margin-bottom:18px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden">'
-      +'<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f3f4f6">'
-      +'<div style="width:22px;height:22px;border-radius:50%;background:'+color+';color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div>'
-      +'<div style="font-size:13px;font-weight:700;color:#111;flex:1">'+h_(s.label||'Banner')+'</div>'
-      +'<div style="font-size:10px;color:#9ca3af;background:#f9fafb;border:1px solid #e5e7eb;border-radius:5px;padding:2px 8px">'+(s.files||1)+' file'+((s.files||1)>1?'s':'')+'</div>'
+        +(b.refImgs||[]).slice(0,6).map(function(img){
+          return '<div style="border-radius:6px;overflow:hidden;border:1px solid '+c1+'">'
+            +'<img src="'+img.data+'" style="width:72px;height:56px;object-fit:cover;display:block"></div>';
+        }).join('')
+        +'</div></div>';
+    }
+
+    return '<div class="card">'
+      +'<div class="card-header">'
+      +'<div class="num-badge" style="background:'+badgeColor+';color:'+badgeTextColor+'">'+(i+1)+'</div>'
+      +'<div class="card-title">'+h_(s.label||'Banner')+'</div>'
+      +'<div class="type-badge">'+files+' file'+(files>1?'s':'')+'</div>'
       +'</div>'
-      +'<div style="display:flex;gap:10px;padding:12px 14px 10px">'+specCards+'</div>'
-      +'<div style="margin:0 14px 12px;background:#f9fafb;border:1px solid #f0f0f0;border-radius:8px;padding:12px;display:flex;align-items:center;gap:14px">'
-      +(w&&hh?ratioBox(w,hh):'')
-      +'<div style="font-size:11.5px;color:#6b7280;line-height:1.5">'+h_(s.note||(w&&hh?'Min '+w+'x'+hh+'px':''))+'</div>'
+      +'<div class="card-body">'
+      +'<div class="size-row">'+sizeChips+'</div>'
+      +(w&&hh?'<div class="mockup-row">'+mockup+'<div class="mockup-note">'+h_(noteText)+'</div></div>':'')
+      +specsTable
+      +refHTML
       +'</div>'
-      +'<div style="margin:0 14px 14px">'+refZone+'</div>'
       +'</div>';
   }).join('');
 
-  const prodsHTML=(b.products||[]).length
-    ?'<div style="margin-bottom:18px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px">'
-      +'<div style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Sản phẩm có deal</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-      +(b.products||[]).map(function(p){
-        return '<div style="background:'+colorBg+';border:1px solid '+colorLt+';border-left:3px solid '+color+';border-radius:6px;padding:5px 10px">'
-          +'<div style="font-size:11.5px;font-weight:600;color:'+colorDk+'">'+h_(p.n)+'</div>'
-          +(p.d?'<div style="font-size:9.5px;color:#9ca3af">'+h_(p.d)+'</div>':'')
-          +'</div>';
-      }).join('')
-      +'</div></div>'
-    :'';
+  // ── Products ─────────────────────────────────────────────
+  var prodsHTML = '';
+  if(prods.length){
+    var prodCards = prods.map(function(p){
+      return '<div class="product-card">'
+        +'<div class="product-name">'+h_(p.n)+'</div>'
+        +(p.d?'<div class="product-detail">'+h_(p.d)+'</div>':'')
+        +'</div>';
+    }).join('');
+    prodsHTML = '<div class="divider"></div>'
+      +'<div class="section-title">Danh Sách Sản Phẩm Có Deal</div>'
+      +'<div style="font-size:12.5px;color:#666;margin-bottom:10px;line-height:1.5">'
+      +prods.length+' sản phẩm dưới đây cần được thiết kế riêng.</div>'
+      +'<div class="products-grid" style="margin-bottom:4px">'+prodCards+'</div>';
+  }
 
-  const notesHTML=b.notes
-    ?'<div style="margin-bottom:18px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:11px 14px;font-size:12px;color:#78350f;line-height:1.6">'
-      +'<strong style="display:block;margin-bottom:3px;font-size:9px;text-transform:uppercase;letter-spacing:.6px">Ghi chú</strong>'
-      +h_(b.notes)+'</div>'
-    :'';
-
-  const delivHTML=specs.length
-    ?'<div style="margin-bottom:18px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden">'
-      +'<div style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">'
-      +'<span style="font-size:11px;font-weight:700;color:#111">Deliverables</span>'
-      +'<span style="font-size:10px;background:'+color+';color:#fff;border-radius:20px;padding:1px 10px;font-weight:700">'+totalFiles+' files</span></div>'
-      +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
-      +'<tr style="background:'+colorBg+'">'
-      +['Banner','Kích thước','Format','Files','Filename'].map(function(th){return '<th style="padding:6px 10px;text-align:left;font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;border-bottom:1px solid '+colorLt+'">'+th+'</th>';}).join('')
+  // ── Deliverables table ───────────────────────────────────
+  var delivHTML = '';
+  if(specs.length){
+    var rows = specs.map(function(s,i){
+      var slug = (b.type==='video'?'video_':'banner_')
+        +(s.label||'').toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').slice(0,22)
+        +'.'+(s.fmt||'jpg').toLowerCase().split('/')[0].trim();
+      return '<tr>'
+        +'<td>'+h_(s.label)+'</td>'
+        +'<td>'+s.w+' &times; '+s.h+' px</td>'
+        +'<td>'+h_(s.fmt||'—')+'</td>'
+        +'<td><span class="deliv-num">'+(s.files||1)+' file'+((s.files||1)>1?'s':'')+'</span></td>'
+        +'<td><code>'+slug+'</code></td>'
+        +'</tr>';
+    }).join('');
+    delivHTML = '<div class="divider"></div>'
+      +'<div class="section-title">Tổng Hợp File Cần Giao (Deliverables)</div>'
+      +'<div class="card"><div class="card-body" style="padding:0;overflow:hidden">'
+      +'<table class="deliv-table"><thead><tr>'
+      +'<th>Loại Banner</th><th>Kích thước</th><th>Format</th><th>Số lượng</th><th>Tên file gợi ý</th>'
+      +'</tr></thead><tbody>'
+      +rows
+      +'<tr class="total-row">'
+      +'<td colspan="3"><strong>TỔNG CỘNG</strong></td>'
+      +'<td><span class="deliv-num">'+totalFiles+' files</span></td>'
+      +'<td></td>'
       +'</tr>'
-      +specs.map(function(s,i){
-        const slug='banner_'+(s.label||'').toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').slice(0,24)+'.'+(s.fmt||'jpg').toLowerCase().split('/')[0].trim();
-        return '<tr style="background:'+(i%2?'#f9fafb':'#fff')+'">'
-          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5">'+h_(s.label)+'</td>'
-          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5;font-weight:600;color:'+color+'">'+s.w+'x'+s.h+'</td>'
-          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5">'+h_(s.fmt||'—')+'</td>'
-          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5"><span style="background:'+colorLt+';border-radius:4px;padding:1px 7px;font-weight:700;color:'+color+'">'+(s.files||1)+'</span></td>'
-          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5;font-family:monospace;font-size:9.5px;color:#9ca3af">'+slug+'</td></tr>';
-      }).join('')
-      +'<tr style="background:'+colorLt+'"><td colspan="3" style="padding:7px 10px;font-weight:700;color:'+colorDk+'">TỔNG</td>'
-      +'<td style="padding:7px 10px"><span style="background:'+color+';border-radius:4px;padding:1px 9px;font-size:11px;font-weight:700;color:#fff">'+totalFiles+'</span></td><td></td></tr>'
-      +'</table></div>'
-    :'';
+      +'</tbody></table></div></div>';
+  }
 
-  const pillStyle='background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 11px;font-size:10.5px';
-  const pills=[b.platform,b.theme,specs.length?specs.length+' loại '+(b.type==='video'?'format':'banner'):null,totalFiles?totalFiles+' files':null].filter(Boolean)
-    .map(function(t){return '<span style="'+pillStyle+'">'+h_(t)+'</span>';}).join('');
+  // ── Notes ────────────────────────────────────────────────
+  var globalNotes = [
+    'Tất cả kích thước là <strong>kích thước tối thiểu</strong> — có thể xuất lớn hơn, không được nhỏ hơn.',
+    'Giới hạn tuyệt đối: <strong>không chiều nào vượt quá 5000px</strong> (yêu cầu platform).',
+    (b.theme?'Theme: <strong>'+h_(b.theme)+'</strong> — thiết kế phù hợp với concept và màu sắc của campaign.':''),
+    'Ảnh sản phẩm phải <strong>rõ ràng, chất lượng cao</strong> — không mờ, không vỡ pixel.',
+    'Đảm bảo toàn bộ text <strong>đọc được rõ ràng</strong>.',
+    (b.notes?'<strong>Ghi chú thêm:</strong> '+h_(b.notes):''),
+  ].filter(Boolean);
 
-  return '<div style="width:720px;background:#f5f5f3;font-family:-apple-system,BlinkMacSystemFont,\'DM Sans\',sans-serif;padding:0 0 4px">'
+  var notesHTML = '<div class="divider"></div>'
+    +'<div class="section-title">Quy Định Chung</div>'
+    +'<div class="notes-box">'
+    +globalNotes.map(function(n){return '<div class="note-item">'+n+'</div>';}).join('')
+    +'</div>';
+
+  // ── Header tags ──────────────────────────────────────────
+  var tags = [
+    b.platform ? 'Platform: '+b.platform : '',
+    b.theme    ? 'Theme: '+b.theme : '',
+    specs.length+' loại banner',
+    prods.length ? prods.length+' sản phẩm deal' : '',
+    'Tổng: '+totalFiles+' files',
+  ].filter(Boolean).map(function(t){return '<span class="tag">'+h_(t)+'</span>';}).join('');
+
+  // ── Final HTML ───────────────────────────────────────────
+  return '<!DOCTYPE html><html lang="vi"><head>'
+    +'<meta charset="UTF-8">'
+    +'<meta name="viewport" content="width=device-width,initial-scale=1.0">'
+    +'<title>'+h_(b.name||'Design Brief')+'</title>'
+    +'<style>'+css+'</style>'
+    +'</head><body><div class="container">'
 
     // Header
-    +'<div style="background:linear-gradient(135deg,'+colorDk+' 0%,'+color+' 55%,'+colorMd+' 100%);padding:20px 22px 18px;color:#fff;position:relative;overflow:hidden">'
-    +'<div style="position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.06)"></div>'
-    +'<div style="font-size:9px;text-transform:uppercase;letter-spacing:2px;opacity:.7;margin-bottom:5px">'+h_(b.platform||'—')+' · '+(b.type==='video'?'VIDEO BRIEF':'STOREFRONT BANNER')+'</div>'
-    +'<div style="font-size:22px;font-weight:700;line-height:1.2;margin-bottom:10px">'+h_(b.name||'—')+(b.theme?' — <span style="opacity:.85">'+h_(b.theme)+'</span>':'')+'</div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+pills+'</div></div>'
+    +'<div class="header">'
+    +'<div class="brand">'+h_(b.platform||'—')+' · '+typeLabel+'</div>'
+    +'<div class="title-main">'+h_(b.name||'Design Brief')+(b.theme?' — '+h_(b.theme):'')+'</div>'
+    +'<div class="title-sub">Tài liệu hướng dẫn thiết kế — dành cho team Designer</div>'
+    +'<div class="tags">'+tags+'</div>'
+    +'</div>'
 
-    // Stats
-    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-bottom:2px solid #f0f0f0">'
-    +[[specs.length,b.type==='video'?'Loại format':'Loại banner'],[(b.products||[]).length,'Sản phẩm'],[totalFiles,'Files'],['5,000px','Max/chiều']].map(function(n){
-      return '<div style="padding:12px 10px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:20px;font-weight:700;color:'+color+';line-height:1">'+n[0]+'</div><div style="font-size:9.5px;color:#9ca3af;margin-top:3px">'+n[1]+'</div></div>';
-    }).join('')+'</div>'
-
-    // Who/when
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 14px;background:#fff;margin-bottom:12px;border-bottom:1px solid #f0f0f0">'
+    // Who/when strip
+    +'<div class="meta-strip">'
     +[['Order by',b.orderedBy],['Assign to',b.assignTo],['Deadline',b.deadline]].map(function(kv){
-      return '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 11px"><div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">'+kv[0]+'</div><div style="font-size:13px;font-weight:600;color:#111">'+h_(kv[1]||'—')+'</div></div>';
-    }).join('')+'</div>'
+      return '<div class="meta-card"><div class="meta-label">'+kv[0]+'</div>'
+        +'<div class="meta-val">'+h_(kv[1]||'—')+'</div></div>';
+    }).join('')
+    +'</div>'
 
-    // Specs + products + notes + deliverables
-    +'<div style="padding:0 14px">'+specsHTML+prodsHTML+notesHTML+delivHTML+'</div>'
+    // Spec sections
+    +(specs.length?'<div class="section-title">Chi Tiết Từng Loại Banner</div>':'')
+    +specsHTML
+
+    // Products, deliverables, notes
+    +prodsHTML
+    +delivHTML
+    +notesHTML
 
     // Footer
-    +'<div style="text-align:center;padding:8px;font-size:9.5px;color:#c0c0c0;border-top:1px solid #f0f0f0;margin:0 14px">'+h_(b.platform||'—')+' · '+h_(b.name||'Brief')+' · '+ts+'</div>'
-    +'</div>';
+    +'<div style="text-align:center;margin-top:20px;font-size:11px;color:#aaa">'
+    +h_(b.platform||'—')+' · '+h_(b.name||'Brief')+' · '+ts
+    +'</div>'
+
+    +'</div></body></html>';
 }
 
 function h_(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function ratioLabel(w,h){
+  var r=w/h;
+  var label=r>1.5?'Landscape (ngang)':r<0.85?'Portrait (dọc)':'Gần vuông';
+  return 'Tỉ lệ ~'+Math.round(r*100)/100+':1 · '+label;
+}
+
 
 
 /* ══ SYNC FROM APPS SCRIPT ══ */
