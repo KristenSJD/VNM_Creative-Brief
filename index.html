@@ -53,9 +53,8 @@ html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;
 .nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
 .nav-item.active{background:rgba(255,255,255,.14);color:#fff}
 .nav-item .nav-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
-.nav-item .nav-badge{margin-left:auto;background:var(--g5);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;min-width:18px;text-align:center}
-.nav-item .nav-badge.red{background:var(--red)}
-.nav-item .nav-badge.amber{background:var(--amber)}
+.nav-item .nav-badge{margin-left:auto;background:rgba(255,255,255,.18);color:rgba(255,255,255,.8);font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;min-width:18px;text-align:center}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.28);color:#fff}
 
 .sb-divider{height:1px;background:rgba(255,255,255,.06);margin:6px 8px}
 
@@ -152,12 +151,16 @@ html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;
 .bc-platform{font-size:10px;color:var(--ink3);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:2px 7px;flex-shrink:0}
 
 /* Status badges */
-.status{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
-.status.todo{background:#f1f5f9;color:#475569}
-.status.inprogress{background:#eff6ff;color:#1d4ed8}
-.status.done{background:var(--g0);color:var(--g7)}
-.status.revision{background:#fff7ed;color:#c2410c}
-.status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.status{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:var(--bg);color:var(--ink3);border:1px solid var(--line)}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ink4);flex-shrink:0}
+.status.todo{background:var(--bg);color:var(--ink3)}
+.status.todo::before{background:var(--ink4)}
+.status.inprogress{background:var(--bg);color:var(--ink2)}
+.status.inprogress::before{background:var(--ink2)}
+.status.done{background:var(--bg);color:var(--ink2)}
+.status.done::before{background:var(--ink3)}
+.status.revision{background:var(--bg);color:var(--ink2)}
+.status.revision::before{background:var(--ink3)}
 
 .bc-meta{display:flex;align-items:center;gap:12px;padding:0 14px 10px;flex-wrap:wrap}
 .bc-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink3)}
@@ -403,7 +406,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
     <div class="sb-section" style="margin-top:4px">Status</div>
     <div class="nav-item" data-page="todo" onclick="navTo('todo',this)">
       <span class="nav-icon">⬜</span> To-do
-      <span class="nav-badge amber" id="badge-todo">0</span>
+      <span class="nav-badge" id="badge-todo">0</span>
     </div>
     <div class="nav-item" data-page="inprogress" onclick="navTo('inprogress',this)">
       <span class="nav-icon">🔵</span> In Progress
@@ -411,7 +414,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
     </div>
     <div class="nav-item" data-page="revision" onclick="navTo('revision',this)">
       <span class="nav-icon">🔁</span> Needs Revision
-      <span class="nav-badge red" id="badge-revision">0</span>
+      <span class="nav-badge" id="badge-revision">0</span>
     </div>
     <div class="nav-item" data-page="done" onclick="navTo('done',this)">
       <span class="nav-icon">✅</span> Done
@@ -829,15 +832,15 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
 </div>
 
 <!-- ════ BRIEF FORM (slide panel) ════ -->
-<div class="form-overlay" id="formOverlay" onclick="if(event.target===this)closeForm()">
+<div class="form-overlay" id="formOverlay" onclick="if(event.target===this)tryCloseForm()">
   <div class="form-panel" id="formPanel">
     <div class="fp-header">
       <div class="fp-title" id="fpTitle">New Brief</div>
-      <button class="fp-close" onclick="closeForm()">✕</button>
+      <button class="fp-close" onclick="tryCloseForm()" title="Đóng">✕</button>
     </div>
     <div class="fp-body" id="fpBody"><!-- injected by JS --></div>
     <div class="fp-footer">
-      <button class="tb-btn" onclick="closeForm()">Huỷ</button>
+      <button class="tb-btn" onclick="tryCloseForm()" style="color:var(--ink3)">✕ Đóng</button>
       <button class="tb-btn" onclick="saveDraftBrief()" style="margin-right:4px">💾 Lưu nháp</button>
       <button class="tb-btn primary" onclick="publishBrief()">🚀 Publish</button>
     </div>
@@ -863,7 +866,49 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
   </div>
 </div>
 
-<!-- DELETE CONFIRM -->
+<!-- DISCARD CONFIRM -->
+<div class="overlay" id="discardModal">
+  <div class="modal" style="width:380px">
+    <div class="modal-h" style="background:var(--ink2)">
+      <h3>⚠ Bỏ thay đổi?</h3>
+      <button class="modal-x" onclick="closeOverlay('discardModal')">✕</button>
+    </div>
+    <div class="modal-b">
+      <p style="font-size:13px;color:var(--ink);line-height:1.6;margin-bottom:10px">
+        Form đang có nội dung chưa lưu.<br>Bạn muốn làm gì?
+      </p>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <button onclick="discardSaveDraft()"
+          style="width:100%;background:var(--g0);border:1.5px solid var(--g1);color:var(--g7);font-family:inherit;font-size:12.5px;font-weight:600;padding:9px;border-radius:var(--r-md);cursor:pointer;text-align:left;transition:all .15s"
+          onmouseover="this.style.background='var(--g1)'" onmouseout="this.style.background='var(--g0)'">
+          💾 Lưu nháp rồi đóng
+        </button>
+        <button onclick="discardConfirm()"
+          style="width:100%;background:var(--red0);border:1.5px solid #fca5a5;color:var(--red);font-family:inherit;font-size:12.5px;font-weight:600;padding:9px;border-radius:var(--r-md);cursor:pointer;text-align:left;transition:all .15s"
+          onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='var(--red0)'">
+          🗑 Huỷ & bỏ hết nội dung đã nhập
+        </button>
+        <button onclick="closeOverlay('discardModal')"
+          style="width:100%;background:none;border:1.5px solid var(--line);color:var(--ink3);font-family:inherit;font-size:12.5px;font-weight:500;padding:9px;border-radius:var(--r-md);cursor:pointer;text-align:left;transition:all .15s"
+          onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">
+          ← Quay lại tiếp tục chỉnh sửa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTOSAVE INDICATOR -->
+<div id="autosaveBar" style="
+  display:none;position:fixed;bottom:60px;left:50%;
+  transform:translateX(-50%);
+  background:var(--ink);color:#fff;
+  font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;
+  padding:5px 14px;border-radius:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  z-index:998;pointer-events:none;
+  transition:opacity .3s;
+">✓ Đã tự lưu nháp</div>
 <div class="overlay" id="deleteModal">
   <div class="modal">
     <div class="modal-h" style="background:var(--red)"><h3>🗑 Xoá brief</h3><button class="modal-x" onclick="closeOverlay('deleteModal')">✕</button></div>
@@ -923,6 +968,12 @@ window.onload = () => {
   applyCfgToForm();
   initSettingsUI();   // restore appearance from localStorage
   updateBadges();
+  renderDashboard();
+  renderList('all');
+  renderList('banner');
+  renderList('video');
+  renderStatusLists();
+  checkAutosaveRestore(); // restore draft if browser was closed mid-edit
   renderDashboard();
   renderList('all');
   renderList('banner');
@@ -1018,12 +1069,11 @@ function setFilter(page, status, el){
 }
 
 function renderList(page){
-  const listEl = document.getElementById('list-'+({all:'All',banner:'Banner',video:'Video'}[page]||page.charAt(0).toUpperCase()+page.slice(1)));
+  const idMap = {all:'listAll', banner:'listBanner', video:'listVideo'};
+  const listEl = document.getElementById(idMap[page] || ('list'+page.charAt(0).toUpperCase()+page.slice(1)));
   if(!listEl) return;
 
-  const searchEl = document.getElementById('search-'+({all:'All',banner:'Banner',video:'Video'}[page]||page));
-  // handle id mapping
-  const searchId = `search${page.charAt(0).toUpperCase()+page.slice(1)}`;
+  const searchId = 'search'+page.charAt(0).toUpperCase()+page.slice(1);
   const search = (document.getElementById(searchId)||{}).value||'';
   const status = filterStatus[page]||'all';
 
@@ -1048,7 +1098,7 @@ function renderList(page){
 
 function renderStatusLists(){
   ['todo','inprogress','revision','done'].forEach(status=>{
-    const el = document.getElementById('list-'+capitalize(status));
+    const el = document.getElementById('list'+capitalize(status));
     if(!el) return;
     const filtered = briefs.filter(b=>b.status===status).sort((a,b)=>b.createdAt-a.createdAt);
     if(!filtered.length){ el.innerHTML=emptyState('Không có brief nào ở trạng thái này',''); return; }
@@ -1059,11 +1109,11 @@ function renderStatusLists(){
 
 /* ── BRIEF CARD HTML ── */
 const STATUS_LABEL = { todo:'To-do', inprogress:'In Progress', done:'Done', revision:'Needs Revision' };
-const TYPE_COLOR   = { banner:'#6dcb6d', video:'#60a5fa', hero:'#f97316', secondary:'#a78bfa', frame:'#fb7185', brand:'#fbbf24' };
+const TYPE_COLOR   = {};  // monochrome — all dots use same neutral color
 
 function briefCardHTML(b){
   const status = b.status || 'todo';
-  const typeColor = TYPE_COLOR[b.subtype||b.type] || '#94a3b8';
+  const typeColor = 'var(--ink4)';
   const dl = b.deadline ? daysUntil(b.deadline) : null;
   const dlWarn = dl !== null && dl < 3;
 
@@ -1168,8 +1218,168 @@ function openForm(type, briefData=null){
 }
 
 function closeForm(){
+  clearAutosaveTimer();
   document.getElementById('formOverlay').classList.remove('show');
-  editingId=null;
+  editingId = null;
+  formDirty = false;
+}
+
+/* ══════════════════════════════════════════════
+   DISCARD / DIRTY TRACKING
+══════════════════════════════════════════════ */
+let formDirty     = false;
+let autosaveTimer = null;
+const AUTOSAVE_KEY = 'bm_autosave_draft';
+
+// Mark form dirty on any input inside the panel
+document.addEventListener('input', e => {
+  if(e.target.closest('#formPanel')) {
+    formDirty = true;
+    scheduleAutosave();
+  }
+});
+
+// Detect form has meaningful content
+function formHasContent(){
+  const name = (document.getElementById('f-name')||{}).value||'';
+  return name.trim().length > 0 || formSpecs.length > 0 || formProds.length > 0;
+}
+
+// Try to close — show confirm if dirty & has content
+function tryCloseForm(){
+  if(formDirty && formHasContent()){
+    document.getElementById('discardModal').classList.add('show');
+  } else {
+    closeForm();
+  }
+}
+
+// Discard actions
+function discardConfirm(){
+  // Remove autosave
+  localStorage.removeItem(AUTOSAVE_KEY);
+  closeOverlay('discardModal');
+  closeForm();
+  toast('Brief đã huỷ');
+}
+
+function discardSaveDraft(){
+  closeOverlay('discardModal');
+  saveDraftBriefSilent(); // save without closing
+  closeForm();
+}
+
+/* ══════════════════════════════════════════════
+   AUTOSAVE
+══════════════════════════════════════════════ */
+function scheduleAutosave(){
+  clearAutosaveTimer();
+  autosaveTimer = setTimeout(() => doAutosave(), 30000); // 30s debounce
+}
+
+function clearAutosaveTimer(){
+  if(autosaveTimer){ clearTimeout(autosaveTimer); autosaveTimer = null; }
+}
+
+function doAutosave(){
+  if(!document.getElementById('formOverlay').classList.contains('show')) return;
+  if(!formHasContent()) return;
+  try {
+    const data = readFormData();
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+      data, type: currentFormType, ts: Date.now()
+    }));
+    showAutosaveBar();
+    formDirty = false;
+  } catch(e) { /* silent */ }
+}
+
+function showAutosaveBar(){
+  const bar = document.getElementById('autosaveBar');
+  if(!bar) return;
+  bar.style.display = 'block';
+  bar.style.opacity = '1';
+  setTimeout(() => {
+    bar.style.opacity = '0';
+    setTimeout(() => { bar.style.display = 'none'; }, 300);
+  }, 2000);
+}
+
+// Save before unload (tab close / navigate away)
+window.addEventListener('beforeunload', e => {
+  if(document.getElementById('formOverlay').classList.contains('show') && formHasContent()){
+    doAutosave(); // save immediately, no debounce
+    e.preventDefault();
+    e.returnValue = ''; // triggers browser's own "leave?" dialog
+  }
+});
+
+// Save when tab becomes hidden (phone lock, alt-tab, etc.)
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden &&
+     document.getElementById('formOverlay').classList.contains('show') &&
+     formHasContent()){
+    doAutosave();
+  }
+});
+
+// On page load — restore autosave if exists
+function checkAutosaveRestore(){
+  try {
+    const saved = localStorage.getItem(AUTOSAVE_KEY);
+    if(!saved) return;
+    const { data, type, ts } = JSON.parse(saved);
+    if(!data || !data.name) return;
+
+    const age = Date.now() - ts;
+    const hrs = Math.round(age / 3600000);
+    const label = hrs < 1 ? 'vừa rồi' : hrs < 24 ? `${hrs} giờ trước` : `${Math.round(hrs/24)} ngày trước`;
+
+    // Show restore prompt as a toast-like banner
+    const banner = document.createElement('div');
+    banner.style.cssText = `
+      position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+      background:var(--white);border:1.5px solid var(--g1);border-radius:12px;
+      padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.12);
+      z-index:997;display:flex;align-items:center;gap:12px;
+      font-family:'DM Sans',sans-serif;font-size:12.5px;color:var(--ink);
+      max-width:420px;width:90vw;
+    `;
+    banner.innerHTML = `
+      <span style="font-size:20px">📝</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;margin-bottom:2px">Có nháp chưa lưu: <em>${data.name||'Brief'}</em></div>
+        <div style="font-size:11px;color:var(--ink3)">Tự lưu ${label}</div>
+      </div>
+      <button onclick="restoreAutosave()" style="background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;white-space:nowrap">Khôi phục</button>
+      <button onclick="this.closest('div').remove();localStorage.removeItem('${AUTOSAVE_KEY}')" style="background:none;border:1px solid var(--line);color:var(--ink3);font-family:inherit;font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer">Bỏ</button>
+    `;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 12000); // auto-dismiss after 12s
+  } catch(e) { /* silent */ }
+}
+
+function restoreAutosave(){
+  try {
+    const saved = localStorage.getItem(AUTOSAVE_KEY);
+    if(!saved) return;
+    const { data, type } = JSON.parse(saved);
+    document.querySelector('[id^="autosave"]')?.closest('div[style*="position:fixed"]')?.remove();
+    document.querySelectorAll('div[style*="position:fixed"]').forEach(el => {
+      if(el.textContent.includes('Khôi phục')) el.remove();
+    });
+    openForm(type || data.type || 'banner', data);
+    localStorage.removeItem(AUTOSAVE_KEY);
+    toast('✓ Đã khôi phục nháp!');
+  } catch(e) { toast('⚠ Không khôi phục được'); }
+}
+
+function saveDraftBriefSilent(){
+  const data = readFormData();
+  if(!data.name) return;
+  upsertBrief(data);
+  saveLocal();
+  refreshAllLists();
 }
 
 function showNewBriefMenu(){
@@ -1205,7 +1415,7 @@ function renderTemplateList(){
 
   el.innerHTML = filtered.map(b => {
     const typeIcon  = b.type === 'video' ? '🎬' : '🖼';
-    const typeColor = b.type === 'video' ? '#93c5fd' : getComputedStyle(document.documentElement).getPropertyValue('--g3');
+    const typeColor = 'var(--ink4)';
     const specsText = (b.bannerSpecs||b.videoSpecs||[]).length
       ? `${(b.bannerSpecs||b.videoSpecs).length} spec${(b.bannerSpecs||b.videoSpecs).length>1?'s':''}`
       : '';
@@ -1221,10 +1431,10 @@ function renderTemplateList(){
         style="display:flex;align-items:center;gap:10px;padding:9px 11px;
                border:1.5px solid var(--line);border-radius:var(--r-md);
                cursor:pointer;background:var(--white);transition:all .15s"
-        onmouseover="this.style.borderColor='${typeColor}';this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--g0')"
+        onmouseover="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--g3');this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--g0')"
         onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--white)'">
         <!-- Type icon -->
-        <div style="width:32px;height:32px;border-radius:8px;background:${typeColor}22;
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--line);
                     display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
           ${typeIcon}
         </div>
@@ -2092,11 +2302,6 @@ function applyTheme(save=true){
   const inp  = g('cfg-lbl-inprogress'); if(inp)        STATUS_LABEL.inprogress = inp;
   const done = g('cfg-lbl-done');       if(done)       STATUS_LABEL.done       = done;
   const rev  = g('cfg-lbl-revision');   if(rev)        STATUS_LABEL.revision   = rev;
-
-  // Sidebar nav badge color
-  document.querySelectorAll('.nav-badge:not(.red):not(.amber)').forEach(b=>{
-    b.style.background = c.g5;
-  });
 
   renderThemePreview();
 
