@@ -5,48 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brief Builder — Amazon Storefront</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- html2canvas for screenshot -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-/* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:13px;scroll-behavior:smooth}
 body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f5f3;color:#1a1a18;min-height:100vh}
 
-/* ── VARS ── */
 :root{
   --g9:#0a3d0a;--g7:#1a6b1a;--g5:#2a9e2a;--g3:#6dcb6d;--g1:#d4f0d4;--g0:#f0fbf0;
   --ink:#111110;--ink2:#3d3d3a;--ink3:#6b6b67;--ink4:#b8b8b3;
   --line:#e8e8e5;--line2:#f0f0ee;--bg:#f5f5f3;--white:#fff;
   --amber:#d97706;--amber0:#fffbeb;--amber1:#fef3c7;
   --red:#dc2626;--red0:#fef2f2;
+  --blue:#2563eb;--blue0:#eff6ff;
   --r-sm:6px;--r-md:10px;--r-lg:14px;
-  --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --sh-md:0 4px 16px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);
+  --sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.08);
 }
 
 /* ── TOPBAR ── */
-.topbar{
-  position:sticky;top:0;z-index:200;height:44px;
-  background:var(--g7);
-  display:flex;align-items:center;gap:8px;padding:0 14px;
-  border-bottom:2px solid var(--g5);
-}
+.topbar{position:sticky;top:0;z-index:200;height:46px;background:var(--g7);border-bottom:2px solid var(--g5);display:flex;align-items:center;gap:8px;padding:0 14px;}
 .tb-logo{font-size:13px;font-weight:700;color:#fff;letter-spacing:-.2px;white-space:nowrap}
 .tb-pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .tb-tabs{display:flex;gap:2px;flex:1;justify-content:center}
 .tab{background:none;border:none;color:rgba(255,255,255,.6);font-family:inherit;font-size:11.5px;font-weight:500;padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .15s}
 .tab:hover{background:rgba(255,255,255,.1);color:#fff}
 .tab.on{background:rgba(255,255,255,.18);color:#fff}
-.tb-acts{display:flex;gap:6px;flex-shrink:0}
-.btn-g{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tb-acts{display:flex;gap:5px;flex-shrink:0;align-items:center}
+.btn-g{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;font-weight:500;padding:4px 9px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-g:hover{background:rgba(255,255,255,.2)}
-.btn-pri{background:#fff;border:none;color:var(--g7);font-family:inherit;font-size:11px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-pri{background:#fff;border:none;color:var(--g7);font-family:inherit;font-size:11px;font-weight:700;padding:4px 11px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-pri:hover{background:var(--g1)}
 
-/* ── LAYOUT ── */
-.panels{display:flex;height:calc(100vh - 44px);overflow:hidden}
+/* Drive button states */
+.btn-drive{background:#4285f4;border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:700;padding:4px 11px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.btn-drive:hover{background:#3367d6}
+.btn-drive.connected{background:#34a853}
+.btn-drive.loading{background:#fbbc04;color:#000;cursor:wait}
+.btn-drive:disabled{opacity:.6;cursor:not-allowed}
+.drive-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);flex-shrink:0}
+.drive-dot.on{background:#fff;box-shadow:0 0 5px rgba(255,255,255,.8)}
+
+/* ── PANELS ── */
+.panels{display:flex;height:calc(100vh - 46px);overflow:hidden}
 .pf{width:52%;overflow-y:auto;background:var(--white);border-right:1px solid var(--line)}
 .pp{width:48%;overflow-y:auto;background:var(--bg)}
-.fi{padding:18px 18px 48px}
+.fi{padding:18px 16px 56px}
+.pi{padding:12px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
 
 /* ── FORM ── */
 .fsec{margin-bottom:22px}
@@ -55,16 +61,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f5f3;color:#1a1a18
 .field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:3px}
 .field label .req{color:var(--red);margin-left:2px}
 .field label .hint{font-weight:400;color:var(--ink4);font-size:10px;margin-left:3px}
-input[type=text],input[type=number],select,textarea{
-  width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);
-  background:var(--bg);border:1.5px solid var(--line);
-  border-radius:var(--r-sm);padding:6px 9px;outline:none;
-  transition:border-color .15s,background .15s;-webkit-appearance:none
-}
-input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{
-  border-color:var(--g3);background:var(--white);
-  box-shadow:0 0 0 3px rgba(109,203,109,.12)
-}
+input[type=text],input[type=number],select,textarea{width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:6px 9px;outline:none;transition:border-color .15s,background .15s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--g3);background:var(--white);box-shadow:0 0 0 3px rgba(109,203,109,.12)}
 textarea{resize:vertical;min-height:64px;line-height:1.55}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
@@ -72,7 +70,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
 /* ── BANNER CARD ── */
 .bcard{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-md);margin-bottom:10px;overflow:hidden;transition:border-color .15s}
 .bcard:focus-within{border-color:var(--g3)}
-.bcard-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.7);border-bottom:1px solid var(--line)}
+.bcard-head{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.7);border-bottom:1px solid var(--line)}
 .bnum{width:20px;height:20px;border-radius:50%;background:var(--g7);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .bcard-head input{flex:1;background:none;border:none;padding:0;font-size:12px;font-weight:600;color:var(--ink2);outline:none;font-family:inherit}
 .rm-btn{background:none;border:none;cursor:pointer;color:var(--ink4);font-size:13px;padding:2px 4px;border-radius:4px;transition:all .12s;line-height:1}
@@ -80,51 +78,55 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
 .bcard-body{padding:11px 12px;display:flex;flex-direction:column;gap:9px}
 
 /* ── IMAGE UPLOAD ── */
-.img-upload-area{
-  border:2px dashed var(--g3);border-radius:var(--r-md);
-  padding:10px;text-align:center;cursor:pointer;
-  transition:all .15s;background:var(--g0);position:relative;
-  min-height:64px;display:flex;align-items:center;justify-content:center;
-}
-.img-upload-area:hover{border-color:var(--g5);background:var(--g1)}
-.img-upload-area.has-img{border-style:solid;border-color:var(--g3);padding:6px}
-.img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.img-thumb-row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}
-.img-thumb{position:relative;display:inline-block}
-.img-thumb img{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block}
-.img-thumb-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-.img-upload-hint{font-size:11px;color:var(--g5);font-weight:500}
-.img-upload-hint span{display:block;font-size:10px;color:var(--ink4);font-weight:400;margin-top:2px}
-.img-count-badge{font-size:10px;color:var(--g7);font-weight:600;background:var(--g1);border-radius:4px;padding:1px 6px}
+.ref-upload{border:1.5px dashed var(--g3);border-radius:var(--r-md);padding:10px;cursor:pointer;transition:all .15s;background:var(--g0);position:relative;min-height:60px;display:flex;align-items:center;justify-content:center}
+.ref-upload:hover{border-color:var(--g5);background:var(--g1)}
+.ref-upload.has-imgs{border-style:solid;padding:7px}
+.ref-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ref-hint{font-size:11px;color:var(--g5);text-align:center;font-weight:500}
+.ref-hint span{display:block;font-size:9.5px;color:var(--ink4);font-weight:400;margin-top:2px}
+.thumb-row{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start}
+.thumb{position:relative;display:inline-block}
+.thumb img{width:54px;height:46px;object-fit:cover;border-radius:5px;border:1px solid var(--line);display:block}
+.thumb-del{position:absolute;top:-4px;right:-4px;width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-/* ── PRODUCT TAGS ── */
-.prod-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+/* ── PROD TAGS ── */
+.ptags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .ptag{display:flex;align-items:center;gap:4px;background:var(--g0);border:1px solid var(--g1);border-radius:20px;padding:3px 8px 3px 10px;font-size:11.5px;color:var(--g9)}
-.ptag .pdel{background:none;border:none;cursor:pointer;color:var(--g3);font-size:12px;line-height:1;padding:0;display:flex;align-items:center}
-.ptag .pdel:hover{color:var(--red)}
-.prod-input-row{display:flex;gap:6px;margin-top:5px}
-.prod-input-row input{flex:1}
-.prod-input-row button{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:0 11px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;transition:background .15s}
-.prod-input-row button:hover{background:var(--g9)}
+.ptag-del{background:none;border:none;cursor:pointer;color:var(--g3);font-size:12px;line-height:1;padding:0;display:flex;align-items:center}
+.ptag-del:hover{color:var(--red)}
+.prod-row{display:flex;gap:6px;margin-top:5px}
+.prod-row input{flex:1}
+.prod-row button{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:0 11px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;transition:background .15s}
+.prod-row button:hover{background:var(--g9)}
+
+/* ── SWATCHES ── */
+.swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative;flex-shrink:0}
+.sw:hover{transform:scale(1.1)}
+.sw.on{border-color:var(--ink)}
+.sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
 
 /* ── ADD BTN ── */
 .add-btn{width:100%;background:none;border:1.5px dashed var(--g3);border-radius:var(--r-md);color:var(--g5);font-family:inherit;font-size:12px;font-weight:500;padding:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .add-btn:hover{background:var(--g0);border-color:var(--g5)}
 
-/* ── COLOR SWATCHES ── */
-.swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
-.sw{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .15s;position:relative;flex-shrink:0}
-.sw:hover{transform:scale(1.1)}
-.sw.on{border-color:var(--ink)}
-.sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+/* ── DRIVE CONFIG PANEL ── */
+.drive-config{background:var(--blue0);border:1.5px solid #bfdbfe;border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px}
+.drive-config-title{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.drive-status{display:flex;align-items:center;gap:6px;font-size:11px;padding:6px 10px;border-radius:6px;background:rgba(255,255,255,.6);border:1px solid #bfdbfe;margin-top:8px}
+.drive-status.ok{background:#f0fdf4;border-color:#86efac;color:#15803d}
+.drive-status.err{background:var(--red0);border-color:#fca5a5;color:#b91c1c}
 
-/* ── PREVIEW WRAPPER ── */
-.pi{padding:14px}
+/* ── PREVIEW CARD ── */
 .pcard{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
+/* ── SCREENSHOT OVERLAY ── */
+.capture-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.capture-overlay.show{display:flex}
+.capture-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.capture-msg{color:#fff;font-size:14px;font-weight:500}
+.capture-sub{color:rgba(255,255,255,.6);font-size:12px}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--g9);color:#fff;font-size:12px;font-weight:500;padding:7px 16px;border-radius:20px;box-shadow:var(--sh-md);z-index:999;transition:transform .25s,opacity .25s;opacity:0;white-space:nowrap;pointer-events:none}
@@ -133,44 +135,37 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
 /* ── MODAL ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center}
 .overlay.show{display:flex}
-.modal{background:var(--white);border-radius:var(--r-lg);width:420px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
+.modal{background:var(--white);border-radius:var(--r-lg);width:460px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
 .modal-h{background:var(--g7);color:#fff;padding:13px 17px;display:flex;align-items:center;justify-content:space-between}
 .modal-h h3{font-size:13.5px;font-weight:700}
 .modal-x{background:none;border:none;color:rgba(255,255,255,.7);font-size:17px;cursor:pointer;line-height:1}
 .modal-b{padding:16px}
-.mstep{display:flex;gap:11px;margin-bottom:13px}
+.mstep{display:flex;gap:10px;margin-bottom:13px}
 .mnum{width:22px;height:22px;border-radius:50%;background:var(--g7);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .mstep-t{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
 .mstep-d{font-size:11.5px;color:var(--ink3);line-height:1.5}
 .mstep-d a{color:var(--g7);font-weight:500}
+.mstep-d code{background:var(--bg);padding:1px 5px;border-radius:3px;font-size:10.5px;font-family:'DM Mono',monospace}
 .modal-f{padding:11px 16px 15px;display:flex;gap:7px;justify-content:flex-end;border-top:1px solid var(--line)}
 .mf-sec{background:var(--bg);border:1.5px solid var(--line);color:var(--ink2);font-family:inherit;font-size:12px;font-weight:500;padding:6px 13px;border-radius:var(--r-sm);cursor:pointer}
 .mf-pri{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:6px 15px;border-radius:var(--r-sm);cursor:pointer}
 .mf-pri:hover{background:var(--g9)}
 
-/* ══════════════════════════════════════════
-   PRINT / PDF STYLES
-══════════════════════════════════════════ */
-@media print {
-  @page{size:A4;margin:0}
-  html,body{background:#fff!important;font-size:11px!important}
-  .topbar,.pf,.tb-acts,.tb-tabs,.toast,.overlay{display:none!important}
-  .panels{display:block!important;height:auto!important;overflow:visible!important}
-  .pp{width:100%!important;overflow:visible!important;background:#fff!important}
-  .pi{padding:0!important}
-  .pcard{border-radius:0!important;box-shadow:none!important}
-  /* Inject print header via JS before printing */
-  .print-header{display:block!important}
-  /* Force page breaks between banner sections */
-  .pv-bsec{page-break-inside:avoid}
-  .pv-deliv-sec{page-break-before:auto}
-  /* Show reference images in print */
-  .ref-img-grid img{max-width:120px!important;max-height:90px!important}
-}
-.print-header{display:none}
+/* ── SETUP MODAL (Google Cloud steps) ── */
+.setup-step{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 13px;margin-bottom:8px}
+.setup-step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--g7);color:#fff;font-size:9px;font-weight:700;margin-right:6px;flex-shrink:0}
+.setup-step-title{font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;margin-bottom:5px}
+.setup-step-body{font-size:11px;color:var(--ink3);line-height:1.6;padding-left:24px}
+.setup-step-body code{background:var(--white);border:1px solid var(--line);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:10px;color:var(--g7)}
+.client-id-input{width:100%;margin-top:6px;font-family:'DM Mono',monospace;font-size:11px}
+.folder-input{width:100%;margin-top:6px}
+
+
 </style>
 </head>
 <body>
+
+<!-- TOPBAR -->
 <div class="topbar">
   <span class="tb-logo">🌿 Brief Builder</span>
   <span class="tb-pill">Amazon · Storefront</span>
@@ -181,8 +176,11 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
   </div>
   <div class="tb-acts">
     <button class="btn-g" onclick="resetAll()">↺ Reset</button>
-    <button class="btn-g" onclick="exportHTML()">⬇ HTML</button>
-    <button class="btn-pri" onclick="exportPDF()">🖨 PDF</button>
+    <button class="btn-g" onclick="saveAsPNG()">🖼 PNG</button>
+    <button class="btn-drive" id="driveBtn" onclick="handleDriveBtn()">
+      <span class="drive-dot" id="driveDot"></span>
+      <span id="driveBtnLabel">Drive</span>
+    </button>
   </div>
 </div>
 
@@ -192,7 +190,32 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
 <div class="pf" id="pf">
 <div class="fi">
 
-  <!-- PROJECT -->
+  <!-- GOOGLE DRIVE CONFIG -->
+  <div class="fsec">
+    <div class="fsec-title">☁️ Google Drive Setup</div>
+    <div class="drive-config">
+      <div class="drive-config-title">🔑 Kết nối Google Drive</div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Google OAuth Client ID <span class="req">*</span>
+          <span class="hint">— <a href="#" onclick="showSetupModal();return false" style="color:var(--blue)">Hướng dẫn lấy Client ID</a></span>
+        </label>
+        <input type="text" id="clientId" placeholder="xxxx.apps.googleusercontent.com" oninput="saveConfig()">
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Google Drive Folder ID <span class="hint">(để trống = lưu vào My Drive root)</span></label>
+        <input type="text" id="folderId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" oninput="saveConfig()">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Tên subfolder <span class="hint">(tự động tạo nếu chưa có)</span></label>
+        <input type="text" id="driveFolder" value="Brief Builder / Banners" oninput="saveConfig()">
+      </div>
+      <div class="drive-status" id="driveStatus">
+        <span>⚪</span> Chưa kết nối — nhập Client ID và nhấn nút Drive ở trên
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECT INFO -->
   <div class="fsec">
     <div class="fsec-title">📋 Thông tin dự án</div>
     <div class="field"><label>Tên chiến dịch <span class="req">*</span></label>
@@ -206,8 +229,8 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
       <div class="field"><label>Theme / Chủ đề</label>
         <input type="text" id="f-theme" value="Spring / Mùa Xuân" oninput="upd()"></div>
     </div>
-    <div class="field"><label>Mô tả ngắn <span class="hint">(optional)</span></label>
-      <textarea id="f-desc" rows="2" placeholder="Mô tả chiến dịch, mục tiêu, đối tượng..." oninput="upd()"></textarea></div>
+    <div class="field"><label>Mô tả ngắn</label>
+      <textarea id="f-desc" rows="2" placeholder="Mô tả chiến dịch, mục tiêu..." oninput="upd()"></textarea></div>
   </div>
 
   <!-- BANNERS -->
@@ -220,11 +243,11 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
   <!-- PRODUCTS -->
   <div class="fsec">
     <div class="fsec-title">🛒 Sản phẩm có deal</div>
-    <div class="prod-input-row">
-      <input type="text" id="f-prod" placeholder="Tên sản phẩm + quy cách, VD: Mango 250g" onkeydown="if(event.key==='Enter')addProd()">
+    <div class="prod-row">
+      <input type="text" id="f-prod" placeholder="Tên sản phẩm + quy cách" onkeydown="if(event.key==='Enter')addProd()">
       <button onclick="addProd()">+ Thêm</button>
     </div>
-    <div class="prod-tags" id="ptags"></div>
+    <div class="ptags" id="ptags"></div>
   </div>
 
   <!-- GLOBAL -->
@@ -232,9 +255,9 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
     <div class="fsec-title">📐 Quy định chung</div>
     <div class="row2">
       <div class="field"><label>Max px / chiều</label>
-        <input type="number" id="f-maxpx" value="5000" min="100" max="20000" oninput="upd()"></div>
+        <input type="number" id="f-maxpx" value="5000" min="100" oninput="upd()"></div>
       <div class="field"><label>Font tối thiểu</label>
-        <input type="number" id="f-minfont" value="14" min="8" max="72" oninput="upd()"></div>
+        <input type="number" id="f-minfont" value="14" min="8" oninput="upd()"></div>
     </div>
     <div class="field"><label>Màu chủ đạo</label>
       <div class="swatches" id="swatches">
@@ -248,8 +271,8 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
         <div class="sw" style="background:#111110" data-c="#111110" onclick="pickColor(this)"></div>
       </div>
     </div>
-    <div class="field"><label>Quy định bổ sung <span class="hint">(mỗi dòng = 1 quy định)</span></label>
-      <textarea id="f-rules" rows="3" placeholder="VD: Ảnh sản phẩm phải rõ nét&#10;Không dùng font hệ thống" oninput="upd()"></textarea></div>
+    <div class="field"><label>Quy định bổ sung</label>
+      <textarea id="f-rules" rows="3" placeholder="Mỗi dòng = 1 quy định" oninput="upd()"></textarea></div>
   </div>
 
   <!-- DEADLINE -->
@@ -261,11 +284,11 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
       <div class="field"><label>Người phụ trách</label>
         <input type="text" id="f-contact" placeholder="Tên / Email / Slack" oninput="upd()"></div>
     </div>
-    <div class="field"><label>Ghi chú <span class="hint">(optional)</span></label>
-      <textarea id="f-notes" rows="2" placeholder="Lưu ý thêm cho designer..." oninput="upd()"></textarea></div>
+    <div class="field"><label>Ghi chú</label>
+      <textarea id="f-notes" rows="2" placeholder="Lưu ý thêm..." oninput="upd()"></textarea></div>
   </div>
 
-</div><!-- /fi -->
+</div>
 </div><!-- /pf -->
 
 <!-- ══ PREVIEW PANEL ══ -->
@@ -277,87 +300,151 @@ textarea{resize:vertical;min-height:64px;line-height:1.55}
 
 </div><!-- /panels -->
 
-<!-- EXPORT MODAL -->
-<div class="overlay" id="expModal">
-  <div class="modal">
-    <div class="modal-h"><h3>⬇ Export & Embed Notion</h3><button class="modal-x" onclick="closeModal()">✕</button></div>
-    <div class="modal-b">
-      <div class="mstep"><div class="mnum">1</div><div><div class="mstep-t">Download HTML</div><div class="mstep-d">Nhấn <strong>Download HTML</strong> bên dưới.</div></div></div>
-      <div class="mstep"><div class="mnum">2</div><div><div class="mstep-t">Upload lên Netlify Drop</div><div class="mstep-d">Vào <a href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop</a> → kéo thả file → copy link.</div></div></div>
-      <div class="mstep"><div class="mnum">3</div><div><div class="mstep-t">Embed vào Notion</div><div class="mstep-d">Gõ <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;font-size:10.5px">/embed</code> → paste link → resize height ~900px.</div></div></div>
+<!-- CAPTURE OVERLAY -->
+<div class="capture-overlay" id="captureOverlay">
+  <div class="capture-spinner"></div>
+  <div class="capture-msg" id="captureMsg">Đang chụp ảnh brief...</div>
+  <div class="capture-sub" id="captureSub">Vui lòng chờ trong giây lát</div>
+</div>
+
+<!-- SETUP MODAL (Google Cloud guide) -->
+<div class="overlay" id="setupModal">
+  <div class="modal" style="width:520px">
+    <div class="modal-h">
+      <h3>🔑 Hướng dẫn lấy Google OAuth Client ID</h3>
+      <button class="modal-x" onclick="closeSetup()">✕</button>
+    </div>
+    <div class="modal-b" style="max-height:70vh;overflow-y:auto">
+
+      <div class="setup-step">
+        <div class="setup-step-title"><span class="setup-step-num">1</span>Tạo Google Cloud Project</div>
+        <div class="setup-step-body">
+          Vào <a href="https://console.cloud.google.com" target="_blank" style="color:var(--blue)">console.cloud.google.com</a>
+          → <strong>New Project</strong> → đặt tên <code>brief-builder</code> → Create.
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="setup-step-title"><span class="setup-step-num">2</span>Bật Google Drive API</div>
+        <div class="setup-step-body">
+          Menu trái → <strong>APIs & Services</strong> → <strong>Library</strong>
+          → Tìm <code>Google Drive API</code> → Enable.
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="setup-step-title"><span class="setup-step-num">3</span>Tạo OAuth Consent Screen</div>
+        <div class="setup-step-body">
+          <strong>APIs & Services</strong> → <strong>OAuth consent screen</strong>
+          → Chọn <code>External</code> → Fill tên app → Add scope:
+          <code>https://www.googleapis.com/auth/drive.file</code>
+          → Save → Publish app (hoặc thêm test user là email của bạn).
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="setup-step-title"><span class="setup-step-num">4</span>Tạo OAuth Client ID</div>
+        <div class="setup-step-body">
+          <strong>Credentials</strong> → <strong>Create Credentials</strong>
+          → <strong>OAuth client ID</strong> → Application type: <code>Web application</code><br><br>
+          Thêm Authorized JavaScript origins:<br>
+          <code>https://kristensjd.github.io</code><br><br>
+          Thêm Authorized redirect URIs:<br>
+          <code>https://kristensjd.github.io</code><br><br>
+          → Create → Copy <strong>Client ID</strong> (dạng <code>xxx.apps.googleusercontent.com</code>)
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="setup-step-title"><span class="setup-step-num">5</span>Lấy Drive Folder ID (optional)</div>
+        <div class="setup-step-body">
+          Mở folder muốn lưu trên Google Drive → xem URL:<br>
+          <code>drive.google.com/drive/folders/<strong>[FOLDER_ID]</strong></code><br>
+          Copy phần <strong>FOLDER_ID</strong> dán vào ô Folder ID bên trên.
+        </div>
+      </div>
+
+      <div style="background:var(--g0);border:1px solid var(--g1);border-radius:var(--r-md);padding:10px 12px;font-size:11.5px;color:var(--g9);">
+        ✅ Sau khi điền Client ID → nhấn nút <strong>Drive</strong> trên thanh top → Google popup xin quyền → Allow → Kết nối thành công!
+      </div>
     </div>
     <div class="modal-f">
-      <button class="mf-sec" onclick="closeModal()">Đóng</button>
-      <button class="mf-pri" onclick="doDownload()">⬇ Download HTML</button>
+      <button class="mf-sec" onclick="closeSetup()">Đóng</button>
+      <button class="mf-pri" onclick="closeSetup()">Đã hiểu!</button>
     </div>
   </div>
 </div>
 
+
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════════════
-   STATE
-══════════════════════════════════ */
+/* ══ CONFIG ══ */
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+let accessToken = null;
+let driveConnected = false;
+
+/* ══ STATE ══ */
 let S = {
   name:'Spring Sales 2025', platform:'Amazon', theme:'Spring / Mùa Xuân', desc:'',
   banners:[
     {id:1,label:'Hero Banner — Desktop',w:1464,h:625,fmt:'JPG / PNG',files:1,note:'Landscape · Thiết kế riêng với mobile',imgs:[]},
     {id:2,label:'Hero Banner — Mobile', w:463, h:625,fmt:'JPG / PNG',files:1,note:'Portrait · Không crop từ desktop',imgs:[]},
-    {id:3,label:'Secondary Banner',     w:362, h:453,fmt:'JPG / PNG',files:1,note:'Banner phụ, portrait, spotlight deal',imgs:[]},
-    {id:4,label:'Product Frame',        w:166, h:182,fmt:'PNG',       files:7,note:'Thumbnail · 1 file / sản phẩm, nền trong',imgs:[]},
+    {id:3,label:'Secondary Banner',     w:362, h:453,fmt:'JPG / PNG',files:1,note:'Banner phụ, portrait',imgs:[]},
+    {id:4,label:'Product Frame',        w:166, h:182,fmt:'PNG',       files:7,note:'Thumbnail · 1 / sản phẩm',imgs:[]},
   ],
   prods:[
     {n:'Sugarcane Powder',d:'600g'},{n:'Jackfruit',d:'250g'},
     {n:'Pineapple',d:'Pack of 3'},{n:'Dragon Fruit',d:'Pack of 3'},
     {n:'Mango',d:'250g'},{n:'Soursop',d:'Pack of 5'},{n:'Mango No Sugar',d:'Pack of 3'},
   ],
-  maxpx:5000, minfont:14, color:'#2a9e2a',
-  rules:'', dl:'', contact:'', notes:''
+  maxpx:5000,minfont:14,color:'#2a9e2a',
+  rules:'',dl:'',contact:'',notes:''
 };
-let BID = 5;
+let BID=5;
 
-/* ══════════════════════════════════
-   INIT
-══════════════════════════════════ */
-window.onload = () => { renderBanners(); renderProds(); upd(); };
+/* ══ INIT ══ */
+window.onload=()=>{
+  // Restore saved config
+  const saved=localStorage.getItem('briefDriveConfig');
+  if(saved){const cfg=JSON.parse(saved);document.getElementById('clientId').value=cfg.clientId||'';document.getElementById('folderId').value=cfg.folderId||'';document.getElementById('driveFolder').value=cfg.driveFolder||'Brief Builder / Banners';}
+  renderBanners();renderProds();upd();
+};
 
-/* ══════════════════════════════════
-   READ FORM
-══════════════════════════════════ */
+/* ══ SAVE CONFIG ══ */
+function saveConfig(){
+  localStorage.setItem('briefDriveConfig',JSON.stringify({
+    clientId:g('clientId'),
+    folderId:g('folderId'),
+    driveFolder:g('driveFolder')
+  }));
+}
+
+/* ══ READ FORM ══ */
 function readForm(){
-  S.name     = v('f-name');
-  S.platform = v('f-platform');
-  S.theme    = v('f-theme');
-  S.desc     = v('f-desc');
-  S.maxpx    = +v('f-maxpx')||5000;
-  S.minfont  = +v('f-minfont')||14;
-  S.rules    = v('f-rules');
-  S.dl       = v('f-dl');
-  S.contact  = v('f-contact');
-  S.notes    = v('f-notes');
+  S.name=g('f-name');S.platform=g('f-platform');S.theme=g('f-theme');
+  S.desc=g('f-desc');S.maxpx=+g('f-maxpx')||5000;S.minfont=+g('f-minfont')||14;
+  S.rules=g('f-rules');S.dl=g('f-dl');S.contact=g('f-contact');S.notes=g('f-notes');
   S.banners.forEach(b=>{
-    const g = k => { const el=document.getElementById(k+'_'+b.id); return el?el.value:null; };
-    const gn= k => { const el=document.getElementById(k+'_'+b.id); return el?+el.value||0:null; };
-    if(g('bl')!==null) b.label=g('bl');
-    if(gn('bw')!==null) b.w=gn('bw');
-    if(gn('bh')!==null) b.h=gn('bh');
-    if(gn('bn')!==null) b.files=gn('bn');
-    if(g('bf')!==null) b.fmt=g('bf');
-    if(g('bc')!==null) b.note=g('bc');
+    const gv=k=>{const el=document.getElementById(k+'_'+b.id);return el?el.value:null;};
+    if(gv('bl')!==null)b.label=gv('bl');
+    if(gv('bw')!==null)b.w=+gv('bw')||b.w;
+    if(gv('bh')!==null)b.h=+gv('bh')||b.h;
+    if(gv('bn')!==null)b.files=+gv('bn')||1;
+    if(gv('bf')!==null)b.fmt=gv('bf');
+    if(gv('bc')!==null)b.note=gv('bc');
   });
 }
-function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+function g(id){const el=document.getElementById(id);return el?el.value.trim():'';}
 
-/* ══════════════════════════════════
-   BANNER LIST
-══════════════════════════════════ */
+/* ══ BANNERS ══ */
 function renderBanners(){
-  document.getElementById('blist').innerHTML = S.banners.map((b,i)=>`
-    <div class="bcard" id="bcard_${b.id}">
+  document.getElementById('blist').innerHTML=S.banners.map((b,i)=>`
+    <div class="bcard">
       <div class="bcard-head">
         <div class="bnum">${i+1}</div>
-        <input id="bl_${b.id}" value="${h(b.label)}" placeholder="Tên loại banner" oninput="upd()">
+        <input id="bl_${b.id}" value="${h(b.label)}" placeholder="Tên banner" oninput="upd()">
         <button class="rm-btn" onclick="rmBanner(${b.id})">✕</button>
       </div>
       <div class="bcard-body">
@@ -375,13 +462,11 @@ function renderBanners(){
               ${['JPG / PNG','PNG','JPG','WebP'].map(f=>`<option${b.fmt===f?' selected':''}>${f}</option>`).join('')}
             </select></div>
           <div class="field" style="margin:0"><label>Ghi chú</label>
-            <input type="text" id="bc_${b.id}" value="${h(b.note)}" placeholder="Lưu ý thiết kế..." oninput="upd()"></div>
+            <input type="text" id="bc_${b.id}" value="${h(b.note)}" oninput="upd()"></div>
         </div>
-
-        <!-- IMAGE REFERENCE UPLOAD -->
         <div class="field" style="margin:0">
-          <label>🖼 Hình Reference <span class="hint">(kéo thả hoặc click, nhiều ảnh)</span></label>
-          <div class="img-upload-area ${b.imgs&&b.imgs.length?'has-img':''}" id="iu_${b.id}"
+          <label>🖼 Hình Reference <span class="hint">(kéo thả)</span></label>
+          <div class="ref-upload ${b.imgs&&b.imgs.length?'has-imgs':''}"
                onclick="document.getElementById('fi_${b.id}').click()"
                ondragover="event.preventDefault();this.style.borderColor='var(--g5)'"
                ondragleave="this.style.borderColor=''"
@@ -389,377 +474,381 @@ function renderBanners(){
             <input type="file" id="fi_${b.id}" accept="image/*" multiple style="display:none"
                    onchange="handleFiles(this.files,${b.id})">
             ${b.imgs&&b.imgs.length
-              ? `<div style="display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;">
-                   <div class="img-thumb-row" id="it_${b.id}">
-                     ${b.imgs.map((img,ii)=>`
-                       <div class="img-thumb">
-                         <img src="${img.data}" title="${h(img.name)}">
-                         <button class="img-thumb-del" onclick="event.stopPropagation();rmImg(${b.id},${ii})">✕</button>
-                       </div>`).join('')}
-                   </div>
-                   <span class="img-count-badge">${b.imgs.length} ảnh</span>
-                 </div>`
-              : `<div class="img-upload-hint">📎 Kéo thả hình reference vào đây<span>Hoặc click để chọn file · JPG, PNG, WebP</span></div>`
-            }
+              ?`<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;width:100%">
+                  <div class="thumb-row">
+                    ${b.imgs.map((img,ii)=>`<div class="thumb"><img src="${img.data}" title="${h(img.name)}"><button class="thumb-del" onclick="event.stopPropagation();rmImg(${b.id},${ii})">✕</button></div>`).join('')}
+                  </div>
+                  <span style="font-size:10px;color:var(--g7);font-weight:600;background:var(--g1);border-radius:4px;padding:1px 6px;">${b.imgs.length} refs</span>
+                </div>`
+              :`<div class="ref-hint">📎 Kéo thả hình reference<span>JPG · PNG · WebP</span></div>`}
           </div>
         </div>
-
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
+function addBanner(){S.banners.push({id:BID++,label:`Banner ${S.banners.length+1}`,w:800,h:600,fmt:'JPG / PNG',files:1,note:'',imgs:[]});renderBanners();upd();}
+function rmBanner(id){if(S.banners.length<=1){toast('Cần ít nhất 1 banner');return;}S.banners=S.banners.filter(b=>b.id!==id);renderBanners();upd();}
 
-function addBanner(){
-  S.banners.push({id:BID++,label:`Banner ${S.banners.length+1}`,w:800,h:600,fmt:'JPG / PNG',files:1,note:'',imgs:[]});
-  renderBanners(); upd();
-}
-function rmBanner(id){
-  if(S.banners.length<=1){toast('Cần ít nhất 1 banner');return;}
-  S.banners=S.banners.filter(b=>b.id!==id);
-  renderBanners(); upd();
-}
-
-/* ══════════════════════════════════
-   IMAGE HANDLING
-══════════════════════════════════ */
+/* ══ IMAGES ══ */
 function handleFiles(files,bid){
-  const b=S.banners.find(x=>x.id===bid);
-  if(!b)return;
+  const b=S.banners.find(x=>x.id===bid);if(!b)return;
   if(!b.imgs)b.imgs=[];
-  let loaded=0;
+  let done=0;
   Array.from(files).forEach(f=>{
     if(!f.type.startsWith('image/'))return;
     const r=new FileReader();
-    r.onload=e=>{
-      b.imgs.push({data:e.target.result,name:f.name});
-      loaded++;
-      if(loaded===files.length){renderBanners();upd();}
-    };
+    r.onload=e=>{b.imgs.push({data:e.target.result,name:f.name});done++;if(done===files.length){renderBanners();upd();}};
     r.readAsDataURL(f);
   });
 }
-function handleDrop(e,bid){
-  e.preventDefault();
-  e.currentTarget.style.borderColor='';
-  handleFiles(e.dataTransfer.files,bid);
-}
-function rmImg(bid,idx){
-  const b=S.banners.find(x=>x.id===bid);
-  if(b&&b.imgs){b.imgs.splice(idx,1);renderBanners();upd();}
-}
+function handleDrop(e,bid){e.preventDefault();e.currentTarget.style.borderColor='';handleFiles(e.dataTransfer.files,bid);}
+function rmImg(bid,idx){const b=S.banners.find(x=>x.id===bid);if(b&&b.imgs){b.imgs.splice(idx,1);renderBanners();upd();}}
 
-/* ══════════════════════════════════
-   PRODUCTS
-══════════════════════════════════ */
+/* ══ PRODUCTS ══ */
 function addProd(){
-  const inp=document.getElementById('f-prod');
-  const val=inp.value.trim(); if(!val)return;
-  const parts=val.split(/\s+/);
-  const last=parts[parts.length-1];
-  const isDetail=/^\d/.test(last)||/^pack/i.test(last);
-  const d=isDetail?parts.slice(-2).join(' '):'';
+  const inp=document.getElementById('f-prod');const val=inp.value.trim();if(!val)return;
+  const parts=val.split(/\s+/);const last=parts[parts.length-1];
+  const isD=/^\d/.test(last)||/^pack/i.test(last);
+  const d=isD?parts.slice(-2).join(' '):'';
   const n=d?parts.slice(0,parts.length-(d.includes(' ')?2:1)).join(' ')||val:val;
-  S.prods.push({n,d}); inp.value='';
-  renderProds(); upd();
+  S.prods.push({n,d});inp.value='';renderProds();upd();
 }
-function rmProd(i){ S.prods.splice(i,1); renderProds(); upd(); }
+function rmProd(i){S.prods.splice(i,1);renderProds();upd();}
 function renderProds(){
   document.getElementById('ptags').innerHTML=S.prods.map((p,i)=>`
     <div class="ptag">
-      <span>${h(p.n)}${p.d?` <span style="opacity:.55;font-size:10px">${h(p.d)}</span>`:''}</span>
-      <button class="pdel" onclick="rmProd(${i})">✕</button>
+      <span>${h(p.n)}${p.d?` <span style="opacity:.5;font-size:10px">${h(p.d)}</span>`:''}</span>
+      <button class="ptag-del" onclick="rmProd(${i})">✕</button>
     </div>`).join('');
 }
 
-/* ══════════════════════════════════
-   COLOR
-══════════════════════════════════ */
-function pickColor(el){
-  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
-  el.classList.add('on'); S.color=el.dataset.c; upd();
-}
+/* ══ COLOR ══ */
+function pickColor(el){document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));el.classList.add('on');S.color=el.dataset.c;upd();}
 
-/* ══════════════════════════════════
-   VIEW MODE
-══════════════════════════════════ */
+/* ══ VIEW MODE ══ */
 function setMode(m,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
   const pf=document.getElementById('pf'),pp=document.getElementById('pp');
   if(m==='split'){pf.style.display='';pp.style.display='';pf.style.width='52%';pp.style.width='48%';}
   else if(m==='form'){pf.style.display='';pp.style.display='none';pf.style.width='100%';}
   else{pf.style.display='none';pp.style.display='';pp.style.width='100%';}
 }
 
-/* ══════════════════════════════════
-   UPDATE
-══════════════════════════════════ */
-function upd(){ readForm(); renderPreview(); }
+/* ══ UPDATE ══ */
+function upd(){readForm();renderPreview();}
 
-/* ══════════════════════════════════
-   RENDER PREVIEW
-══════════════════════════════════ */
+/* ══ RENDER PREVIEW ══ */
 function renderPreview(){
-  const s=S, c=s.color;
-  const cd=darken(c,45), cl=lighten(c,88), cm=lighten(c,55);
+  const s=S,c=s.color;
+  const cd=darken(c,45),cl=lighten(c,88),cm=lighten(c,55);
   const totalFiles=s.banners.reduce((a,b)=>a+b.files,0);
-
-  const defRules=[
-    `Tất cả kích thước là <strong>tối thiểu</strong> — có thể làm lớn hơn, không được nhỏ hơn.`,
-    `Giới hạn tuyệt đối: <strong>không chiều nào vượt quá ${s.maxpx.toLocaleString()} px</strong> (yêu cầu Amazon).`,
-    `Font tối thiểu cho banner nhỏ nhất: <strong>${s.minfont}pt</strong>.`,
-    `PNG khi cần nền trong suốt. JPG cho banner có nền đặc hoặc ảnh.`,
-    `Đặt tên file đúng chuẩn theo bảng Deliverables.`,
-  ];
-  const extraR=s.rules?s.rules.split('\n').filter(l=>l.trim()).map(l=>h(l)):[];
-  const allRules=[...defRules,...extraR];
-
-  // Nav links
-  const navLinks=s.banners.map(b=>
-    `<a href="#bs${b.id}" style="color:rgba(255,255,255,.75);font-size:10px;font-weight:500;padding:7px 10px;border-right:1px solid rgba(255,255,255,.1);white-space:nowrap;text-decoration:none;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background=''">${h(b.label)}</a>`
-  ).join('');
-
-  // Banner sections
-  const bannerHTML=s.banners.map((b,i)=>{
-    const ratio=(b.w/b.h).toFixed(2);
-    const orient=b.w>b.h?'Landscape':b.w<b.h?'Portrait':'Square';
-    const mW=Math.max(32,Math.min(Math.round(b.w/b.h*56),150));
-    const mH=56;
-
-    // Reference images
-    const refHTML=b.imgs&&b.imgs.length?`
-      <div style="margin-top:10px;">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${c};margin-bottom:6px;">🖼 Hình Reference (${b.imgs.length})</div>
-        <div class="ref-img-grid" style="display:flex;flex-wrap:wrap;gap:8px;">
-          ${b.imgs.map((img,ii)=>`
-            <div style="border-radius:8px;overflow:hidden;border:1px solid ${cl};background:${cl}22;text-align:center;">
-              <img src="${img.data}" style="width:100px;height:80px;object-fit:cover;display:block">
-              <div style="font-size:8.5px;color:${cd};padding:2px 5px;background:${cl};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px;">${h(img.name)}</div>
+  const defRules=[`Tất cả kích thước là <strong>tối thiểu</strong>.`,`Max <strong>${s.maxpx.toLocaleString()} px</strong> mỗi chiều.`,`Font tối thiểu: <strong>${s.minfont}pt</strong>.`,`PNG nền trong · JPG nền đặc.`];
+  const allRules=[...defRules,...(s.rules?s.rules.split('\n').filter(l=>l.trim()).map(l=>h(l)):[])];
+  const navLinks=s.banners.map(b=>`<a href="#bs${b.id}" style="color:rgba(255,255,255,.75);font-size:10px;font-weight:500;padding:7px 10px;border-right:1px solid rgba(255,255,255,.1);white-space:nowrap;text-decoration:none;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background=''">${h(b.label)}</a>`).join('');
+  const bannersHTML=s.banners.map((b,i)=>{
+    const mW=Math.max(32,Math.min(Math.round(b.w/b.h*56),150)),mH=56;
+    const refHTML=b.imgs&&b.imgs.length?`<div style="margin-top:10px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${c};margin-bottom:6px;">🖼 Reference (${b.imgs.length})</div><div style="display:flex;flex-wrap:wrap;gap:7px;">${b.imgs.map(img=>`<div style="border-radius:7px;overflow:hidden;border:1px solid ${cl}"><img src="${img.data}" style="width:90px;height:70px;object-fit:cover;display:block"><div style="font-size:8px;color:${cd};padding:2px 5px;background:${cl};max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${h(img.name)}</div></div>`).join('')}</div></div>`:
+    `<div style="margin-top:8px;padding:8px;border:1.5px dashed ${cl};border-radius:7px;text-align:center;font-size:10px;color:${cm};">Chưa có reference</div>`;
+    return `<div class="pv-bsec" id="bs${b.id}" style="scroll-margin-top:36px;border-top:1px solid #eee;">
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
+        <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${i+1}</div>
+        <div style="font-size:11.5px;font-weight:700;color:#111;">${h(b.label)}</div>
+        <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${b.files} file${b.files>1?'s':''}</div>
+      </div>
+      <div style="padding:10px 14px 13px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          ${[['📐 Kích thước',`${b.w} × ${b.h} px`],['📁 Format',b.fmt],['📄 Files',b.files+' file'+(b.files>1?'s':'')]].map(([k,v])=>`
+            <div style="border:1px solid ${cl};border-radius:8px;overflow:hidden;min-width:100px;">
+              <div style="background:${cl};padding:3px 9px;font-size:9.5px;font-weight:600;color:${cd};border-bottom:1px solid ${cl};">${k}</div>
+              <div style="padding:4px 9px 5px;font-size:14px;font-weight:700;color:#111;">${v}</div>
             </div>`).join('')}
         </div>
-      </div>`:
-      `<div style="margin-top:8px;padding:8px 10px;border:1.5px dashed ${cl};border-radius:7px;text-align:center;font-size:10px;color:${cm};">Chưa có hình reference · Upload từ form bên trái</div>`;
-
-    return `
-      <div class="pv-bsec" id="bs${b.id}" style="scroll-margin-top:36px;border-top:1px solid #eee;">
-        <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
-          <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
-          <div style="font-size:11.5px;font-weight:700;color:#111;">${h(b.label)}</div>
-          <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${b.files} file${b.files>1?'s':''}</div>
-        </div>
-        <div style="padding:10px 14px 13px;">
-
-          <!-- Size chips -->
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <div style="border:1px solid ${cl};border-radius:8px;overflow:hidden;min-width:110px;">
-              <div style="background:${cl};padding:3px 9px;font-size:9.5px;font-weight:600;color:${cd};border-bottom:1px solid ${cl};">📐 Kích thước</div>
-              <div style="padding:4px 9px;font-size:15px;font-weight:700;color:#111;letter-spacing:-.3px;">${b.w} × ${b.h} px</div>
-              <div style="padding:0 9px 5px;font-size:9.5px;color:#bbb;">~${ratio}:1 · ${orient}</div>
-            </div>
-            <div style="border:1px solid ${cl};border-radius:8px;overflow:hidden;min-width:110px;">
-              <div style="background:${cl};padding:3px 9px;font-size:9.5px;font-weight:600;color:${cd};border-bottom:1px solid ${cl};">📁 Format</div>
-              <div style="padding:4px 9px;font-size:15px;font-weight:700;color:#111;">${h(b.fmt)}</div>
-              <div style="padding:0 9px 5px;font-size:9.5px;color:#bbb;">${b.files} file cần giao</div>
-            </div>
+        <div style="display:flex;gap:10px;align-items:flex-end;background:#f6f6f4;border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="border:2px dashed ${cm};border-radius:6px;width:${mW}px;height:${mH}px;display:flex;align-items:center;justify-content:center;background:${cl}33;flex-shrink:0;">
+            <div style="font-size:9px;font-weight:600;color:${c};">${b.w}×${b.h}</div>
           </div>
-
-          <!-- Mockup -->
-          <div style="display:flex;gap:10px;align-items:flex-end;background:#f6f6f4;border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:10px;">
-            <div style="border:2px dashed ${cm};border-radius:6px;width:${mW}px;height:${mH}px;display:flex;align-items:center;justify-content:center;background:${cl}33;flex-shrink:0;">
-              <div style="font-size:9px;font-weight:600;color:${c};text-align:center;">${b.w}×${b.h}</div>
-            </div>
-            <div style="font-size:11px;color:#555;line-height:1.5;">${b.note?h(b.note):`Min ${b.w}×${b.h}px · Tối đa ${s.maxpx.toLocaleString()}px`}</div>
-          </div>
-
-          <!-- Spec rows -->
-          <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;">
-            ${[['Chiều rộng (min)',b.w+' px'],['Chiều cao (min)',b.h+' px'],['Tối đa mỗi chiều','< '+s.maxpx.toLocaleString()+' px'],['Format xuất',b.fmt],['Số file',''+b.files+(b.files===s.prods.length&&b.files>1?' (1 / sản phẩm)':'')]].map(([k,v])=>`
-              <tr style="border-bottom:1px solid #f0f0f0;">
-                <td style="padding:4px 2px;color:#888;width:45%;">${k}</td>
-                <td style="padding:4px 2px;font-weight:600;color:#111;">${v}</td>
-              </tr>`).join('')}
-          </table>
-
-          ${refHTML}
+          <div style="font-size:11px;color:#555;line-height:1.5;">${b.note?h(b.note):`Min ${b.w}×${b.h}px`}</div>
         </div>
-      </div>`;
+        ${refHTML}
+      </div>
+    </div>`;
   }).join('');
-
-  document.getElementById('pcard').innerHTML = `
-    <!-- STICKY NAV -->
-    <div style="position:sticky;top:0;z-index:50;background:${cd};display:flex;align-items:center;overflow-x:auto;border-bottom:2px solid ${c};scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-      <span style="padding:7px 12px;color:#fff;font-size:11px;font-weight:700;letter-spacing:.3px;border-right:1px solid rgba(255,255,255,.2);flex-shrink:0;">🌿 ${h(s.name||'Design Brief')}</span>
+  document.getElementById('pcard').innerHTML=`
+    <div style="position:sticky;top:0;z-index:50;background:${cd};display:flex;align-items:center;overflow-x:auto;border-bottom:2px solid ${c};scrollbar-width:none;">
+      <span style="padding:7px 12px;color:#fff;font-size:11px;font-weight:700;border-right:1px solid rgba(255,255,255,.2);flex-shrink:0;">🌿 ${h(s.name||'Brief')}</span>
       ${navLinks}
-      <a href="#bs-deliv" style="color:rgba(255,255,255,.75);font-size:10px;font-weight:500;padding:7px 10px;white-space:nowrap;text-decoration:none;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background=''">Deliverables</a>
+      <a href="#bs-deliv" style="color:rgba(255,255,255,.75);font-size:10px;font-weight:500;padding:7px 10px;white-space:nowrap;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background=''">Deliverables</a>
     </div>
-
-    <!-- HERO -->
     <div style="padding:18px 20px 16px;background:linear-gradient(135deg,${cd} 0%,${c} 55%,${cm} 100%);color:#fff;">
       <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.8px;opacity:.6;margin-bottom:5px;">${h(s.platform)} · Storefront Banner</div>
       <div style="font-size:19px;font-weight:700;line-height:1.2;">${h(s.name||'—')}${s.theme?` — ${h(s.theme)}`:''}</div>
       ${s.desc?`<div style="font-size:11.5px;opacity:.8;margin-top:4px;">${h(s.desc)}</div>`:''}
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">
-        ${[['📦',s.platform],['🌸',s.theme],['📏','Max '+s.maxpx.toLocaleString()+'px'],['🖼',s.banners.length+' loại banner'],['📁',totalFiles+' files'],s.dl?['📅',s.dl]:null].filter(Boolean).map(([e,t])=>t?`<span style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:2px 9px;font-size:10px;">${e} ${h(t)}</span>`:'')}
+        ${[[s.platform],[s.theme],[`${s.banners.length} loại banner`],[`${totalFiles} files`],s.dl?[s.dl]:null].filter(Boolean).map(([t])=>`<span style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:2px 9px;font-size:10px;">${h(t)}</span>`)}
       </div>
     </div>
-
-    <!-- SUMMARY BAR -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #eee;">
-      ${[[s.banners.length,'Loại banner'],[s.prods.length,'Sản phẩm deal'],[totalFiles,'Files cần giao'],[s.maxpx.toLocaleString()+'px','Max / chiều']].map(([n,l])=>`
+      ${[[s.banners.length,'Loại banner'],[s.prods.length,'Sản phẩm'],[totalFiles,'Files'],[s.maxpx.toLocaleString()+'px','Max/chiều']].map(([n,l])=>`
         <div style="padding:10px 8px;text-align:center;border-right:1px solid #eee;">
           <div style="font-size:18px;font-weight:700;color:${c};line-height:1;">${n}</div>
           <div style="font-size:9px;color:#bbb;margin-top:2px;">${l}</div>
         </div>`).join('')}
     </div>
-
-    ${bannerHTML}
-
-    <!-- PRODUCTS -->
+    ${bannersHTML}
     ${s.prods.length?`
       <div style="border-top:1px solid #eee;">
         <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
           <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${s.banners.length+1}</div>
-          <div style="font-size:11.5px;font-weight:700;color:#111;">Danh Sách Sản Phẩm Có Deal</div>
-          <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${s.prods.length} SKU</div>
+          <div style="font-size:11.5px;font-weight:700;">Sản phẩm</div>
         </div>
-        <div style="padding:10px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;">
-          ${s.prods.map(p=>`
-            <div style="background:#fff;border:1px solid ${cl};border-left:3px solid ${c};border-radius:6px;padding:6px 8px;">
-              <div style="font-size:11px;font-weight:600;color:${cd};">${h(p.n)}</div>
-              ${p.d?`<div style="font-size:9.5px;color:#bbb;margin-top:2px;">${h(p.d)}</div>`:''}
-            </div>`).join('')}
+        <div style="padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px;">
+          ${s.prods.map(p=>`<div style="background:#fff;border:1px solid ${cl};border-left:3px solid ${c};border-radius:6px;padding:6px 8px;"><div style="font-size:11px;font-weight:600;color:${cd};">${h(p.n)}</div>${p.d?`<div style="font-size:9.5px;color:#bbb;">${h(p.d)}</div>`:''}</div>`).join('')}
         </div>
       </div>`:''}
-
-    <!-- DELIVERABLES -->
-    <div class="pv-deliv-sec" id="bs-deliv" style="border-top:1px solid #eee;scroll-margin-top:36px;">
+    <div id="bs-deliv" style="border-top:1px solid #eee;scroll-margin-top:36px;">
       <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
         <div style="width:18px;height:18px;border-radius:50%;background:${cd};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">✓</div>
-        <div style="font-size:11.5px;font-weight:700;color:#111;">Tổng Hợp Deliverables</div>
-        <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${totalFiles} files</div>
+        <div style="font-size:11.5px;font-weight:700;">Deliverables — ${totalFiles} files</div>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:10.5px;">
-        <thead><tr>
-          ${['Loại Banner','Kích thước','Format','Files','Tên file gợi ý'].map(th=>`<th style="background:${cl};padding:5px 9px;text-align:left;font-size:9px;font-weight:700;color:${cd};text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid ${cl};">${th}</th>`).join('')}
-        </tr></thead>
+        <thead><tr>${['Banner','Kích thước','Format','Files','Tên file'].map(th=>`<th style="background:${cl};padding:5px 9px;text-align:left;font-size:9px;font-weight:700;color:${cd};text-transform:uppercase;border-bottom:1px solid ${cl};">${th}</th>`).join('')}</tr></thead>
         <tbody>
-          ${s.banners.map((b,i)=>`
-            <tr style="${i%2?'background:#fafafa':''}">
-              <td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;">${h(b.label)}</td>
-              <td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;font-weight:600;">${b.w} × ${b.h} px</td>
-              <td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;">${h(b.fmt)}</td>
-              <td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;"><span style="background:${cl};border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;color:${c};">${b.files}</span></td>
-              <td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;font-family:monospace;font-size:9.5px;color:#666;">${slug(b.label)}.${b.fmt.toLowerCase().split('/')[0].trim()}</td>
-            </tr>`).join('')}
-          <tr style="background:${cl};">
-            <td colspan="3" style="padding:6px 9px;font-weight:700;color:${cd};">TỔNG CỘNG</td>
-            <td style="padding:6px 9px;"><span style="background:${c};border-radius:4px;padding:1px 8px;font-size:10px;font-weight:700;color:#fff;">${totalFiles}</span></td>
-            <td></td>
-          </tr>
+          ${s.banners.map((b,i)=>`<tr style="${i%2?'background:#fafafa':''}"><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;">${h(b.label)}</td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;font-weight:600;">${b.w}×${b.h}px</td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;">${h(b.fmt)}</td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;"><span style="background:${cl};border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;color:${c};">${b.files}</span></td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;font-family:monospace;font-size:9.5px;color:#888;">${slug(b.label)}.${b.fmt.toLowerCase().split('/')[0].trim()}</td></tr>`).join('')}
+          <tr style="background:${cl};"><td colspan="3" style="padding:6px 9px;font-weight:700;color:${cd};">TỔNG</td><td style="padding:6px 9px;"><span style="background:${c};border-radius:4px;padding:1px 8px;font-size:10px;font-weight:700;color:#fff;">${totalFiles}</span></td><td></td></tr>
         </tbody>
       </table>
     </div>
-
-    <!-- RULES -->
-    <div style="border-top:1px solid #eee;">
-      <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
-        <div style="width:18px;height:18px;border-radius:50%;background:${cd};color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">!</div>
-        <div style="font-size:11.5px;font-weight:700;color:#111;">Quy Định Chung</div>
-      </div>
-      <div style="padding:10px 14px 6px;">
-        <ul style="list-style:none;">
-          ${allRules.map(r=>`
-            <li style="display:flex;gap:7px;font-size:11px;color:#555;padding:3px 0;border-bottom:1px solid #f5f5f5;line-height:1.5;">
-              <span style="color:${c};font-weight:700;flex-shrink:0;">✓</span><span>${r}</span>
-            </li>`).join('')}
-        </ul>
-      </div>
-      ${s.dl||s.contact||s.notes?`
-        <div style="margin:6px 14px 14px;background:${cl};border:1px solid ${cm};border-radius:8px;padding:10px 12px;">
-          ${s.dl?`<div style="font-size:11px;color:${cd};margin-bottom:4px;">📅 <strong>Deadline:</strong> ${h(s.dl)}</div>`:''}
-          ${s.contact?`<div style="font-size:11px;color:${cd};margin-bottom:4px;">👤 <strong>Liên hệ:</strong> ${h(s.contact)}</div>`:''}
-          ${s.notes?`<div style="font-size:11px;color:${cd};">📝 <strong>Ghi chú:</strong> ${h(s.notes)}</div>`:''}
-        </div>`:''}
+    <div style="border-top:1px solid #eee;padding:10px 14px 14px;">
+      <ul style="list-style:none;">
+        ${allRules.map(r=>`<li style="display:flex;gap:7px;font-size:11px;color:#555;padding:3px 0;border-bottom:1px solid #f5f5f5;line-height:1.5;"><span style="color:${c};font-weight:700;flex-shrink:0;">✓</span><span>${r}</span></li>`).join('')}
+      </ul>
+      ${s.contact||s.notes?`<div style="margin-top:10px;background:${cl};border:1px solid ${cm};border-radius:8px;padding:10px 12px;">${s.contact?`<div style="font-size:11px;color:${cd};">👤 <strong>Liên hệ:</strong> ${h(s.contact)}</div>`:''} ${s.notes?`<div style="font-size:11px;color:${cd};margin-top:3px;">📝 ${h(s.notes)}</div>`:''}</div>`:''}
     </div>
-
     <div style="text-align:center;padding:10px;font-size:9px;color:#ccc;border-top:1px solid #f0f0f0;">
-      ${h(s.platform)} · ${h(s.name||'Design Brief')} · Brief Builder
-    </div>
-  `;
+      ${h(s.platform)} · ${h(s.name||'Brief')} · Brief Builder
+    </div>`;
 }
 
-/* ══════════════════════════════════
-   HELPERS
-══════════════════════════════════ */
-function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function slug(l){ return 'banner_'+l.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').slice(0,30); }
-function darken(hex,p){ const n=parseInt(hex.slice(1),16),r=Math.max(0,((n>>16)&0xff)-p),g=Math.max(0,((n>>8)&0xff)-p),b=Math.max(0,(n&0xff)-p);return `rgb(${r},${g},${b})`; }
-function lighten(hex,p){ const n=parseInt(hex.slice(1),16),r=Math.min(255,((n>>16)&0xff)+p),g=Math.min(255,((n>>8)&0xff)+p),b=Math.min(255,(n&0xff)+p);return `rgb(${r},${g},${b})`; }
-function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200); }
+/* ══════════════════════════════════════════
+   GOOGLE DRIVE OAUTH + UPLOAD
+══════════════════════════════════════════ */
 
-/* ══════════════════════════════════
-   RESET
-══════════════════════════════════ */
-function resetAll(){ if(confirm('Reset về mẫu mặc định?'))location.reload(); }
-
-/* ══════════════════════════════════
-   PDF EXPORT
-══════════════════════════════════ */
-function exportPDF(){
-  // Switch to full preview first
-  document.getElementById('pf').style.display='none';
-  document.getElementById('pp').style.width='100%';
-
-  // Small delay then print
-  setTimeout(()=>{
-    window.print();
-    // Restore after print dialog
-    setTimeout(()=>{
-      document.getElementById('pf').style.display='';
-      document.getElementById('pp').style.width='48%';
-    },1000);
-  },200);
+function handleDriveBtn(){
+  const clientId=g('clientId');
+  if(!clientId){toast('⚠ Vui lòng nhập Client ID trước');showSetupModal();return;}
+  if(!driveConnected){initOAuth(clientId);}
+  else{captureAndUpload();}
 }
 
-/* ══════════════════════════════════
-   HTML EXPORT
-══════════════════════════════════ */
-function exportHTML(){
-  document.getElementById('expModal').classList.add('show');
+function initOAuth(clientId){
+  setDriveBtn('loading','Đang kết nối...');
+  // Build OAuth URL
+  const params=new URLSearchParams({
+    client_id:clientId,
+    redirect_uri:window.location.origin+window.location.pathname,
+    response_type:'token',
+    scope:SCOPES,
+    include_granted_scopes:'true',
+    state:'drive_auth',
+  });
+  const authUrl=`https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+  // Open popup
+  const w=500,ht=650;
+  const left=(screen.width-w)/2,top=(screen.height-ht)/2;
+  const popup=window.open(authUrl,'DriveAuth',`width=${w},height=${ht},left=${left},top=${top}`);
+  // Listen for redirect with token
+  const timer=setInterval(()=>{
+    try{
+      const url=popup.location.href;
+      if(url&&url.includes('access_token')){
+        clearInterval(timer);
+        popup.close();
+        const hash=new URLSearchParams(popup.location.hash.slice(1));
+        accessToken=hash.get('access_token');
+        if(accessToken){onDriveConnected();}
+        else{onDriveError('Không lấy được access token.');}
+      }
+    }catch(e){}
+    if(popup&&popup.closed&&!accessToken){clearInterval(timer);setDriveBtn('idle','Drive');}
+  },300);
 }
-function closeModal(){ document.getElementById('expModal').classList.remove('show'); }
-function doDownload(){
-  const inner=document.getElementById('pcard').innerHTML;
-  const s=S, c=s.color;
-  const html=`<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${h(s.name||'Design Brief')}</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:13px;scroll-behavior:smooth}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#fff;color:#111;line-height:1.55}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#e0e0e0;border-radius:10px}
-@media print{@page{size:A4;margin:10mm} .no-print{display:none!important} .pv-bsec{page-break-inside:avoid}}
-</style>
-</head>
-<body>
-<div style="max-width:100%;border:1px solid #eee;overflow:hidden;border-radius:0;">
-${inner}
-</div>
-</body>
-</html>`;
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+
+// Handle redirect back (if same-page redirect)
+window.addEventListener('load',()=>{
+  const hash=new URLSearchParams(window.location.hash.slice(1));
+  const token=hash.get('access_token');
+  const state=hash.get('state');
+  if(token&&state==='drive_auth'){
+    accessToken=token;
+    window.location.hash='';
+    onDriveConnected();
+  }
+});
+
+function onDriveConnected(){
+  driveConnected=true;
+  setDriveBtn('connected','📤 Save to Drive');
+  updateDriveStatus('ok','✅ Đã kết nối Google Drive — nhấn nút Drive để upload brief');
+  toast('✓ Kết nối Google Drive thành công!');
+}
+function onDriveError(msg){
+  driveConnected=false;
+  setDriveBtn('idle','Drive');
+  updateDriveStatus('err','❌ '+msg);
+  toast('⚠ '+msg);
+}
+
+function setDriveBtn(state,label){
+  const btn=document.getElementById('driveBtn');
+  const dot=document.getElementById('driveDot');
+  document.getElementById('driveBtnLabel').textContent=label;
+  btn.className='btn-drive';
+  if(state==='connected'){btn.classList.add('connected');dot.classList.add('on');}
+  else if(state==='loading'){btn.classList.add('loading');dot.classList.remove('on');}
+  else{dot.classList.remove('on');}
+}
+
+function updateDriveStatus(type,msg){
+  const el=document.getElementById('driveStatus');
+  el.className='drive-status'+(type==='ok'?' ok':type==='err'?' err':'');
+  el.innerHTML=msg;
+}
+
+/* ── CAPTURE AND UPLOAD ── */
+async function captureAndUpload(){
+  if(!accessToken){toast('⚠ Chưa kết nối Drive');return;}
+  showCapture('Đang chụp ảnh brief...','html2canvas đang render...');
+  try{
+    // Expand preview to full width for capture
+    const pf=document.getElementById('pf'),pp=document.getElementById('pp');
+    const pfOld=pf.style.display,ppOld=pp.style.width;
+    pf.style.display='none';pp.style.width='100%';
+    await new Promise(r=>setTimeout(r,300));
+
+    const el=document.getElementById('pcard');
+    const canvas=await html2canvas(el,{
+      scale:2,useCORS:true,allowTaint:true,
+      backgroundColor:'#ffffff',
+      scrollX:0,scrollY:-window.scrollY,
+      windowWidth:el.scrollWidth,
+      windowHeight:el.scrollHeight,
+    });
+
+    // Restore layout
+    pf.style.display=pfOld;pp.style.width=ppOld;
+
+    updateCapture('Đang upload lên Google Drive...','Vui lòng chờ...');
+
+    // Convert canvas to blob
+    const blob=await new Promise(res=>canvas.toBlob(res,'image/png',0.95));
+
+    // Build filename
+    const name=S.name||'brief';
+    const date=new Date().toISOString().slice(0,10);
+    const filename=`${name.toLowerCase().replace(/\s+/g,'-')}_${date}.png`;
+
+    // Find or create folder
+    let folderId=g('folderId');
+    const subFolderName=g('driveFolder')||'Brief Builder';
+    if(subFolderName&&!folderId){
+      folderId=await getOrCreateFolder(subFolderName,null);
+    } else if(subFolderName&&folderId){
+      folderId=await getOrCreateFolder(subFolderName,folderId);
+    }
+
+    // Upload file
+    const fileId=await uploadToDrive(blob,filename,folderId);
+    const fileUrl=`https://drive.google.com/file/d/${fileId}/view`;
+
+    hideCapture();
+    updateDriveStatus('ok',`✅ Đã lưu! <a href="${fileUrl}" target="_blank" style="color:var(--blue);font-weight:600;margin-left:4px;">📂 Mở trong Drive →</a>`);
+    toast('✓ Upload thành công!');
+
+  }catch(err){
+    hideCapture();
+    console.error(err);
+    onDriveError('Upload thất bại: '+err.message);
+  }
+}
+
+async function getOrCreateFolder(name,parentId){
+  // Search existing
+  let q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  if(parentId)q+=` and '${parentId}' in parents`;
+  const res=await gFetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`);
+  if(res.files&&res.files.length)return res.files[0].id;
+  // Create
+  const meta={name,mimeType:'application/vnd.google-apps.folder'};
+  if(parentId)meta.parents=[parentId];
+  const created=await gFetch('https://www.googleapis.com/drive/v3/files',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(meta)
+  });
+  return created.id;
+}
+
+async function uploadToDrive(blob,filename,folderId){
+  const meta={name:filename,mimeType:'image/png'};
+  if(folderId)meta.parents=[folderId];
+  const form=new FormData();
+  form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+  form.append('file',blob);
+  const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{
+    method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form
+  });
+  if(!res.ok){const err=await res.json();throw new Error(err.error?.message||'Upload failed');}
+  const data=await res.json();
+  return data.id;
+}
+
+async function gFetch(url,opts={}){
+  const res=await fetch(url,{...opts,headers:{...opts.headers,Authorization:`Bearer ${accessToken}`}});
+  if(!res.ok){const err=await res.json();throw new Error(err.error?.message||'API error');}
+  return res.json();
+}
+
+/* ── CAPTURE OVERLAY ── */
+function showCapture(msg,sub){
+  document.getElementById('captureMsg').textContent=msg;
+  document.getElementById('captureSub').textContent=sub;
+  document.getElementById('captureOverlay').classList.add('show');
+}
+function updateCapture(msg,sub){
+  document.getElementById('captureMsg').textContent=msg;
+  document.getElementById('captureSub').textContent=sub;
+}
+function hideCapture(){document.getElementById('captureOverlay').classList.remove('show');}
+
+/* ══ PNG DOWNLOAD ══ */
+async function saveAsPNG(){
+  showCapture('Đang tạo ảnh PNG...','');
+  const pf=document.getElementById('pf'),pp=document.getElementById('pp');
+  pf.style.display='none';pp.style.width='100%';
+  await new Promise(r=>setTimeout(r,300));
+  const el=document.getElementById('pcard');
+  const canvas=await html2canvas(el,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',scrollX:0,scrollY:-window.scrollY,windowWidth:el.scrollWidth,windowHeight:el.scrollHeight});
+  pf.style.display='';pp.style.width='48%';
+  hideCapture();
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=(s.name||'design-brief').toLowerCase().replace(/\s+/g,'-')+'-brief.html';
+  a.href=canvas.toDataURL('image/png',0.95);
+  a.download=(S.name||'brief').toLowerCase().replace(/\s+/g,'-')+'-brief.png';
   a.click();
-  toast('✓ Đã download HTML!');
-  closeModal();
+  toast('✓ Đã tải PNG!');
 }
+
+/* ══ SETUP MODAL ══ */
+function showSetupModal(){document.getElementById('setupModal').classList.add('show');}
+function closeSetup(){document.getElementById('setupModal').classList.remove('show');}
+
+/* ══ RESET ══ */
+function resetAll(){if(confirm('Reset form?'))location.reload();}
+
+/* ══ HELPERS ══ */
+function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function slug(l){return 'banner_'+l.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').slice(0,30);}
+function darken(hex,p){const n=parseInt(hex.slice(1),16),r=Math.max(0,((n>>16)&0xff)-p),g=Math.max(0,((n>>8)&0xff)-p),b=Math.max(0,(n&0xff)-p);return `rgb(${r},${g},${b})`;}
+function lighten(hex,p){const n=parseInt(hex.slice(1),16),r=Math.min(255,((n>>16)&0xff)+p),g=Math.min(255,((n>>8)&0xff)+p),b=Math.min(255,(n&0xff)+p);return `rgb(${r},${g},${b})`;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 </script>
 </body>
 </html>
