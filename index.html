@@ -1308,9 +1308,9 @@ function openForm(type, briefData=null){
   formProds = briefData?.products    ? [...briefData.products]    : [];
   formImgs  = briefData?.refImgs     ? [...briefData.refImgs]     : [];
 
-  document.getElementById('fpTitle').textContent = briefData
-    ? `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg> Edit: ${briefData.name||'Brief'}`
-    : (type==='banner' ? '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><rect x="2" y="3" width="12" height="10" rx="1.5"/><circle cx="6" cy="7" r="1.5"/><path d="M2 11l4-3 3 3 2-2 3 2"/></svg> New Banner Brief' : '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><rect x="2" y="4" width="10" height="8" rx="1.5"/><path d="M12 6.5l3-2v7l-3-2V6.5z"/></svg> New Video Brief');
+  document.getElementById('fpTitle').innerHTML = briefData
+    ? `✦ Edit: ${briefData.name||'Brief'}`
+    : (type==='banner' ? 'New Banner Brief' : 'New Video Brief');
 
   document.getElementById('fpBody').innerHTML = type==='banner' ? bannerFormHTML(briefData) : videoFormHTML(briefData);
 
@@ -2092,45 +2092,140 @@ async function exportCard(id){
   finally{document.body.removeChild(tmp);}
 }
 
+
 function buildExportHTML(b){
-  const status = b.status||'todo';
-  const statusColor = {todo:'#475569',inprogress:'#1d4ed8',done:'#1a6b1a',revision:'#c2410c'}[status];
-  return `
-  <div style="border:2px solid #e5e7eb;border-radius:14px;overflow:hidden;font-family:sans-serif;">
-    <div style="background:linear-gradient(135deg,#0a3d0a,#1a6b1a,#2a9e2a);padding:20px;color:#fff">
-      <div style="font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">${h(b.type==='banner'?'Banner Brief':'Video Brief')} · ${h(b.platform||'')}</div>
-      <div style="font-size:20px;font-weight:700">${h(b.name||'Brief')}</div>
-      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-        <span style="background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:11px">#${h(b.orderNum||'—')}</span>
-        ${b.deadline?`<span style="background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:11px">${h(b.deadline)}</span>`:''}
-        <span style="background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:11px;color:#fff">${STATUS_LABEL[status]||status}</span>
-      </div>
-    </div>
-    <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;background:#f9fafb">
-      ${[['Order by',b.orderedBy],['Assign to',b.assignTo],['Deadline',b.deadline]].map(([k,v])=>`
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px">
-          <div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">${k}</div>
-          <div style="font-size:12px;font-weight:600;color:#111">${h(v||'—')}</div>
-        </div>`).join('')}
-    </div>
-    ${(b.bannerSpecs||[]).length?`
-    <div style="padding:12px 16px">
-      <div style="font-size:9px;font-weight:700;color:#1a6b1a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Banner Specs</div>
-      <table style="width:100%;border-collapse:collapse;font-size:11px">
-        <tr style="background:#f0fbf0"><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Banner</th><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Size</th><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Format</th><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Files</th></tr>
-        ${(b.bannerSpecs||[]).map((s,i)=>`<tr style="background:${i%2?'#f9fafb':'#fff'}"><td style="padding:5px 8px">${h(s.label)}</td><td style="padding:5px 8px;font-weight:600;color:#1a6b1a">${s.w}×${s.h}px</td><td style="padding:5px 8px">${h(s.fmt)}</td><td style="padding:5px 8px">${s.files}</td></tr>`).join('')}
-      </table>
-    </div>`:''}
-    ${(b.products||[]).length?`
-    <div style="padding:0 16px 12px">
-      <div style="font-size:9px;font-weight:700;color:#1a6b1a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Sản phẩm</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        ${(b.products||[]).map(p=>`<span style="background:#f0fbf0;border:1px solid #d4f0d4;border-radius:20px;padding:3px 10px;font-size:11px;color:#0a3d0a">${h(p.n)}${p.d?' · '+h(p.d):''}</span>`).join('')}
-      </div>
-    </div>`:''}
-    <div style="padding:8px 16px 12px;border-top:1px solid #f3f4f6;font-size:10px;color:#9ca3af">Brief Manager · ${new Date().toLocaleString('vi-VN')}</div>
-  </div>`;
+  const color   = (typeof customColors!=='undefined'&&customColors?.g7)  ? customColors.g7  : '#1a6b1a';
+  const colorDk = (typeof customColors!=='undefined'&&customColors?.g9)  ? customColors.g9  : '#0a3d0a';
+  const colorMd = (typeof customColors!=='undefined'&&customColors?.g5)  ? customColors.g5  : '#2a9e2a';
+  const colorLt = (typeof customColors!=='undefined'&&customColors?.g1)  ? customColors.g1  : '#d4f0d4';
+  const colorBg = (typeof customColors!=='undefined'&&customColors?.g0)  ? customColors.g0  : '#f0fbf0';
+  const specs   = b.type==='video' ? (b.videoSpecs||[]) : (b.bannerSpecs||[]);
+  const totalFiles = specs.reduce((s,x)=>s+(+x.files||1),0);
+  const ts = new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  function ratioBox(w,h_){
+    const maxW=150,maxH=80,ratio=w/h_;
+    let bw=Math.min(maxW,ratio*maxH),bh=bw/ratio;
+    if(bh>maxH){bh=maxH;bw=bh*ratio;}
+    bw=Math.round(bw);bh=Math.round(bh);
+    return '<div style="width:'+bw+'px;height:'+bh+'px;border:2px dashed '+colorMd+';border-radius:5px;background:'+colorBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:9px;font-weight:600;color:'+color+'">'+w+'x'+h_+'</span></div>';
+  }
+
+  const specsHTML = specs.map(function(s,i){
+    const w=+(s.w||s.width||0),hh=+(s.h||s.height||0);
+    const hasRef=b.refImgs&&b.refImgs.length>0;
+    const svgSize='<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M2 6h12M6 2v12"/></svg>';
+    const svgFmt='<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M6 6h4M6 8.5h4M6 11h2"/></svg>';
+    const svgFile='<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round"><path d="M3 4h10v8H3z"/><path d="M7 4v8"/></svg>';
+    const specCards=[
+      [svgSize,'Kích thước',w&&hh?w+' \xd7 '+hh+' px':'—'],
+      [svgFmt,'Format',s.fmt||'—'],
+      [svgFile,'Files',String(s.files||1)],
+    ].map(function(sc){
+      return '<div style="background:'+colorBg+';border:1px solid '+colorLt+';border-radius:8px;padding:8px 12px;min-width:90px">'
+        +'<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">'+sc[0]
+        +'<span style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.5px">'+sc[1]+'</span></div>'
+        +'<div style="font-size:16px;font-weight:700;color:#111;letter-spacing:-.3px">'+h_(sc[2])+'</div></div>';
+    }).join('');
+    const refZone=hasRef&&i===0
+      ?'<div style="border:1.5px solid '+colorLt+';border-radius:8px;padding:8px;background:#fff">'
+        +'<div style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Reference ('+b.refImgs.length+')</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+        +(b.refImgs||[]).slice(0,4).map(function(img){return '<div style="border-radius:6px;overflow:hidden;border:1px solid '+colorLt+'"><img src="'+img.data+'" style="width:72px;height:56px;object-fit:cover;display:block"></div>';}).join('')
+        +'</div></div>'
+      :'<div style="border:1.5px dashed '+colorMd+';border-radius:8px;padding:9px 14px;text-align:center;color:'+color+';font-size:11.5px;font-weight:500;background:'+colorBg+'">Chưa có reference</div>';
+    return '<div style="margin-bottom:18px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden">'
+      +'<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f3f4f6">'
+      +'<div style="width:22px;height:22px;border-radius:50%;background:'+color+';color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#111;flex:1">'+h_(s.label||'Banner')+'</div>'
+      +'<div style="font-size:10px;color:#9ca3af;background:#f9fafb;border:1px solid #e5e7eb;border-radius:5px;padding:2px 8px">'+(s.files||1)+' file'+((s.files||1)>1?'s':'')+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;padding:12px 14px 10px">'+specCards+'</div>'
+      +'<div style="margin:0 14px 12px;background:#f9fafb;border:1px solid #f0f0f0;border-radius:8px;padding:12px;display:flex;align-items:center;gap:14px">'
+      +(w&&hh?ratioBox(w,hh):'')
+      +'<div style="font-size:11.5px;color:#6b7280;line-height:1.5">'+h_(s.note||(w&&hh?'Min '+w+'x'+hh+'px':''))+'</div>'
+      +'</div>'
+      +'<div style="margin:0 14px 14px">'+refZone+'</div>'
+      +'</div>';
+  }).join('');
+
+  const prodsHTML=(b.products||[]).length
+    ?'<div style="margin-bottom:18px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px">'
+      +'<div style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Sản phẩm có deal</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+      +(b.products||[]).map(function(p){
+        return '<div style="background:'+colorBg+';border:1px solid '+colorLt+';border-left:3px solid '+color+';border-radius:6px;padding:5px 10px">'
+          +'<div style="font-size:11.5px;font-weight:600;color:'+colorDk+'">'+h_(p.n)+'</div>'
+          +(p.d?'<div style="font-size:9.5px;color:#9ca3af">'+h_(p.d)+'</div>':'')
+          +'</div>';
+      }).join('')
+      +'</div></div>'
+    :'';
+
+  const notesHTML=b.notes
+    ?'<div style="margin-bottom:18px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:11px 14px;font-size:12px;color:#78350f;line-height:1.6">'
+      +'<strong style="display:block;margin-bottom:3px;font-size:9px;text-transform:uppercase;letter-spacing:.6px">Ghi chú</strong>'
+      +h_(b.notes)+'</div>'
+    :'';
+
+  const delivHTML=specs.length
+    ?'<div style="margin-bottom:18px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden">'
+      +'<div style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">'
+      +'<span style="font-size:11px;font-weight:700;color:#111">Deliverables</span>'
+      +'<span style="font-size:10px;background:'+color+';color:#fff;border-radius:20px;padding:1px 10px;font-weight:700">'+totalFiles+' files</span></div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
+      +'<tr style="background:'+colorBg+'">'
+      +['Banner','Kích thước','Format','Files','Filename'].map(function(th){return '<th style="padding:6px 10px;text-align:left;font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;border-bottom:1px solid '+colorLt+'">'+th+'</th>';}).join('')
+      +'</tr>'
+      +specs.map(function(s,i){
+        const slug='banner_'+(s.label||'').toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').slice(0,24)+'.'+(s.fmt||'jpg').toLowerCase().split('/')[0].trim();
+        return '<tr style="background:'+(i%2?'#f9fafb':'#fff')+'">'
+          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5">'+h_(s.label)+'</td>'
+          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5;font-weight:600;color:'+color+'">'+s.w+'x'+s.h+'</td>'
+          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5">'+h_(s.fmt||'—')+'</td>'
+          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5"><span style="background:'+colorLt+';border-radius:4px;padding:1px 7px;font-weight:700;color:'+color+'">'+(s.files||1)+'</span></td>'
+          +'<td style="padding:6px 10px;border-bottom:1px solid #f5f5f5;font-family:monospace;font-size:9.5px;color:#9ca3af">'+slug+'</td></tr>';
+      }).join('')
+      +'<tr style="background:'+colorLt+'"><td colspan="3" style="padding:7px 10px;font-weight:700;color:'+colorDk+'">TỔNG</td>'
+      +'<td style="padding:7px 10px"><span style="background:'+color+';border-radius:4px;padding:1px 9px;font-size:11px;font-weight:700;color:#fff">'+totalFiles+'</span></td><td></td></tr>'
+      +'</table></div>'
+    :'';
+
+  const pillStyle='background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 11px;font-size:10.5px';
+  const pills=[b.platform,b.theme,specs.length?specs.length+' loại '+(b.type==='video'?'format':'banner'):null,totalFiles?totalFiles+' files':null].filter(Boolean)
+    .map(function(t){return '<span style="'+pillStyle+'">'+h_(t)+'</span>';}).join('');
+
+  return '<div style="width:720px;background:#f5f5f3;font-family:-apple-system,BlinkMacSystemFont,\'DM Sans\',sans-serif;padding:0 0 4px">'
+
+    // Header
+    +'<div style="background:linear-gradient(135deg,'+colorDk+' 0%,'+color+' 55%,'+colorMd+' 100%);padding:20px 22px 18px;color:#fff;position:relative;overflow:hidden">'
+    +'<div style="position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.06)"></div>'
+    +'<div style="font-size:9px;text-transform:uppercase;letter-spacing:2px;opacity:.7;margin-bottom:5px">'+h_(b.platform||'—')+' · '+(b.type==='video'?'VIDEO BRIEF':'STOREFRONT BANNER')+'</div>'
+    +'<div style="font-size:22px;font-weight:700;line-height:1.2;margin-bottom:10px">'+h_(b.name||'—')+(b.theme?' — <span style="opacity:.85">'+h_(b.theme)+'</span>':'')+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+pills+'</div></div>'
+
+    // Stats
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-bottom:2px solid #f0f0f0">'
+    +[[specs.length,b.type==='video'?'Loại format':'Loại banner'],[(b.products||[]).length,'Sản phẩm'],[totalFiles,'Files'],['5,000px','Max/chiều']].map(function(n){
+      return '<div style="padding:12px 10px;text-align:center;border-right:1px solid #f0f0f0"><div style="font-size:20px;font-weight:700;color:'+color+';line-height:1">'+n[0]+'</div><div style="font-size:9.5px;color:#9ca3af;margin-top:3px">'+n[1]+'</div></div>';
+    }).join('')+'</div>'
+
+    // Who/when
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 14px;background:#fff;margin-bottom:12px;border-bottom:1px solid #f0f0f0">'
+    +[['Order by',b.orderedBy],['Assign to',b.assignTo],['Deadline',b.deadline]].map(function(kv){
+      return '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 11px"><div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">'+kv[0]+'</div><div style="font-size:13px;font-weight:600;color:#111">'+h_(kv[1]||'—')+'</div></div>';
+    }).join('')+'</div>'
+
+    // Specs + products + notes + deliverables
+    +'<div style="padding:0 14px">'+specsHTML+prodsHTML+notesHTML+delivHTML+'</div>'
+
+    // Footer
+    +'<div style="text-align:center;padding:8px;font-size:9.5px;color:#c0c0c0;border-top:1px solid #f0f0f0;margin:0 14px">'+h_(b.platform||'—')+' · '+h_(b.name||'Brief')+' · '+ts+'</div>'
+    +'</div>';
 }
+
+function h_(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 
 /* ══ SYNC FROM APPS SCRIPT ══ */
 async function syncBriefs(){
