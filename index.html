@@ -866,7 +866,60 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
   </div>
 </div>
 
-<!-- DISCARD CONFIRM -->
+<!-- ════ BRIEF DETAIL MODAL ════ -->
+<div id="detailModal" style="
+  display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,.55);
+  align-items:flex-start;justify-content:center;
+  padding:20px;overflow:auto;
+">
+  <div style="
+    width:100%;max-width:900px;
+    background:var(--white);border-radius:14px;
+    overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.25);
+    display:flex;flex-direction:column;
+    max-height:calc(100vh - 40px);
+    animation:detailIn .25s cubic-bezier(.34,1.2,.64,1);
+  ">
+    <!-- Header bar -->
+    <div style="
+      display:flex;align-items:center;gap:10px;
+      padding:12px 16px;
+      background:var(--g7);
+      flex-shrink:0;
+    ">
+      <span style="font-size:13px;font-weight:700;color:#fff;flex:1" id="detailTitle">Brief Detail</span>
+      <button onclick="closeBriefDetail()"
+        style="background:none;border:1.5px solid rgba(255,255,255,.4);color:#fff;
+               font-family:inherit;font-size:12px;font-weight:600;
+               padding:4px 12px;border-radius:6px;cursor:pointer;
+               display:flex;align-items:center;gap:5px"
+        onmouseover="this.style.background='rgba(255,255,255,.15)'"
+        onmouseout="this.style.background='none'">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+        Đóng
+      </button>
+      <button id="detailExportBtn"
+        style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;
+               font-family:inherit;font-size:12px;font-weight:600;
+               padding:4px 12px;border-radius:6px;cursor:pointer;
+               display:flex;align-items:center;gap:5px"
+        onmouseover="this.style.background='rgba(255,255,255,.25)'"
+        onmouseout="this.style.background='rgba(255,255,255,.15)'">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3v8M5 8l3 3 3-3"/><path d="M3 13h10"/></svg>
+        Tải HTML
+      </button>
+    </div>
+    <!-- iframe content -->
+    <iframe id="detailFrame" style="
+      flex:1;border:none;width:100%;
+      min-height:70vh;background:#f8f8f5;
+    "></iframe>
+  </div>
+</div>
+<style>
+@keyframes detailIn{from{transform:translateY(-16px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+</style>
 <div class="overlay" id="discardModal">
   <div class="modal" style="width:380px">
     <div class="modal-h" style="background:var(--ink2)">
@@ -1265,10 +1318,12 @@ function briefCardHTML(b){
           <option value="revision"${status==='revision'?' selected':''}>Needs Revision</option>
           <option value="done"${status==='done'?' selected':''}>Done</option>
         </select>
+        <button class="bc-act-btn" onclick="event.stopPropagation();viewBriefDetail('${b.id}')"
+          style="background:var(--g7);border-color:var(--g7);color:#fff;font-weight:600">Chi tiết</button>
         <button class="bc-act-btn" onclick="event.stopPropagation();editBrief('${b.id}')">Edit</button>
         <button class="bc-act-btn" onclick="event.stopPropagation();useAsTemplate('${b.id}')">Template</button>
         ${b.driveUrl?`<button class="bc-act-btn" onclick="event.stopPropagation();window.open('${b.driveUrl}','_blank')">Drive</button>`:''}
-        <button class="bc-act-btn" onclick="event.stopPropagation();exportCard('${b.id}')">Export PNG</button>
+        <button class="bc-act-btn" onclick="event.stopPropagation();exportCard('${b.id}')">Export HTML</button>
         <button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBrief('${b.id}')"
           style="margin-left:auto">Delete</button>
       </div>
@@ -1330,9 +1385,61 @@ function closeForm(){
 }
 
 /* ══════════════════════════════════════════════
-   DISCARD / DIRTY TRACKING
+   BRIEF DETAIL VIEW
 ══════════════════════════════════════════════ */
-let formDirty     = false;
+function viewBriefDetail(id){
+  const b = briefs.find(x=>x.id===id);
+  if(!b){ toast('Brief not found'); return; }
+
+  const htmlContent = buildExportHTML(b);
+  const modal = document.getElementById('detailModal');
+  const frame = document.getElementById('detailFrame');
+  const title = document.getElementById('detailTitle');
+  const exportBtn = document.getElementById('detailExportBtn');
+
+  // Set title
+  title.textContent = '#'+(b.orderNum||'—')+' · '+(b.name||'Brief');
+
+  // Write HTML into iframe
+  frame.srcdoc = htmlContent;
+
+  // Export button downloads the HTML
+  exportBtn.onclick = function(){
+    const blob = new Blob([htmlContent],{type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'brief_'+(b.orderNum||b.id)+'_'+(b.name||'untitled').replace(/\s+/g,'-').toLowerCase()+'.html';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    toast('Đã tải HTML!');
+  };
+
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBriefDetail(){
+  const modal = document.getElementById('detailModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+  // Clear iframe to free memory
+  document.getElementById('detailFrame').srcdoc = '';
+}
+
+// Close on backdrop click
+document.getElementById('detailModal').addEventListener('click', function(e){
+  if(e.target === this) closeBriefDetail();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && document.getElementById('detailModal').style.display === 'flex'){
+    closeBriefDetail();
+  }
+});
+/* ======================================================
+   DISCARD / DIRTY TRACKING
 let autosaveTimer = null;
 const AUTOSAVE_KEY = 'bm_autosave_draft';
 
