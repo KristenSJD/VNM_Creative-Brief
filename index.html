@@ -3,852 +3,2032 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brief Builder — Amazon Storefront</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- html2canvas for screenshot -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<title>Brief Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@3.1.10/dist/dom-to-image-more.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:13px;scroll-behavior:smooth}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f5f3;color:#1a1a18;min-height:100vh}
+html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;color:#1a1a18;background:#f5f5f3;overflow:hidden}
 
+/* ── VARS ── */
 :root{
   --g9:#0a3d0a;--g7:#1a6b1a;--g5:#2a9e2a;--g3:#6dcb6d;--g1:#d4f0d4;--g0:#f0fbf0;
   --ink:#111110;--ink2:#3d3d3a;--ink3:#6b6b67;--ink4:#b8b8b3;
-  --line:#e8e8e5;--line2:#f0f0ee;--bg:#f5f5f3;--white:#fff;
-  --amber:#d97706;--amber0:#fffbeb;--amber1:#fef3c7;
-  --red:#dc2626;--red0:#fef2f2;
-  --blue:#2563eb;--blue0:#eff6ff;
+  --line:#e8e8e5;--bg:#f5f5f3;--white:#fff;
+  --red:#dc2626;--red0:#fef2f2;--blue:#2563eb;--blue0:#eff6ff;
+  --amber:#d97706;--amber0:#fffbeb;
   --r-sm:6px;--r-md:10px;--r-lg:14px;
-  --sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.08);
+  --sh:0 1px 4px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.09);
+  --sidebar:220px;
 }
 
+/* ══ LAYOUT ══ */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--g9);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.sb-brand{
+  padding:16px 14px 12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sb-logo{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.2px;display:flex;align-items:center;gap:7px}
+.sb-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--g3);box-shadow:0 0 6px var(--g3)}
+.sb-version{font-size:9px;color:rgba(255,255,255,.35);margin-top:3px;padding-left:15px}
+
+.sb-section{padding:10px 10px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3)}
+.sb-nav{flex:1;overflow-y:auto;padding:0 8px}
+.sb-nav::-webkit-scrollbar{display:none}
+.nav-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:var(--r-sm);
+  color:rgba(255,255,255,.6);font-size:12.5px;font-weight:500;
+  cursor:pointer;transition:all .15s;margin-bottom:2px;
+  user-select:none;
+}
+.nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,255,255,.14);color:#fff}
+.nav-item .nav-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.nav-item .nav-badge{margin-left:auto;background:var(--g5);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;min-width:18px;text-align:center}
+.nav-item .nav-badge.red{background:var(--red)}
+.nav-item .nav-badge.amber{background:var(--amber)}
+
+.sb-divider{height:1px;background:rgba(255,255,255,.06);margin:6px 8px}
+
+.sb-user{
+  padding:10px 12px;border-top:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+}
+.sb-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--g5);color:#fff;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:11.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-team{font-size:10px;color:rgba(255,255,255,.4)}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
 /* ── TOPBAR ── */
-.topbar{position:sticky;top:0;z-index:200;height:46px;background:var(--g7);border-bottom:2px solid var(--g5);display:flex;align-items:center;gap:8px;padding:0 14px;}
-.tb-logo{font-size:13px;font-weight:700;color:#fff;letter-spacing:-.2px;white-space:nowrap}
-.tb-pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap}
-.tb-tabs{display:flex;gap:2px;flex:1;justify-content:center}
-.tab{background:none;border:none;color:rgba(255,255,255,.6);font-family:inherit;font-size:11.5px;font-weight:500;padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .15s}
-.tab:hover{background:rgba(255,255,255,.1);color:#fff}
-.tab.on{background:rgba(255,255,255,.18);color:#fff}
-.tb-acts{display:flex;gap:5px;flex-shrink:0;align-items:center}
-.btn-g{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;font-weight:500;padding:4px 9px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn-g:hover{background:rgba(255,255,255,.2)}
-.btn-pri{background:#fff;border:none;color:var(--g7);font-family:inherit;font-size:11px;font-weight:700;padding:4px 11px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn-pri:hover{background:var(--g1)}
+.topbar{
+  height:48px;background:var(--white);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;padding:0 18px;flex-shrink:0;
+}
+.topbar-title{font-size:14px;font-weight:700;color:var(--ink);flex:1}
+.topbar-sub{font-size:11px;color:var(--ink4);margin-left:6px;font-weight:400}
+.tb-btn{
+  background:none;border:1.5px solid var(--line);color:var(--ink2);
+  font-family:inherit;font-size:11.5px;font-weight:500;
+  padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;
+  transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;
+}
+.tb-btn:hover{border-color:var(--g3);color:var(--g7);background:var(--g0)}
+.tb-btn.primary{background:var(--g7);border-color:var(--g7);color:#fff}
+.tb-btn.primary:hover{background:var(--g9);border-color:var(--g9)}
 
-/* Drive button states */
-.btn-drive{background:#4285f4;border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:700;padding:4px 11px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px}
-.btn-drive:hover{background:#3367d6}
-.btn-drive.connected{background:#34a853}
-.btn-drive.loading{background:#fbbc04;color:#000;cursor:wait}
-.btn-drive:disabled{opacity:.6;cursor:not-allowed}
-.drive-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);flex-shrink:0}
-.drive-dot.on{background:#fff;box-shadow:0 0 5px rgba(255,255,255,.8)}
+/* ── CONTENT AREA ── */
+.content{flex:1;overflow-y:auto;padding:18px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
 
-/* ── PANELS ── */
-.panels{display:flex;height:calc(100vh - 46px);overflow:hidden}
-.pf{width:52%;overflow-y:auto;background:var(--white);border-right:1px solid var(--line)}
-.pp{width:48%;overflow-y:auto;background:var(--bg)}
-.fi{padding:18px 16px 56px}
-.pi{padding:12px}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
+/* page visibility */
+.page{display:none}
+.page.active{display:block}
 
-/* ── FORM ── */
-.fsec{margin-bottom:22px}
-.fsec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g7);margin-bottom:11px;padding-bottom:6px;border-bottom:1.5px solid var(--g1);display:flex;align-items:center;gap:5px}
+/* ── DASHBOARD STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px}
+.stat-num{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:11px;color:var(--ink3)}
+.stat-card.green .stat-num{color:var(--g7)}
+.stat-card.amber .stat-num{color:var(--amber)}
+.stat-card.red .stat-num{color:var(--red)}
+.stat-card.blue .stat-num{color:var(--blue)}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-pill{
+  background:var(--white);border:1.5px solid var(--line);
+  color:var(--ink3);font-family:inherit;font-size:11.5px;font-weight:500;
+  padding:4px 12px;border-radius:20px;cursor:pointer;transition:all .15s;
+}
+.filter-pill:hover{border-color:var(--g3);color:var(--g7)}
+.filter-pill.active{background:var(--g7);border-color:var(--g7);color:#fff}
+.filter-search{
+  flex:1;min-width:160px;max-width:260px;
+  background:var(--white);border:1.5px solid var(--line);
+  border-radius:var(--r-sm);padding:5px 10px;
+  font-family:inherit;font-size:12px;color:var(--ink);outline:none;
+  transition:border-color .15s;
+}
+.filter-search:focus{border-color:var(--g3)}
+
+/* ── BRIEF CARDS LIST ── */
+.brief-list{display:flex;flex-direction:column;gap:8px}
+.brief-card{
+  background:var(--white);border:1.5px solid var(--line);
+  border-radius:var(--r-lg);overflow:hidden;
+  transition:border-color .15s,box-shadow .15s;cursor:pointer;
+}
+.brief-card:hover{border-color:var(--g3);box-shadow:var(--sh-md)}
+.brief-card.expanded{border-color:var(--g3)}
+
+.bc-header{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.bc-order{
+  font-size:9px;font-weight:700;color:var(--ink3);
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;
+  font-family:'DM Mono',monospace;
+}
+.bc-type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bc-title{font-size:13px;font-weight:600;color:var(--ink);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-platform{font-size:10px;color:var(--ink3);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:2px 7px;flex-shrink:0}
+
+/* Status badges */
+.status{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.status.todo{background:#f1f5f9;color:#475569}
+.status.inprogress{background:#eff6ff;color:#1d4ed8}
+.status.done{background:var(--g0);color:var(--g7)}
+.status.revision{background:#fff7ed;color:#c2410c}
+.status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+.bc-meta{display:flex;align-items:center;gap:12px;padding:0 14px 10px;flex-wrap:wrap}
+.bc-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink3)}
+.bc-meta-item strong{color:var(--ink2);font-weight:600}
+.bc-meta-item.deadline-warn strong{color:var(--red)}
+
+/* Expanded detail */
+.bc-detail{border-top:1px solid var(--line);padding:12px 14px;background:var(--bg);display:none}
+.bc-card.expanded .bc-detail{display:block}
+.bc-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.bc-detail-item{background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px}
+.bc-detail-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);margin-bottom:3px}
+.bc-detail-val{font-size:12px;font-weight:600;color:var(--ink)}
+.bc-actions{display:flex;gap:6px;margin-top:8px}
+.bc-act-btn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  font-family:inherit;font-size:11px;font-weight:500;
+  padding:4px 10px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;
+}
+.bc-act-btn:hover{border-color:var(--g3);color:var(--g7);background:var(--g0)}
+.bc-act-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red0)}
+
+/* ── FORM PANEL (slide in) ── */
+.form-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;
+}
+.form-overlay.show{display:flex;align-items:flex-start;justify-content:flex-end}
+.form-panel{
+  width:520px;max-width:95vw;height:100vh;
+  background:var(--white);overflow-y:auto;
+  box-shadow:-8px 0 32px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;
+}
+.form-panel::-webkit-scrollbar{width:4px}
+.form-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
+.fp-header{
+  padding:16px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;background:var(--white);z-index:10;
+}
+.fp-title{font-size:14px;font-weight:700;color:var(--ink);flex:1}
+.fp-close{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:18px;line-height:1;padding:2px}
+.fp-close:hover{color:var(--ink)}
+.fp-body{padding:16px 18px 32px;flex:1}
+.fp-footer{
+  padding:12px 18px;border-top:1px solid var(--line);
+  display:flex;gap:8px;justify-content:flex-end;
+  position:sticky;bottom:0;background:var(--white);
+}
+
+/* Form elements */
+.fsec{margin-bottom:20px}
+.fsec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g7);margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid var(--g1)}
 .field{margin-bottom:10px}
 .field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:3px}
-.field label .req{color:var(--red);margin-left:2px}
-.field label .hint{font-weight:400;color:var(--ink4);font-size:10px;margin-left:3px}
-input[type=text],input[type=number],select,textarea{width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:6px 9px;outline:none;transition:border-color .15s,background .15s;-webkit-appearance:none}
-input:focus,select:focus,textarea:focus{border-color:var(--g3);background:var(--white);box-shadow:0 0 0 3px rgba(109,203,109,.12)}
-textarea{resize:vertical;min-height:64px;line-height:1.55}
+.req{color:var(--red)}
+.hint{font-weight:400;color:var(--ink4);font-size:10px;margin-left:3px}
+input,select,textarea{
+  width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);
+  background:var(--bg);border:1.5px solid var(--line);
+  border-radius:var(--r-sm);padding:6px 9px;outline:none;
+  transition:border-color .15s,background .15s;-webkit-appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--g3);background:var(--white);box-shadow:0 0 0 3px rgba(109,203,109,.1)}
+textarea{resize:vertical;min-height:60px;line-height:1.55}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
 
-/* ── BANNER CARD ── */
-.bcard{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-md);margin-bottom:10px;overflow:hidden;transition:border-color .15s}
-.bcard:focus-within{border-color:var(--g3)}
-.bcard-head{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.7);border-bottom:1px solid var(--line)}
-.bnum{width:20px;height:20px;border-radius:50%;background:var(--g7);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.bcard-head input{flex:1;background:none;border:none;padding:0;font-size:12px;font-weight:600;color:var(--ink2);outline:none;font-family:inherit}
-.rm-btn{background:none;border:none;cursor:pointer;color:var(--ink4);font-size:13px;padding:2px 4px;border-radius:4px;transition:all .12s;line-height:1}
-.rm-btn:hover{color:var(--red);background:var(--red0)}
-.bcard-body{padding:11px 12px;display:flex;flex-direction:column;gap:9px}
+/* Banner spec rows */
+.spec-row{display:flex;gap:6px;align-items:flex-end;margin-bottom:7px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 9px}
+.spec-row .field{margin:0;flex:1}
+.spec-row .field:first-child{flex:2}
+.spec-del{background:none;border:none;cursor:pointer;color:var(--ink4);font-size:14px;padding:4px;border-radius:4px;transition:all .12s;flex-shrink:0;align-self:flex-end;margin-bottom:1px}
+.spec-del:hover{color:var(--red);background:var(--red0)}
+.add-spec-btn{width:100%;background:none;border:1.5px dashed var(--g3);border-radius:var(--r-sm);color:var(--g5);font-family:inherit;font-size:11.5px;font-weight:500;padding:6px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.add-spec-btn:hover{background:var(--g0);border-color:var(--g5)}
 
-/* ── IMAGE UPLOAD ── */
-.ref-upload{border:1.5px dashed var(--g3);border-radius:var(--r-md);padding:10px;cursor:pointer;transition:all .15s;background:var(--g0);position:relative;min-height:60px;display:flex;align-items:center;justify-content:center}
-.ref-upload:hover{border-color:var(--g5);background:var(--g1)}
-.ref-upload.has-imgs{border-style:solid;padding:7px}
-.ref-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.ref-hint{font-size:11px;color:var(--g5);text-align:center;font-weight:500}
-.ref-hint span{display:block;font-size:9.5px;color:var(--ink4);font-weight:400;margin-top:2px}
-.thumb-row{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start}
-.thumb{position:relative;display:inline-block}
-.thumb img{width:54px;height:46px;object-fit:cover;border-radius:5px;border:1px solid var(--line);display:block}
-.thumb-del{position:absolute;top:-4px;right:-4px;width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Tags */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.tag{display:flex;align-items:center;gap:4px;background:var(--g0);border:1px solid var(--g1);border-radius:20px;padding:3px 8px 3px 10px;font-size:11.5px;color:var(--g9)}
+.tag-del{background:none;border:none;cursor:pointer;color:var(--g3);font-size:12px;line-height:1;padding:0}
+.tag-del:hover{color:var(--red)}
+.tag-input-row{display:flex;gap:6px;margin-top:5px}
+.tag-input-row input{flex:1}
+.tag-input-row button{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:0 10px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap}
 
-/* ── PROD TAGS ── */
-.ptags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
-.ptag{display:flex;align-items:center;gap:4px;background:var(--g0);border:1px solid var(--g1);border-radius:20px;padding:3px 8px 3px 10px;font-size:11.5px;color:var(--g9)}
-.ptag-del{background:none;border:none;cursor:pointer;color:var(--g3);font-size:12px;line-height:1;padding:0;display:flex;align-items:center}
-.ptag-del:hover{color:var(--red)}
-.prod-row{display:flex;gap:6px;margin-top:5px}
-.prod-row input{flex:1}
-.prod-row button{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:0 11px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;transition:background .15s}
-.prod-row button:hover{background:var(--g9)}
+/* Ref images */
+.ref-zone{border:1.5px dashed var(--g3);border-radius:var(--r-md);padding:10px;cursor:pointer;transition:all .15s;background:var(--g0);position:relative;min-height:52px;display:flex;align-items:center;justify-content:center}
+.ref-zone:hover{border-color:var(--g5);background:var(--g1)}
+.ref-zone.has-imgs{border-style:solid;padding:7px}
+.ref-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ref-hint{font-size:11px;color:var(--g5);text-align:center}
+.ref-hint small{display:block;font-size:9.5px;color:var(--ink4);margin-top:2px}
+.thumbs{display:flex;flex-wrap:wrap;gap:5px}
+.thumb{position:relative}
+.thumb img{width:48px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--line);display:block}
+.thumb-del{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-/* ── SWATCHES ── */
-.swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
-.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative;flex-shrink:0}
-.sw:hover{transform:scale(1.1)}
-.sw.on{border-color:var(--ink)}
-.sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+/* ── SETTINGS PAGE ── */
+.settings-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px}
+.settings-card-header{padding:11px 16px;background:var(--bg);border-bottom:1px solid var(--line);font-size:12px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px}
+.settings-card-body{padding:14px 16px}
+.int-status{display:flex;align-items:center;gap:6px;font-size:11px;padding:6px 9px;border-radius:6px;margin-top:8px;border:1px solid var(--line)}
+.int-status.ok{background:#f0fdf4;border-color:#86efac;color:#15803d}
+.int-status.err{background:var(--red0);border-color:#fca5a5;color:#b91c1c}
+.int-status.idle{background:var(--white);color:var(--ink3)}
+.test-btn{background:none;border:1px solid var(--g3);color:var(--g7);font-family:inherit;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;cursor:pointer;margin-left:auto;white-space:nowrap}
+.test-btn:hover{background:var(--g0)}
 
-/* ── ADD BTN ── */
-.add-btn{width:100%;background:none;border:1.5px dashed var(--g3);border-radius:var(--r-md);color:var(--g5);font-family:inherit;font-size:12px;font-weight:500;padding:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
-.add-btn:hover{background:var(--g0);border-color:var(--g5)}
-
-/* ── DRIVE CONFIG PANEL ── */
-.drive-config{background:var(--blue0);border:1.5px solid #bfdbfe;border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px}
-.drive-config-title{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:5px}
-.drive-status{display:flex;align-items:center;gap:6px;font-size:11px;padding:6px 10px;border-radius:6px;background:rgba(255,255,255,.6);border:1px solid #bfdbfe;margin-top:8px}
-.drive-status.ok{background:#f0fdf4;border-color:#86efac;color:#15803d}
-.drive-status.err{background:var(--red0);border-color:#fca5a5;color:#b91c1c}
-
-/* ── PREVIEW CARD ── */
-.pcard{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden}
-
-/* ── SCREENSHOT OVERLAY ── */
-.capture-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.capture-overlay.show{display:flex}
-.capture-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.capture-msg{color:#fff;font-size:14px;font-weight:500}
-.capture-sub{color:rgba(255,255,255,.6);font-size:12px}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--g9);color:#fff;font-size:12px;font-weight:500;padding:7px 16px;border-radius:20px;box-shadow:var(--sh-md);z-index:999;transition:transform .25s,opacity .25s;opacity:0;white-space:nowrap;pointer-events:none}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:48px 24px;color:var(--ink3)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.empty-title{font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.empty-sub{font-size:12px;line-height:1.6}
 
 /* ── MODAL ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
 .overlay.show{display:flex}
-.modal{background:var(--white);border-radius:var(--r-lg);width:460px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
-.modal-h{background:var(--g7);color:#fff;padding:13px 17px;display:flex;align-items:center;justify-content:space-between}
-.modal-h h3{font-size:13.5px;font-weight:700}
-.modal-x{background:none;border:none;color:rgba(255,255,255,.7);font-size:17px;cursor:pointer;line-height:1}
+.modal{background:var(--white);border-radius:var(--r-lg);width:400px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
+.modal-h{background:var(--g7);color:#fff;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+.modal-h h3{font-size:13px;font-weight:700}
+.modal-x{background:none;border:none;color:rgba(255,255,255,.7);font-size:16px;cursor:pointer}
 .modal-b{padding:16px}
-.mstep{display:flex;gap:10px;margin-bottom:13px}
-.mnum{width:22px;height:22px;border-radius:50%;background:var(--g7);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.mstep-t{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
-.mstep-d{font-size:11.5px;color:var(--ink3);line-height:1.5}
-.mstep-d a{color:var(--g7);font-weight:500}
-.mstep-d code{background:var(--bg);padding:1px 5px;border-radius:3px;font-size:10.5px;font-family:'DM Mono',monospace}
-.modal-f{padding:11px 16px 15px;display:flex;gap:7px;justify-content:flex-end;border-top:1px solid var(--line)}
-.mf-sec{background:var(--bg);border:1.5px solid var(--line);color:var(--ink2);font-family:inherit;font-size:12px;font-weight:500;padding:6px 13px;border-radius:var(--r-sm);cursor:pointer}
-.mf-pri{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:6px 15px;border-radius:var(--r-sm);cursor:pointer}
-.mf-pri:hover{background:var(--g9)}
+.modal-f{padding:10px 16px 14px;display:flex;gap:7px;justify-content:flex-end;border-top:1px solid var(--line)}
+.modal-f button{font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--r-sm);cursor:pointer;border:1.5px solid var(--line)}
+.modal-f .btn-cancel{background:var(--bg);color:var(--ink2)}
+.modal-f .btn-ok{background:var(--g7);border-color:var(--g7);color:#fff}
+.modal-f .btn-danger{background:var(--red);border-color:var(--red);color:#fff}
 
-/* ── SETUP MODAL (Google Cloud steps) ── */
-.setup-step{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 13px;margin-bottom:8px}
-.setup-step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--g7);color:#fff;font-size:9px;font-weight:700;margin-right:6px;flex-shrink:0}
-.setup-step-title{font-size:12px;font-weight:600;color:var(--ink);display:flex;align-items:center;margin-bottom:5px}
-.setup-step-body{font-size:11px;color:var(--ink3);line-height:1.6;padding-left:24px}
-.setup-step-body code{background:var(--white);border:1px solid var(--line);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:10px;color:var(--g7)}
-.client-id-input{width:100%;margin-top:6px;font-family:'DM Mono',monospace;font-size:11px}
-.folder-input{width:100%;margin-top:6px}
+/* ── SPINNER ── */
+.spin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.spin-overlay.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-msg{color:#fff;font-size:13px;font-weight:500}
 
+/* ── TOAST ── */
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--g9);color:#fff;font-size:12px;font-weight:500;padding:7px 16px;border-radius:20px;box-shadow:var(--sh-md);z-index:999;transition:transform .25s,opacity .25s;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
+/* ── SECTION HEADING ── */
+.sec-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-heading h2{font-size:15px;font-weight:700;color:var(--ink)}
+.sec-heading p{font-size:11.5px;color:var(--ink3);margin-top:2px}
+
+/* ── SETTINGS TABS ── */
+.stab{
+  background:none;border:none;border-bottom:2.5px solid transparent;
+  color:var(--ink3);font-family:inherit;font-size:12.5px;font-weight:500;
+  padding:8px 14px;cursor:pointer;transition:all .15s;
+  margin-bottom:-2px;
+}
+.stab:hover{color:var(--ink2)}
+.stab.active{color:var(--g7);border-bottom-color:var(--g5)}
+.stab-content{display:none}
+.stab-content.active{display:block}
+
+/* ── COLOR PRESET ── */
+.color-preset{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;padding:8px 10px;border-radius:var(--r-md);
+  border:2px solid transparent;transition:all .15s;min-width:64px;
+}
+.color-preset:hover{border-color:var(--line)}
+.color-preset.active{border-color:var(--g5);background:var(--g0)}
+.preset-swatch-row{display:flex;gap:3px}
+.preset-swatch{width:16px;height:16px;border-radius:4px}
+.preset-label{font-size:9.5px;color:var(--ink3);font-weight:500;text-align:center}
+.color-preset.active .preset-label{color:var(--g7);font-weight:700}
+
+/* ── COLOR PICKER ROW ── */
+.color-picker-item{
+  background:var(--bg);border:1.5px solid var(--line);
+  border-radius:var(--r-md);padding:9px 11px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.color-picker-item label{font-size:10px;font-weight:600;color:var(--ink2)}
+.color-picker-row{display:flex;align-items:center;gap:7px}
+.color-picker-row input[type=color]{
+  width:32px;height:32px;border:1.5px solid var(--line);
+  border-radius:6px;padding:2px;cursor:pointer;background:none;
+  flex-shrink:0;
+}
+.color-picker-row input[type=text]{
+  flex:1;font-family:'DM Mono',monospace;font-size:11px;
+  padding:5px 7px;
+}
+
+/* ── THEME PREVIEW ── */
+.tp-sidebar{background:var(--g9);padding:10px 10px 8px;border-radius:6px 0 0 6px}
+.tp-sidebar-logo{font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.tp-dot{width:6px;height:6px;border-radius:50%;background:var(--g3)}
+.tp-nav{font-size:10px;color:rgba(255,255,255,.6);padding:4px 6px;border-radius:4px;margin-bottom:3px}
+.tp-nav.act{background:rgba(255,255,255,.14);color:#fff}
+.tp-main{padding:10px 12px;flex:1}
+.tp-stat{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:7px 9px;text-align:center;flex:1}
+.tp-stat-num{font-size:16px;font-weight:700;color:var(--g7)}
+.tp-stat-lbl{font-size:8px;color:var(--ink3)}
+.tp-card{background:var(--white);border:1.5px solid var(--line);border-radius:7px;padding:8px 10px;margin-top:8px}
+.tp-badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--g0);color:var(--g7)}
+.type-video{background:#60a5fa}
+.type-hero{background:#f97316}
+.type-secondary{background:#a78bfa}
+.type-frame{background:#fb7185}
+.type-brand{background:#fbbf24}
+.type-other{background:#94a3b8}
 </style>
 </head>
 <body>
+<div class="app">
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <span class="tb-logo">🌿 Brief Builder</span>
-  <span class="tb-pill">Amazon · Storefront</span>
-  <div class="tb-tabs">
-    <button class="tab on" onclick="setMode('split',this)">Split</button>
-    <button class="tab" onclick="setMode('form',this)">Form</button>
-    <button class="tab" onclick="setMode('preview',this)">Preview</button>
+<!-- ════ SIDEBAR ════ -->
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <span class="sb-logo-dot"></span>
+      Brief Manager
+    </div>
+    <div class="sb-version">Amazon · Storefront</div>
   </div>
-  <div class="tb-acts">
-    <button class="btn-g" onclick="resetAll()">↺ Reset</button>
-    <button class="btn-g" onclick="saveAsPNG()">🖼 PNG</button>
-    <button class="btn-drive" id="driveBtn" onclick="handleDriveBtn()">
-      <span class="drive-dot" id="driveDot"></span>
-      <span id="driveBtnLabel">Drive</span>
-    </button>
+
+  <div class="sb-nav" id="sbNav">
+    <div style="height:8px"></div>
+    <div class="sb-section">Overview</div>
+    <div class="nav-item active" data-page="dashboard" onclick="navTo('dashboard',this)">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+
+    <div class="sb-section" style="margin-top:4px">Briefs</div>
+    <div class="nav-item" data-page="all" onclick="navTo('all',this)">
+      <span class="nav-icon">📋</span> Tất cả Brief
+      <span class="nav-badge" id="badge-all">0</span>
+    </div>
+    <div class="nav-item" data-page="banner" onclick="navTo('banner',this)">
+      <span class="nav-icon">🖼</span> Banner Brief
+      <span class="nav-badge" id="badge-banner">0</span>
+    </div>
+    <div class="nav-item" data-page="video" onclick="navTo('video',this)">
+      <span class="nav-icon">🎬</span> Video Brief
+      <span class="nav-badge" id="badge-video">0</span>
+    </div>
+
+    <div class="sb-section" style="margin-top:4px">Status</div>
+    <div class="nav-item" data-page="todo" onclick="navTo('todo',this)">
+      <span class="nav-icon">⬜</span> To-do
+      <span class="nav-badge amber" id="badge-todo">0</span>
+    </div>
+    <div class="nav-item" data-page="inprogress" onclick="navTo('inprogress',this)">
+      <span class="nav-icon">🔵</span> In Progress
+      <span class="nav-badge" id="badge-inprogress">0</span>
+    </div>
+    <div class="nav-item" data-page="revision" onclick="navTo('revision',this)">
+      <span class="nav-icon">🔁</span> Needs Revision
+      <span class="nav-badge red" id="badge-revision">0</span>
+    </div>
+    <div class="nav-item" data-page="done" onclick="navTo('done',this)">
+      <span class="nav-icon">✅</span> Done
+      <span class="nav-badge" id="badge-done">0</span>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="nav-item" data-page="settings" onclick="navTo('settings',this)">
+      <span class="nav-icon">⚙</span> Settings
+    </div>
+  </div>
+
+  <div class="sb-user" onclick="showProfileModal()">
+    <div class="sb-avatar" id="sbAvatar">?</div>
+    <div class="sb-user-info">
+      <div class="sb-user-name" id="sbUserName">Chưa đăng nhập</div>
+      <div class="sb-user-team" id="sbUserTeam">Nhấn để cập nhật</div>
+    </div>
   </div>
 </div>
 
-<div class="panels" id="panels">
+<!-- ════ MAIN ════ -->
+<div class="main">
 
-<!-- ══ FORM PANEL ══ -->
-<div class="pf" id="pf">
-<div class="fi">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard <span class="topbar-sub" id="topbarSub"></span></div>
+    <button class="tb-btn" onclick="syncBriefs()" id="syncBtn">🔄 Sync</button>
+    <button class="tb-btn" onclick="showNewBriefMenu()">＋ New Brief</button>
+  </div>
 
-  <!-- GOOGLE DRIVE CONFIG -->
-  <div class="fsec">
-    <div class="fsec-title">☁️ Google Drive Setup</div>
-    <div class="drive-config">
-      <div class="drive-config-title">🔑 Kết nối Google Drive</div>
-      <div class="field" style="margin-bottom:8px">
-        <label>Google OAuth Client ID <span class="req">*</span>
-          <span class="hint">— <a href="#" onclick="showSetupModal();return false" style="color:var(--blue)">Hướng dẫn lấy Client ID</a></span>
-        </label>
-        <input type="text" id="clientId" placeholder="xxxx.apps.googleusercontent.com" oninput="saveConfig()">
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="sec-heading">
+        <div>
+          <h2>Brief gần đây</h2>
+          <p>5 brief mới nhất từ tất cả loại</p>
+        </div>
       </div>
-      <div class="field" style="margin-bottom:8px">
-        <label>Google Drive Folder ID <span class="hint">(để trống = lưu vào My Drive root)</span></label>
-        <input type="text" id="folderId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" oninput="saveConfig()">
+      <div class="brief-list" id="recentList"></div>
+    </div>
+
+    <!-- ── ALL BRIEFS ── -->
+    <div class="page" id="page-all">
+      <div class="filter-bar" id="filterAll">
+        <input class="filter-search" id="searchAll" placeholder="Tìm theo tên, platform, người assign..." oninput="renderList('all')">
+        <button class="filter-pill active" data-status="all" onclick="setFilter('all','all',this)">Tất cả</button>
+        <button class="filter-pill" data-status="todo" onclick="setFilter('all','todo',this)">To-do</button>
+        <button class="filter-pill" data-status="inprogress" onclick="setFilter('all','inprogress',this)">In Progress</button>
+        <button class="filter-pill" data-status="revision" onclick="setFilter('all','revision',this)">Revision</button>
+        <button class="filter-pill" data-status="done" onclick="setFilter('all','done',this)">Done</button>
       </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Tên subfolder <span class="hint">(tự động tạo nếu chưa có)</span></label>
-        <input type="text" id="driveFolder" value="Brief Builder / Banners" oninput="saveConfig()">
+      <div class="brief-list" id="listAll"></div>
+    </div>
+
+    <!-- ── BANNER BRIEFS ── -->
+    <div class="page" id="page-banner">
+      <div class="filter-bar">
+        <input class="filter-search" id="searchBanner" placeholder="Tìm banner brief..." oninput="renderList('banner')">
+        <button class="filter-pill active" data-status="all" onclick="setFilter('banner','all',this)">Tất cả</button>
+        <button class="filter-pill" data-status="todo" onclick="setFilter('banner','todo',this)">To-do</button>
+        <button class="filter-pill" data-status="inprogress" onclick="setFilter('banner','inprogress',this)">In Progress</button>
+        <button class="filter-pill" data-status="revision" onclick="setFilter('banner','revision',this)">Revision</button>
+        <button class="filter-pill" data-status="done" onclick="setFilter('banner','done',this)">Done</button>
       </div>
-      <div class="drive-status" id="driveStatus">
-        <span>⚪</span> Chưa kết nối — nhập Client ID và nhấn nút Drive ở trên
+      <div class="brief-list" id="listBanner"></div>
+    </div>
+
+    <!-- ── VIDEO BRIEFS ── -->
+    <div class="page" id="page-video">
+      <div class="filter-bar">
+        <input class="filter-search" id="searchVideo" placeholder="Tìm video brief..." oninput="renderList('video')">
+        <button class="filter-pill active" data-status="all" onclick="setFilter('video','all',this)">Tất cả</button>
+        <button class="filter-pill" data-status="todo" onclick="setFilter('video','todo',this)">To-do</button>
+        <button class="filter-pill" data-status="inprogress" onclick="setFilter('video','inprogress',this)">In Progress</button>
+        <button class="filter-pill" data-status="done" onclick="setFilter('video','done',this)">Done</button>
+      </div>
+      <div class="brief-list" id="listVideo"></div>
+    </div>
+
+    <!-- ── STATUS PAGES (todo / inprogress / revision / done) ── -->
+    <div class="page" id="page-todo"><div class="brief-list" id="listTodo"></div></div>
+    <div class="page" id="page-inprogress"><div class="brief-list" id="listInprogress"></div></div>
+    <div class="page" id="page-revision"><div class="brief-list" id="listRevision"></div></div>
+    <div class="page" id="page-done"><div class="brief-list" id="listDone"></div></div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="page-settings">
+      <div class="sec-heading">
+        <div><h2>Settings</h2><p>Tùy chỉnh giao diện, thông tin workspace và tích hợp</p></div>
+        <button class="tb-btn primary" onclick="applyAndSaveCfg()">💾 Lưu tất cả</button>
+      </div>
+
+      <!-- Settings Tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--line);padding-bottom:0">
+        <button class="stab active" id="stab-appearance" onclick="setStab('appearance',this)">🎨 Appearance</button>
+        <button class="stab" id="stab-workspace"   onclick="setStab('workspace',this)">🏢 Workspace</button>
+        <button class="stab" id="stab-integrations" onclick="setStab('integrations',this)">🔌 Integrations</button>
+      </div>
+
+      <!-- ── TAB: APPEARANCE ── -->
+      <div class="stab-content active" id="sc-appearance">
+
+        <!-- Live preview -->
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">👁 Live Preview</div>
+          <div class="settings-card-body" style="padding:12px">
+            <div id="themePreview" style="border-radius:10px;overflow:hidden;border:1px solid var(--line)">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Color scheme -->
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">🎨 Bảng màu chủ đạo</div>
+          <div class="settings-card-body">
+            <div style="font-size:11px;color:var(--ink3);margin-bottom:12px;line-height:1.5;">Chọn preset hoặc tự tuỳ chỉnh từng màu. Màu thay đổi sẽ cập nhật toàn bộ giao diện ngay lập tức.</div>
+
+            <!-- Presets -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="colorPresets">
+              <!-- rendered by JS -->
+            </div>
+
+            <!-- Manual color pickers -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="colorPickers">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography & Shape -->
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">✏️ Typography & Shape</div>
+          <div class="settings-card-body">
+            <div class="row2">
+              <div class="field">
+                <label>Font chữ</label>
+                <select id="cfg-font" onchange="applyTheme()">
+                  <option value="DM Sans">DM Sans (default)</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Nunito">Nunito</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Outfit">Outfit</option>
+                  <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Bo góc (border radius)</label>
+                <select id="cfg-radius" onchange="applyTheme()">
+                  <option value="sharp">Sharp (0px)</option>
+                  <option value="soft" selected>Soft (6–14px)</option>
+                  <option value="round">Round (10–20px)</option>
+                  <option value="pill">Pill (20–28px)</option>
+                </select>
+              </div>
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label>Mật độ (density)</label>
+                <select id="cfg-density" onchange="applyTheme()">
+                  <option value="compact">Compact</option>
+                  <option value="default" selected>Default</option>
+                  <option value="comfortable">Comfortable</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Dark mode</label>
+                <select id="cfg-darkmode" onchange="applyTheme()">
+                  <option value="light" selected>Light</option>
+                  <option value="dark">Dark</option>
+                  <option value="auto">Auto (system)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar style -->
+        <div class="settings-card">
+          <div class="settings-card-header">🗂 Sidebar style</div>
+          <div class="settings-card-body">
+            <div class="row2">
+              <div class="field">
+                <label>Sidebar màu nền</label>
+                <select id="cfg-sidebarStyle" onchange="applyTheme()">
+                  <option value="dark">Dark (default)</option>
+                  <option value="light">Light</option>
+                  <option value="accent">Accent color</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Sidebar width</label>
+                <select id="cfg-sidebarWidth" onchange="applyTheme()">
+                  <option value="200">Compact (200px)</option>
+                  <option value="220" selected>Default (220px)</option>
+                  <option value="240">Wide (240px)</option>
+                  <option value="260">Extra wide (260px)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sc-appearance -->
+
+      <!-- ── TAB: WORKSPACE ── -->
+      <div class="stab-content" id="sc-workspace">
+
+        <!-- Branding -->
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">🏷 Thông tin Workspace</div>
+          <div class="settings-card-body">
+            <div class="row2">
+              <div class="field">
+                <label>Tên app <span class="hint">(hiện trên sidebar)</span></label>
+                <input type="text" id="cfg-appName" value="Brief Manager" placeholder="Brief Manager" oninput="applyTheme()">
+              </div>
+              <div class="field">
+                <label>Tên công ty / brand</label>
+                <input type="text" id="cfg-companyName" placeholder="VD: Your Company" oninput="applyTheme()">
+              </div>
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label>Tagline <span class="hint">(dưới tên app)</span></label>
+                <input type="text" id="cfg-tagline" value="Amazon · Storefront" placeholder="VD: Amazon · Storefront" oninput="applyTheme()">
+              </div>
+              <div class="field">
+                <label>Emoji icon sidebar</label>
+                <input type="text" id="cfg-appIcon" value="🌿" placeholder="🌿" maxlength="4" oninput="applyTheme()" style="font-size:18px;text-align:center">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team -->
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">👥 Thành viên team</div>
+          <div class="settings-card-body">
+            <div class="field">
+              <label>Danh sách designer / editor <span class="hint">(mỗi người 1 dòng — dùng trong dropdown Assign to)</span></label>
+              <textarea id="cfg-designers" rows="5" placeholder="Linh Nguyen&#10;Minh Tran&#10;Hoa Le&#10;Nam Pham" oninput="saveCfg()"></textarea>
+            </div>
+            <div class="field">
+              <label>Danh sách team / bộ phận <span class="hint">(dropdown khi tạo profile)</span></label>
+              <input type="text" id="cfg-teams" placeholder="Design,Marketing,eCommerce,Product,Content" oninput="saveCfg()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Form fields customization -->
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">📋 Tuỳ chỉnh Form fields</div>
+          <div class="settings-card-body">
+            <div class="field">
+              <label>Danh sách Platform <span class="hint">(cách nhau bằng dấu phẩy)</span></label>
+              <input type="text" id="cfg-platforms" value="Amazon,Shopee,Lazada,TikTok Shop,Website" oninput="saveCfg()">
+            </div>
+            <div class="field">
+              <label>Banner subtypes <span class="hint">(cách nhau bằng dấu phẩy)</span></label>
+              <input type="text" id="cfg-bannerTypes" value="Hero,Secondary,Product Frame,Brand Story,Other" oninput="saveCfg()">
+            </div>
+            <div class="field">
+              <label>Video subtypes <span class="hint">(cách nhau bằng dấy phẩy)</span></label>
+              <input type="text" id="cfg-videoTypes" value="Product Demo,Brand Story,UGC,Unboxing,Tutorial,Lifestyle,Flash Sale" oninput="saveCfg()">
+            </div>
+            <div class="field">
+              <label>Default banner specs <span class="hint">(preset khi tạo banner mới)</span></label>
+              <select id="cfg-defaultSpecs" onchange="saveCfg()">
+                <option value="amazon">Amazon standard (Hero Desktop/Mobile, Secondary, Frame)</option>
+                <option value="social">Social media (Feed, Stories, Reels)</option>
+                <option value="ecommerce">E-commerce (Square, Landscape, Portrait)</option>
+                <option value="empty">Trống — tự thêm</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status labels -->
+        <div class="settings-card">
+          <div class="settings-card-header">🏷 Tuỳ chỉnh Status labels</div>
+          <div class="settings-card-body">
+            <div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Đổi tên hiển thị của từng trạng thái (không ảnh hưởng logic).</div>
+            <div class="row2">
+              <div class="field">
+                <label>⬜ To-do label</label>
+                <input type="text" id="cfg-lbl-todo" value="To-do" oninput="saveCfg()">
+              </div>
+              <div class="field">
+                <label>🔵 In Progress label</label>
+                <input type="text" id="cfg-lbl-inprogress" value="In Progress" oninput="saveCfg()">
+              </div>
+              <div class="field">
+                <label>✅ Done label</label>
+                <input type="text" id="cfg-lbl-done" value="Done" oninput="saveCfg()">
+              </div>
+              <div class="field">
+                <label>🔁 Revision label</label>
+                <input type="text" id="cfg-lbl-revision" value="Needs Revision" oninput="saveCfg()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sc-workspace -->
+
+      <!-- ── TAB: INTEGRATIONS ── -->
+      <div class="stab-content" id="sc-integrations">
+
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">☁️ Google Drive + Apps Script</div>
+          <div class="settings-card-body">
+            <div class="field">
+              <label>Apps Script Web App URL <span class="req">*</span>
+                <span class="hint">— <a href="https://script.google.com" target="_blank" style="color:var(--blue)">script.google.com</a></span>
+              </label>
+              <input type="text" id="cfg-scriptUrl" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveCfg()">
+            </div>
+            <div class="field">
+              <label>Tên folder Drive <span class="hint">(tự tạo nếu chưa có)</span></label>
+              <input type="text" id="cfg-driveFolder" value="Brief Manager" oninput="saveCfg()">
+            </div>
+            <div class="int-status idle" id="st-drive">
+              ⚪ Chưa cấu hình
+              <button class="test-btn" onclick="testDrive()">Test kết nối</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card" style="margin-bottom:14px">
+          <div class="settings-card-header">📧 Email thông báo</div>
+          <div class="settings-card-body">
+            <div class="field">
+              <label>Danh sách email nhận thông báo <span class="hint">(mỗi email 1 dòng)</span></label>
+              <textarea id="cfg-emails" rows="4" placeholder="designer@company.com&#10;marketing@company.com&#10;manager@company.com" oninput="saveCfg()"></textarea>
+            </div>
+            <div class="int-status idle" id="st-email">
+              ⚪ Nhập email → nhấn Test
+              <button class="test-btn" onclick="testEmail()">Test gửi email</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-header">ℹ️ Hướng dẫn setup</div>
+          <div class="settings-card-body">
+            <div style="font-size:12px;line-height:1.7;color:var(--ink2)">
+              <strong>Bước 1:</strong> Vào <a href="https://script.google.com" target="_blank" style="color:var(--blue)">script.google.com</a> → New project → paste code từ file <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">brief-manager-apps-script.gs</code><br><br>
+              <strong>Bước 2:</strong> Sửa <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">TEAM_EMAILS</code> → chạy <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">testAll()</code> để kiểm tra<br><br>
+              <strong>Bước 3:</strong> Deploy → New deployment → Web app → Execute as: <strong>Me</strong> → Access: <strong>Anyone</strong> → Deploy → copy URL<br><br>
+              <strong>Bước 4:</strong> Paste URL vào ô trên → nhấn <strong>Test kết nối</strong>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sc-integrations -->
+
+    </div><!-- /page-settings -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ════ NEW BRIEF MENU ════ -->
+<div class="overlay" id="newBriefMenu">
+  <div class="modal">
+    <div class="modal-h"><h3>＋ Tạo Brief mới</h3><button class="modal-x" onclick="closeOverlay('newBriefMenu')">✕</button></div>
+    <div class="modal-b" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div onclick="openForm('banner');closeOverlay('newBriefMenu')"
+        style="border:1.5px solid var(--line);border-radius:10px;padding:16px;cursor:pointer;text-align:center;transition:all .15s"
+        onmouseover="this.style.borderColor='#6dcb6d';this.style.background='#f0fbf0'"
+        onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
+        <div style="font-size:28px;margin-bottom:8px">🖼</div>
+        <div style="font-size:13px;font-weight:600;color:var(--ink)">Banner Brief</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:3px">Hero, Secondary, Frame, Brand Story...</div>
+      </div>
+      <div onclick="openForm('video');closeOverlay('newBriefMenu')"
+        style="border:1.5px solid var(--line);border-radius:10px;padding:16px;cursor:pointer;text-align:center;transition:all .15s"
+        onmouseover="this.style.borderColor='#60a5fa';this.style.background='#eff6ff'"
+        onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
+        <div style="font-size:28px;margin-bottom:8px">🎬</div>
+        <div style="font-size:13px;font-weight:600;color:var(--ink)">Video Brief</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:3px">TikTok, Reels, YouTube, Amazon Ads...</div>
       </div>
     </div>
+    <div class="modal-f"><button class="btn-cancel" onclick="closeOverlay('newBriefMenu')">Huỷ</button></div>
   </div>
-
-  <!-- PROJECT INFO -->
-  <div class="fsec">
-    <div class="fsec-title">📋 Thông tin dự án</div>
-    <div class="field"><label>Tên chiến dịch <span class="req">*</span></label>
-      <input type="text" id="f-name" value="Spring Sales 2025" oninput="upd()"></div>
-    <div class="row2">
-      <div class="field"><label>Platform</label>
-        <select id="f-platform" onchange="upd()">
-          <option>Amazon</option><option>Shopee</option><option>Lazada</option>
-          <option>TikTok Shop</option><option>Website</option><option>Khác</option>
-        </select></div>
-      <div class="field"><label>Theme / Chủ đề</label>
-        <input type="text" id="f-theme" value="Spring / Mùa Xuân" oninput="upd()"></div>
-    </div>
-    <div class="field"><label>Mô tả ngắn</label>
-      <textarea id="f-desc" rows="2" placeholder="Mô tả chiến dịch, mục tiêu..." oninput="upd()"></textarea></div>
-  </div>
-
-  <!-- BANNERS -->
-  <div class="fsec">
-    <div class="fsec-title">🖼 Thông số Banner</div>
-    <div id="blist"></div>
-    <button class="add-btn" onclick="addBanner()">＋ Thêm loại banner</button>
-  </div>
-
-  <!-- PRODUCTS -->
-  <div class="fsec">
-    <div class="fsec-title">🛒 Sản phẩm có deal</div>
-    <div class="prod-row">
-      <input type="text" id="f-prod" placeholder="Tên sản phẩm + quy cách" onkeydown="if(event.key==='Enter')addProd()">
-      <button onclick="addProd()">+ Thêm</button>
-    </div>
-    <div class="ptags" id="ptags"></div>
-  </div>
-
-  <!-- GLOBAL -->
-  <div class="fsec">
-    <div class="fsec-title">📐 Quy định chung</div>
-    <div class="row2">
-      <div class="field"><label>Max px / chiều</label>
-        <input type="number" id="f-maxpx" value="5000" min="100" oninput="upd()"></div>
-      <div class="field"><label>Font tối thiểu</label>
-        <input type="number" id="f-minfont" value="14" min="8" oninput="upd()"></div>
-    </div>
-    <div class="field"><label>Màu chủ đạo</label>
-      <div class="swatches" id="swatches">
-        <div class="sw on" style="background:#2a9e2a" data-c="#2a9e2a" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#d97706" data-c="#d97706" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#2563eb" data-c="#2563eb" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#dc2626" data-c="#dc2626" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#9333ea" data-c="#9333ea" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#0891b2" data-c="#0891b2" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#db2777" data-c="#db2777" onclick="pickColor(this)"></div>
-        <div class="sw" style="background:#111110" data-c="#111110" onclick="pickColor(this)"></div>
-      </div>
-    </div>
-    <div class="field"><label>Quy định bổ sung</label>
-      <textarea id="f-rules" rows="3" placeholder="Mỗi dòng = 1 quy định" oninput="upd()"></textarea></div>
-  </div>
-
-  <!-- DEADLINE -->
-  <div class="fsec">
-    <div class="fsec-title">📅 Deadline & Liên hệ</div>
-    <div class="row2">
-      <div class="field"><label>Deadline</label>
-        <input type="text" id="f-dl" placeholder="VD: 20/05/2025" oninput="upd()"></div>
-      <div class="field"><label>Người phụ trách</label>
-        <input type="text" id="f-contact" placeholder="Tên / Email / Slack" oninput="upd()"></div>
-    </div>
-    <div class="field"><label>Ghi chú</label>
-      <textarea id="f-notes" rows="2" placeholder="Lưu ý thêm..." oninput="upd()"></textarea></div>
-  </div>
-
 </div>
-</div><!-- /pf -->
 
-<!-- ══ PREVIEW PANEL ══ -->
-<div class="pp" id="pp">
-  <div class="pi">
-    <div class="pcard" id="pcard"></div>
+<!-- ════ BRIEF FORM (slide panel) ════ -->
+<div class="form-overlay" id="formOverlay" onclick="if(event.target===this)closeForm()">
+  <div class="form-panel" id="formPanel">
+    <div class="fp-header">
+      <div class="fp-title" id="fpTitle">New Brief</div>
+      <button class="fp-close" onclick="closeForm()">✕</button>
+    </div>
+    <div class="fp-body" id="fpBody"><!-- injected by JS --></div>
+    <div class="fp-footer">
+      <button class="tb-btn" onclick="closeForm()">Huỷ</button>
+      <button class="tb-btn" onclick="saveDraftBrief()" style="margin-right:4px">💾 Lưu nháp</button>
+      <button class="tb-btn primary" onclick="publishBrief()">🚀 Publish</button>
+    </div>
   </div>
 </div>
 
-</div><!-- /panels -->
-
-<!-- CAPTURE OVERLAY -->
-<div class="capture-overlay" id="captureOverlay">
-  <div class="capture-spinner"></div>
-  <div class="capture-msg" id="captureMsg">Đang chụp ảnh brief...</div>
-  <div class="capture-sub" id="captureSub">Vui lòng chờ trong giây lát</div>
-</div>
-
-<!-- SETUP MODAL (Google Cloud guide) -->
-<div class="overlay" id="setupModal">
-  <div class="modal" style="width:520px">
-    <div class="modal-h">
-      <h3>🔑 Hướng dẫn lấy Google OAuth Client ID</h3>
-      <button class="modal-x" onclick="closeSetup()">✕</button>
-    </div>
-    <div class="modal-b" style="max-height:70vh;overflow-y:auto">
-
-      <div class="setup-step">
-        <div class="setup-step-title"><span class="setup-step-num">1</span>Tạo Google Cloud Project</div>
-        <div class="setup-step-body">
-          Vào <a href="https://console.cloud.google.com" target="_blank" style="color:var(--blue)">console.cloud.google.com</a>
-          → <strong>New Project</strong> → đặt tên <code>brief-builder</code> → Create.
-        </div>
-      </div>
-
-      <div class="setup-step">
-        <div class="setup-step-title"><span class="setup-step-num">2</span>Bật Google Drive API</div>
-        <div class="setup-step-body">
-          Menu trái → <strong>APIs & Services</strong> → <strong>Library</strong>
-          → Tìm <code>Google Drive API</code> → Enable.
-        </div>
-      </div>
-
-      <div class="setup-step">
-        <div class="setup-step-title"><span class="setup-step-num">3</span>Tạo OAuth Consent Screen</div>
-        <div class="setup-step-body">
-          <strong>APIs & Services</strong> → <strong>OAuth consent screen</strong>
-          → Chọn <code>External</code> → Fill tên app → Add scope:
-          <code>https://www.googleapis.com/auth/drive.file</code>
-          → Save → Publish app (hoặc thêm test user là email của bạn).
-        </div>
-      </div>
-
-      <div class="setup-step">
-        <div class="setup-step-title"><span class="setup-step-num">4</span>Tạo OAuth Client ID</div>
-        <div class="setup-step-body">
-          <strong>Credentials</strong> → <strong>Create Credentials</strong>
-          → <strong>OAuth client ID</strong> → Application type: <code>Web application</code><br><br>
-          Thêm Authorized JavaScript origins:<br>
-          <code>https://kristensjd.github.io</code><br><br>
-          Thêm Authorized redirect URIs:<br>
-          <code>https://kristensjd.github.io</code><br><br>
-          → Create → Copy <strong>Client ID</strong> (dạng <code>xxx.apps.googleusercontent.com</code>)
-        </div>
-      </div>
-
-      <div class="setup-step">
-        <div class="setup-step-title"><span class="setup-step-num">5</span>Lấy Drive Folder ID (optional)</div>
-        <div class="setup-step-body">
-          Mở folder muốn lưu trên Google Drive → xem URL:<br>
-          <code>drive.google.com/drive/folders/<strong>[FOLDER_ID]</strong></code><br>
-          Copy phần <strong>FOLDER_ID</strong> dán vào ô Folder ID bên trên.
-        </div>
-      </div>
-
-      <div style="background:var(--g0);border:1px solid var(--g1);border-radius:var(--r-md);padding:10px 12px;font-size:11.5px;color:var(--g9);">
-        ✅ Sau khi điền Client ID → nhấn nút <strong>Drive</strong> trên thanh top → Google popup xin quyền → Allow → Kết nối thành công!
-      </div>
+<!-- ════ PROFILE MODAL ════ -->
+<div class="overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-h"><h3>👤 Thông tin của bạn</h3><button class="modal-x" onclick="closeOverlay('profileModal')">✕</button></div>
+    <div class="modal-b">
+      <div class="field"><label>Tên của bạn <span class="req">*</span></label>
+        <input type="text" id="prof-name" placeholder="VD: Linh Nguyen"></div>
+      <div class="field"><label>Team / Bộ phận</label>
+        <input type="text" id="prof-team" placeholder="VD: Marketing, Design, eCommerce"></div>
+      <div class="field"><label>Email</label>
+        <input type="text" id="prof-email" placeholder="your@company.com"></div>
     </div>
     <div class="modal-f">
-      <button class="mf-sec" onclick="closeSetup()">Đóng</button>
-      <button class="mf-pri" onclick="closeSetup()">Đã hiểu!</button>
+      <button class="btn-cancel" onclick="closeOverlay('profileModal')">Huỷ</button>
+      <button class="btn-ok" onclick="saveProfile()">Lưu</button>
     </div>
   </div>
 </div>
 
+<!-- DELETE CONFIRM -->
+<div class="overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-h" style="background:var(--red)"><h3>🗑 Xoá brief</h3><button class="modal-x" onclick="closeOverlay('deleteModal')">✕</button></div>
+    <div class="modal-b"><p style="font-size:13px;color:var(--ink)">Bạn có chắc muốn xoá brief này? Hành động không thể hoàn tác.</p></div>
+    <div class="modal-f">
+      <button class="btn-cancel" onclick="closeOverlay('deleteModal')">Huỷ</button>
+      <button class="btn-danger" onclick="confirmDelete()">Xoá</button>
+    </div>
+  </div>
+</div>
 
-
+<div class="spin-overlay" id="spinOverlay">
+  <div class="spinner"></div>
+  <div class="spin-msg" id="spinMsg">Đang xử lý...</div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══ CONFIG ══ */
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-let accessToken = null;
-let driveConnected = false;
+/* ══════════════════════════════════════════════
+   STATE & STORAGE
+══════════════════════════════════════════════ */
+let briefs = [];          // all briefs array
+let editingId = null;     // brief being edited
+let deleteId = null;      // brief pending delete
+let currentFormType = 'banner';
+let filterStatus = { all:'all', banner:'all', video:'all' };
+let user = { name:'', team:'', email:'' };
+let cfg  = { scriptUrl:'', driveFolder:'Brief Manager', emails:'', designers:'', platforms:'Amazon,Shopee,Lazada,TikTok Shop,Website' };
 
-/* ══ STATE ══ */
-let S = {
-  name:'Spring Sales 2025', platform:'Amazon', theme:'Spring / Mùa Xuân', desc:'',
-  banners:[
-    {id:1,label:'Hero Banner — Desktop',w:1464,h:625,fmt:'JPG / PNG',files:1,note:'Landscape · Thiết kế riêng với mobile',imgs:[]},
-    {id:2,label:'Hero Banner — Mobile', w:463, h:625,fmt:'JPG / PNG',files:1,note:'Portrait · Không crop từ desktop',imgs:[]},
-    {id:3,label:'Secondary Banner',     w:362, h:453,fmt:'JPG / PNG',files:1,note:'Banner phụ, portrait',imgs:[]},
-    {id:4,label:'Product Frame',        w:166, h:182,fmt:'PNG',       files:7,note:'Thumbnail · 1 / sản phẩm',imgs:[]},
-  ],
-  prods:[
-    {n:'Sugarcane Powder',d:'600g'},{n:'Jackfruit',d:'250g'},
-    {n:'Pineapple',d:'Pack of 3'},{n:'Dragon Fruit',d:'Pack of 3'},
-    {n:'Mango',d:'250g'},{n:'Soursop',d:'Pack of 5'},{n:'Mango No Sugar',d:'Pack of 3'},
-  ],
-  maxpx:5000,minfont:14,color:'#2a9e2a',
-  rules:'',dl:'',contact:'',notes:''
-};
-let BID=5;
+function loadLocal(){
+  briefs = JSON.parse(localStorage.getItem('bm_briefs') || '[]');
+  user   = JSON.parse(localStorage.getItem('bm_user')   || '{}');
+  cfg    = { ...cfg, ...JSON.parse(localStorage.getItem('bm_cfg') || '{}') };
+}
+function saveLocal(){
+  localStorage.setItem('bm_briefs', JSON.stringify(briefs));
+}
+function saveCfg(){
+  cfg.scriptUrl    = g('cfg-scriptUrl');
+  cfg.driveFolder  = g('cfg-driveFolder');
+  cfg.emails       = g('cfg-emails');
+  cfg.designers    = g('cfg-designers');
+  cfg.platforms    = g('cfg-platforms');
+  cfg.teams        = g('cfg-teams')        || cfg.teams        || '';
+  cfg.bannerTypes  = g('cfg-bannerTypes')  || cfg.bannerTypes  || '';
+  cfg.videoTypes   = g('cfg-videoTypes')   || cfg.videoTypes   || '';
+  cfg.defaultSpecs = g('cfg-defaultSpecs') || cfg.defaultSpecs || 'amazon';
+  localStorage.setItem('bm_cfg', JSON.stringify(cfg));
+}
+
+function g(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
 
 /* ══ INIT ══ */
-window.onload=()=>{
-  // Restore saved config
-  const saved=localStorage.getItem('briefDriveConfig');
-  if(saved){const cfg=JSON.parse(saved);document.getElementById('clientId').value=cfg.clientId||'';document.getElementById('folderId').value=cfg.folderId||'';document.getElementById('driveFolder').value=cfg.driveFolder||'Brief Builder / Banners';}
-  renderBanners();renderProds();upd();
+window.onload = () => {
+  loadLocal();
+  applyProfile();
+  applyCfgToForm();
+  initSettingsUI();   // restore appearance from localStorage
+  updateBadges();
+  renderDashboard();
+  renderList('all');
+  renderList('banner');
+  renderList('video');
+  renderStatusLists();
 };
 
-/* ══ SAVE CONFIG ══ */
-function saveConfig(){
-  localStorage.setItem('briefDriveConfig',JSON.stringify({
-    clientId:g('clientId'),
-    folderId:g('folderId'),
-    driveFolder:g('driveFolder')
-  }));
+function applyProfile(){
+  if(user.name){
+    document.getElementById('sbUserName').textContent = user.name;
+    document.getElementById('sbUserTeam').textContent = user.team || 'No team';
+    document.getElementById('sbAvatar').textContent   = user.name.charAt(0).toUpperCase();
+  }
+}
+function applyCfgToForm(){
+  if(cfg.scriptUrl)    document.getElementById('cfg-scriptUrl').value    = cfg.scriptUrl;
+  if(cfg.driveFolder)  document.getElementById('cfg-driveFolder').value  = cfg.driveFolder;
+  if(cfg.emails)       document.getElementById('cfg-emails').value       = cfg.emails;
+  if(cfg.designers)    document.getElementById('cfg-designers').value    = cfg.designers;
+  if(cfg.platforms)    document.getElementById('cfg-platforms').value    = cfg.platforms;
+  if(cfg.teams)        setVal('cfg-teams',        cfg.teams);
+  if(cfg.bannerTypes)  setVal('cfg-bannerTypes',  cfg.bannerTypes);
+  if(cfg.videoTypes)   setVal('cfg-videoTypes',   cfg.videoTypes);
+  if(cfg.defaultSpecs) setVal('cfg-defaultSpecs', cfg.defaultSpecs);
 }
 
-/* ══ READ FORM ══ */
-function readForm(){
-  S.name=g('f-name');S.platform=g('f-platform');S.theme=g('f-theme');
-  S.desc=g('f-desc');S.maxpx=+g('f-maxpx')||5000;S.minfont=+g('f-minfont')||14;
-  S.rules=g('f-rules');S.dl=g('f-dl');S.contact=g('f-contact');S.notes=g('f-notes');
-  S.banners.forEach(b=>{
-    const gv=k=>{const el=document.getElementById(k+'_'+b.id);return el?el.value:null;};
-    if(gv('bl')!==null)b.label=gv('bl');
-    if(gv('bw')!==null)b.w=+gv('bw')||b.w;
-    if(gv('bh')!==null)b.h=+gv('bh')||b.h;
-    if(gv('bn')!==null)b.files=+gv('bn')||1;
-    if(gv('bf')!==null)b.fmt=gv('bf');
-    if(gv('bc')!==null)b.note=gv('bc');
+/* ══ NAVIGATION ══ */
+const PAGE_TITLES = {
+  dashboard:'Dashboard', all:'Tất cả Brief', banner:'Banner Brief',
+  video:'Video Brief', todo:'To-do', inprogress:'In Progress',
+  revision:'Needs Revision', done:'Done / Delivered', settings:'Settings',
+};
+function navTo(page, el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[page] || page;
+  document.getElementById('topbarSub').textContent = '';
+  if(page==='dashboard') renderDashboard();
+  if(['todo','inprogress','revision','done'].includes(page)) renderStatusLists();
+}
+
+/* ══ BADGES ══ */
+function updateBadges(){
+  const counts = { all:0, banner:0, video:0, todo:0, inprogress:0, revision:0, done:0 };
+  briefs.forEach(b=>{
+    counts.all++;
+    if(b.type==='banner') counts.banner++;
+    if(b.type==='video')  counts.video++;
+    if(b.status) counts[b.status] = (counts[b.status]||0)+1;
+  });
+  Object.keys(counts).forEach(k=>{
+    const el=document.getElementById('badge-'+k);
+    if(el) el.textContent = counts[k];
   });
 }
-function g(id){const el=document.getElementById(id);return el?el.value.trim():'';}
 
-/* ══ BANNERS ══ */
-function renderBanners(){
-  document.getElementById('blist').innerHTML=S.banners.map((b,i)=>`
-    <div class="bcard">
-      <div class="bcard-head">
-        <div class="bnum">${i+1}</div>
-        <input id="bl_${b.id}" value="${h(b.label)}" placeholder="Tên banner" oninput="upd()">
-        <button class="rm-btn" onclick="rmBanner(${b.id})">✕</button>
+/* ══════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════ */
+function renderDashboard(){
+  const total    = briefs.length;
+  const todo     = briefs.filter(b=>b.status==='todo').length;
+  const progress = briefs.filter(b=>b.status==='inprogress').length;
+  const revision = briefs.filter(b=>b.status==='revision').length;
+  const done     = briefs.filter(b=>b.status==='done').length;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card green"><div class="stat-num">${total}</div><div class="stat-lbl">Tổng briefs</div></div>
+    <div class="stat-card amber"><div class="stat-num">${todo+progress}</div><div class="stat-lbl">Đang thực hiện</div></div>
+    <div class="stat-card red"><div class="stat-num">${revision}</div><div class="stat-lbl">Cần chỉnh sửa</div></div>
+    <div class="stat-card blue"><div class="stat-num">${done}</div><div class="stat-lbl">Hoàn thành</div></div>
+  `;
+
+  const recent = [...briefs].sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
+  const el = document.getElementById('recentList');
+  if(!recent.length){ el.innerHTML=emptyState('Chưa có brief nào','Nhấn ＋ New Brief để bắt đầu'); return; }
+  el.innerHTML = recent.map(b=>briefCardHTML(b)).join('');
+  attachCardEvents(el);
+}
+
+/* ══════════════════════════════════════════════
+   BRIEF LISTS
+══════════════════════════════════════════════ */
+function setFilter(page, status, el){
+  const bar = el.closest('.filter-bar');
+  bar.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  filterStatus[page] = status;
+  renderList(page);
+}
+
+function renderList(page){
+  const listEl = document.getElementById('list-'+({all:'All',banner:'Banner',video:'Video'}[page]||page.charAt(0).toUpperCase()+page.slice(1)));
+  if(!listEl) return;
+
+  const searchEl = document.getElementById('search-'+({all:'All',banner:'Banner',video:'Video'}[page]||page));
+  // handle id mapping
+  const searchId = `search${page.charAt(0).toUpperCase()+page.slice(1)}`;
+  const search = (document.getElementById(searchId)||{}).value||'';
+  const status = filterStatus[page]||'all';
+
+  let filtered = briefs.filter(b=>{
+    if(page==='banner' && b.type!=='banner') return false;
+    if(page==='video'  && b.type!=='video')  return false;
+    if(status!=='all'  && b.status!==status) return false;
+    if(search){
+      const q=search.toLowerCase();
+      return (b.name||'').toLowerCase().includes(q)||
+             (b.platform||'').toLowerCase().includes(q)||
+             (b.assignTo||'').toLowerCase().includes(q)||
+             (b.orderedBy||'').toLowerCase().includes(q);
+    }
+    return true;
+  }).sort((a,b)=>b.createdAt-a.createdAt);
+
+  if(!filtered.length){ listEl.innerHTML=emptyState('Không có brief nào','Thử thay đổi bộ lọc hoặc tạo brief mới'); return; }
+  listEl.innerHTML = filtered.map(b=>briefCardHTML(b)).join('');
+  attachCardEvents(listEl);
+}
+
+function renderStatusLists(){
+  ['todo','inprogress','revision','done'].forEach(status=>{
+    const el = document.getElementById('list-'+capitalize(status));
+    if(!el) return;
+    const filtered = briefs.filter(b=>b.status===status).sort((a,b)=>b.createdAt-a.createdAt);
+    if(!filtered.length){ el.innerHTML=emptyState('Không có brief nào ở trạng thái này',''); return; }
+    el.innerHTML = filtered.map(b=>briefCardHTML(b)).join('');
+    attachCardEvents(el);
+  });
+}
+
+/* ── BRIEF CARD HTML ── */
+const STATUS_LABEL = { todo:'To-do', inprogress:'In Progress', done:'Done', revision:'Needs Revision' };
+const TYPE_COLOR   = { banner:'#6dcb6d', video:'#60a5fa', hero:'#f97316', secondary:'#a78bfa', frame:'#fb7185', brand:'#fbbf24' };
+
+function briefCardHTML(b){
+  const status = b.status || 'todo';
+  const typeColor = TYPE_COLOR[b.subtype||b.type] || '#94a3b8';
+  const dl = b.deadline ? daysUntil(b.deadline) : null;
+  const dlWarn = dl !== null && dl < 3;
+
+  const specsCount = (b.bannerSpecs||[]).length;
+  const prodsCount = (b.products||[]).length;
+
+  return `
+  <div class="brief-card" id="bc-${b.id}" onclick="toggleCard('${b.id}')">
+    <div class="bc-header">
+      <span class="bc-order">#${b.orderNum||'—'}</span>
+      <span class="bc-type-dot" style="background:${typeColor}"></span>
+      <span class="bc-title">${h(b.name||'Untitled')}</span>
+      <span class="bc-platform">${h(b.platform||'—')}</span>
+      <span class="status ${status}">${STATUS_LABEL[status]||status}</span>
+    </div>
+    <div class="bc-meta">
+      <div class="bc-meta-item">👤 <strong>${h(b.orderedBy||'—')}</strong></div>
+      <div class="bc-meta-item">✏️ <strong>${h(b.assignTo||'Unassigned')}</strong></div>
+      ${b.deadline?`<div class="bc-meta-item${dlWarn?' deadline-warn':''}">📅 <strong>${h(b.deadline)}${dl!==null?` (${dl<0?'quá hạn '+Math.abs(dl):dl===0?'hôm nay':dl+' ngày'})`:''}` </strong></div>`:''}
+      ${specsCount?`<div class="bc-meta-item">🖼 ${specsCount} banner${specsCount>1?'s':''}</div>`:''}
+      ${prodsCount?`<div class="bc-meta-item">🛒 ${prodsCount} sản phẩm</div>`:''}
+    </div>
+    <div class="bc-detail" id="bcd-${b.id}">
+      <div class="bc-detail-grid">
+        <div class="bc-detail-item"><div class="bc-detail-label">Campaign</div><div class="bc-detail-val">${h(b.name||'—')}</div></div>
+        <div class="bc-detail-item"><div class="bc-detail-label">Platform</div><div class="bc-detail-val">${h(b.platform||'—')}</div></div>
+        <div class="bc-detail-item"><div class="bc-detail-label">Theme</div><div class="bc-detail-val">${h(b.theme||'—')}</div></div>
+        <div class="bc-detail-item"><div class="bc-detail-label">Order by</div><div class="bc-detail-val">${h(b.orderedBy||'—')}</div></div>
+        <div class="bc-detail-item"><div class="bc-detail-label">Assign to</div><div class="bc-detail-val">${h(b.assignTo||'—')}</div></div>
+        <div class="bc-detail-item"><div class="bc-detail-label">Deadline</div><div class="bc-detail-val">${h(b.deadline||'—')}</div></div>
       </div>
-      <div class="bcard-body">
-        <div class="row3">
-          <div class="field" style="margin:0"><label>Rộng (px)</label>
-            <input type="number" id="bw_${b.id}" value="${b.w}" min="1" oninput="upd()"></div>
-          <div class="field" style="margin:0"><label>Cao (px)</label>
-            <input type="number" id="bh_${b.id}" value="${b.h}" min="1" oninput="upd()"></div>
-          <div class="field" style="margin:0"><label>Số file</label>
-            <input type="number" id="bn_${b.id}" value="${b.files}" min="1" oninput="upd()"></div>
-        </div>
-        <div class="row2">
-          <div class="field" style="margin:0"><label>Format</label>
-            <select id="bf_${b.id}" onchange="upd()">
-              ${['JPG / PNG','PNG','JPG','WebP'].map(f=>`<option${b.fmt===f?' selected':''}>${f}</option>`).join('')}
-            </select></div>
-          <div class="field" style="margin:0"><label>Ghi chú</label>
-            <input type="text" id="bc_${b.id}" value="${h(b.note)}" oninput="upd()"></div>
-        </div>
-        <div class="field" style="margin:0">
-          <label>🖼 Hình Reference <span class="hint">(kéo thả)</span></label>
-          <div class="ref-upload ${b.imgs&&b.imgs.length?'has-imgs':''}"
-               onclick="document.getElementById('fi_${b.id}').click()"
-               ondragover="event.preventDefault();this.style.borderColor='var(--g5)'"
-               ondragleave="this.style.borderColor=''"
-               ondrop="handleDrop(event,${b.id})">
-            <input type="file" id="fi_${b.id}" accept="image/*" multiple style="display:none"
-                   onchange="handleFiles(this.files,${b.id})">
-            ${b.imgs&&b.imgs.length
-              ?`<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;width:100%">
-                  <div class="thumb-row">
-                    ${b.imgs.map((img,ii)=>`<div class="thumb"><img src="${img.data}" title="${h(img.name)}"><button class="thumb-del" onclick="event.stopPropagation();rmImg(${b.id},${ii})">✕</button></div>`).join('')}
-                  </div>
-                  <span style="font-size:10px;color:var(--g7);font-weight:600;background:var(--g1);border-radius:4px;padding:1px 6px;">${b.imgs.length} refs</span>
-                </div>`
-              :`<div class="ref-hint">📎 Kéo thả hình reference<span>JPG · PNG · WebP</span></div>`}
-          </div>
-        </div>
+      ${b.notes?`<div style="font-size:11.5px;color:var(--ink3);margin-bottom:8px;line-height:1.5;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:7px 9px;">📝 ${h(b.notes)}</div>`:''}
+      ${(b.bannerSpecs||[]).length?`
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--g7);margin-bottom:5px;">Banner Specs</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+          ${(b.bannerSpecs||[]).map(s=>`<span style="background:var(--g0);border:1px solid var(--g1);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--g9);">${h(s.label||'Banner')} · ${s.w}×${s.h}px · ${h(s.fmt)} · ${s.files}f</span>`).join('')}
+        </div>`:''}
+      ${(b.products||[]).length?`
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--g7);margin-bottom:5px;">Sản phẩm</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+          ${(b.products||[]).map(p=>`<span style="background:var(--g0);border:1px solid var(--g1);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--g9);">${h(p.n)}${p.d?' · '+h(p.d):''}</span>`).join('')}
+        </div>`:''}
+      <div class="bc-actions">
+        <select onchange="updateStatus('${b.id}',this.value)" onclick="event.stopPropagation()" style="width:auto;padding:4px 8px;font-size:11px;flex-shrink:0;">
+          <option value="todo"${status==='todo'?' selected':''}>⬜ To-do</option>
+          <option value="inprogress"${status==='inprogress'?' selected':''}>🔵 In Progress</option>
+          <option value="revision"${status==='revision'?' selected':''}>🔁 Needs Revision</option>
+          <option value="done"${status==='done'?' selected':''}>✅ Done</option>
+        </select>
+        <button class="bc-act-btn" onclick="event.stopPropagation();editBrief('${b.id}')">✏️ Edit</button>
+        ${b.driveUrl?`<button class="bc-act-btn" onclick="event.stopPropagation();window.open('${b.driveUrl}','_blank')">📂 Drive</button>`:''}
+        <button class="bc-act-btn" onclick="event.stopPropagation();exportCard('${b.id}')">📸 Export</button>
+        <button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBrief('${b.id}')">🗑</button>
       </div>
+    </div>
+  </div>`;
+}
+
+function attachCardEvents(container){
+  // nothing extra needed — all inline handlers
+}
+
+function toggleCard(id){
+  const card = document.getElementById('bc-'+id);
+  const detail = document.getElementById('bcd-'+id);
+  if(!card||!detail) return;
+  const isOpen = detail.style.display==='block';
+  detail.style.display = isOpen?'none':'block';
+  card.classList.toggle('expanded', !isOpen);
+}
+
+/* ══════════════════════════════════════════════
+   FORM — NEW / EDIT BRIEF
+══════════════════════════════════════════════ */
+let formSpecs   = [];
+let formProds   = [];
+let formImgs    = [];
+let formSpecId  = 0;
+
+function openForm(type, briefData=null){
+  currentFormType = type;
+  editingId = briefData ? briefData.id : null;
+
+  // Reset
+  formSpecs = briefData?.bannerSpecs ? [...briefData.bannerSpecs] : [];
+  formProds = briefData?.products    ? [...briefData.products]    : [];
+  formImgs  = briefData?.refImgs     ? [...briefData.refImgs]     : [];
+
+  document.getElementById('fpTitle').textContent = briefData
+    ? `✏️ Edit: ${briefData.name||'Brief'}`
+    : (type==='banner' ? '🖼 New Banner Brief' : '🎬 New Video Brief');
+
+  document.getElementById('fpBody').innerHTML = type==='banner' ? bannerFormHTML(briefData) : videoFormHTML(briefData);
+
+  // Populate specs/prods/imgs
+  renderFormSpecs();
+  renderFormProds();
+  renderFormImgs();
+
+  document.getElementById('formOverlay').classList.add('show');
+}
+
+function closeForm(){
+  document.getElementById('formOverlay').classList.remove('show');
+  editingId=null;
+}
+
+function showNewBriefMenu(){
+  document.getElementById('newBriefMenu').classList.add('show');
+}
+
+/* ── BANNER FORM HTML ── */
+function bannerFormHTML(d){
+  const platforms = cfg.platforms.split(',').map(p=>p.trim());
+  const designers = cfg.designers.split('\n').map(p=>p.trim()).filter(Boolean);
+
+  return `
+  <div class="fsec">
+    <div class="fsec-title">📋 Thông tin chung</div>
+    <div class="row2">
+      <div class="field"><label>Số order <span class="req">*</span></label>
+        <input type="text" id="f-order" value="${h(d?.orderNum||nextOrder())}" placeholder="VD: 001"></div>
+      <div class="field"><label>Platform</label>
+        <select id="f-platform">
+          ${platforms.map(p=>`<option${d?.platform===p?' selected':''}>${p}</option>`).join('')}
+        </select></div>
+    </div>
+    <div class="field"><label>Tên campaign <span class="req">*</span></label>
+      <input type="text" id="f-name" value="${h(d?.name||'')}" placeholder="VD: Spring Sales 2025"></div>
+    <div class="row2">
+      <div class="field"><label>Theme</label>
+        <input type="text" id="f-theme" value="${h(d?.theme||'')}" placeholder="VD: Spring / Mùa Xuân"></div>
+      <div class="field"><label>Subtype</label>
+        <select id="f-subtype">
+          ${['hero','secondary','frame','brand','other'].map(s=>`<option value="${s}"${d?.subtype===s?' selected':''}>${capitalize(s)}</option>`).join('')}
+        </select></div>
+    </div>
+    <div class="field"><label>Mô tả / Mục đích</label>
+      <textarea id="f-desc" rows="2" placeholder="Mục tiêu campaign, đối tượng...">${h(d?.desc||'')}</textarea></div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">👥 Phân công</div>
+    <div class="row3">
+      <div class="field"><label>Order by <span class="req">*</span></label>
+        <input type="text" id="f-orderedBy" value="${h(d?.orderedBy||user.name||'')}" placeholder="Tên người order"></div>
+      <div class="field"><label>Assign to</label>
+        <input type="text" id="f-assignTo" value="${h(d?.assignTo||'')}" list="designer-list" placeholder="Designer nhận task">
+        <datalist id="designer-list">${designers.map(n=>`<option value="${n}">`).join('')}</datalist></div>
+      <div class="field"><label>Deadline</label>
+        <input type="text" id="f-deadline" value="${h(d?.deadline||'')}" placeholder="VD: 20/05/2025"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Priority</label>
+        <select id="f-priority">
+          ${['Normal','High','Urgent'].map(p=>`<option${d?.priority===p?' selected':''}>${p}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>Status</label>
+        <select id="f-status">
+          <option value="todo"${(d?.status||'todo')==='todo'?' selected':''}>⬜ To-do</option>
+          <option value="inprogress"${d?.status==='inprogress'?' selected':''}>🔵 In Progress</option>
+          <option value="revision"${d?.status==='revision'?' selected':''}>🔁 Needs Revision</option>
+          <option value="done"${d?.status==='done'?' selected':''}>✅ Done</option>
+        </select></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">🖼 Banner Specs</div>
+    <div id="specList"></div>
+    <button class="add-spec-btn" onclick="addSpec()">＋ Thêm banner size</button>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">🛒 Sản phẩm có deal</div>
+    <div class="tag-input-row">
+      <input type="text" id="f-prod-input" placeholder="Tên SP + quy cách, VD: Mango 250g" onkeydown="if(event.key==='Enter')addProdTag()">
+      <button onclick="addProdTag()">+ Thêm</button>
+    </div>
+    <div class="tags-wrap" id="prodTags"></div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">🖼 Reference Images</div>
+    <div class="ref-zone ${formImgs.length?'has-imgs':''}" id="refZone"
+         onclick="document.getElementById('refInput').click()"
+         ondragover="event.preventDefault()"
+         ondrop="handleImgDrop(event)">
+      <input type="file" id="refInput" accept="image/*" multiple style="display:none" onchange="handleImgFiles(this.files)">
+      <div id="refThumbsWrap">
+        ${formImgs.length
+          ? `<div class="thumbs" id="refThumbs"></div>`
+          : `<div class="ref-hint">📎 Kéo thả hình reference<small>JPG · PNG · WebP</small></div>`}
+      </div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">📝 Ghi chú</div>
+    <textarea id="f-notes" rows="3" placeholder="Lưu ý thêm cho designer...">${h(d?.notes||'')}</textarea>
+  </div>`;
+}
+
+/* ── VIDEO FORM HTML ── */
+function videoFormHTML(d){
+  const platforms = cfg.platforms.split(',').map(p=>p.trim());
+  const designers = cfg.designers.split('\n').map(p=>p.trim()).filter(Boolean);
+
+  return `
+  <div class="fsec">
+    <div class="fsec-title">📋 Thông tin chung</div>
+    <div class="row2">
+      <div class="field"><label>Số order <span class="req">*</span></label>
+        <input type="text" id="f-order" value="${h(d?.orderNum||nextOrder())}" placeholder="VD: V001"></div>
+      <div class="field"><label>Platform</label>
+        <select id="f-platform">
+          ${['TikTok','Instagram Reels','YouTube','Facebook','Amazon','Khác'].map(p=>`<option${d?.platform===p?' selected':''}>${p}</option>`).join('')}
+        </select></div>
+    </div>
+    <div class="field"><label>Tên campaign <span class="req">*</span></label>
+      <input type="text" id="f-name" value="${h(d?.name||'')}" placeholder="VD: Spring Sales — Video Ads"></div>
+    <div class="row2">
+      <div class="field"><label>Loại video</label>
+        <select id="f-subtype">
+          ${['Product Demo','Brand Story','UGC','Unboxing','Tutorial','Lifestyle','Flash Sale','Khác'].map(s=>`<option value="${s.toLowerCase().replace(/\s/g,'-')}"${d?.subtype===s.toLowerCase().replace(/\s/g,'-')?' selected':''}>${s}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>Thời lượng</label>
+        <input type="text" id="f-duration" value="${h(d?.duration||'')}" placeholder="VD: 15–30s"></div>
+    </div>
+    <div class="field"><label>Key message / Hook</label>
+      <input type="text" id="f-hook" value="${h(d?.hook||'')}" placeholder="VD: Hook 3 giây đầu..."></div>
+    <div class="field"><label>Mô tả</label>
+      <textarea id="f-desc" rows="2">${h(d?.desc||'')}</textarea></div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">👥 Phân công</div>
+    <div class="row3">
+      <div class="field"><label>Order by <span class="req">*</span></label>
+        <input type="text" id="f-orderedBy" value="${h(d?.orderedBy||user.name||'')}" placeholder="Tên người order"></div>
+      <div class="field"><label>Assign to</label>
+        <input type="text" id="f-assignTo" value="${h(d?.assignTo||'')}" list="designer-list2" placeholder="Editor / Videographer">
+        <datalist id="designer-list2">${designers.map(n=>`<option value="${n}">`).join('')}</datalist></div>
+      <div class="field"><label>Deadline</label>
+        <input type="text" id="f-deadline" value="${h(d?.deadline||'')}" placeholder="VD: 20/05/2025"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Priority</label>
+        <select id="f-priority">
+          ${['Normal','High','Urgent'].map(p=>`<option${d?.priority===p?' selected':''}>${p}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>Status</label>
+        <select id="f-status">
+          <option value="todo"${(d?.status||'todo')==='todo'?' selected':''}>⬜ To-do</option>
+          <option value="inprogress"${d?.status==='inprogress'?' selected':''}>🔵 In Progress</option>
+          <option value="revision"${d?.status==='revision'?' selected':''}>🔁 Needs Revision</option>
+          <option value="done"${d?.status==='done'?' selected':''}>✅ Done</option>
+        </select></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">🎞 Video Formats</div>
+    <div id="specList"></div>
+    <button class="add-spec-btn" onclick="addSpec()">＋ Thêm format</button>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">🛒 Sản phẩm trong video</div>
+    <div class="tag-input-row">
+      <input type="text" id="f-prod-input" placeholder="Tên SP + quy cách" onkeydown="if(event.key==='Enter')addProdTag()">
+      <button onclick="addProdTag()">+ Thêm</button>
+    </div>
+    <div class="tags-wrap" id="prodTags"></div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">📎 Reference / Mood board</div>
+    <div class="ref-zone ${formImgs.length?'has-imgs':''}" id="refZone"
+         onclick="document.getElementById('refInput').click()"
+         ondragover="event.preventDefault()"
+         ondrop="handleImgDrop(event)">
+      <input type="file" id="refInput" accept="image/*" multiple style="display:none" onchange="handleImgFiles(this.files)">
+      <div id="refThumbsWrap">
+        ${formImgs.length
+          ? `<div class="thumbs" id="refThumbs"></div>`
+          : `<div class="ref-hint">📎 Kéo thả hình/mood board<small>JPG · PNG · WebP</small></div>`}
+      </div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">📝 Ghi chú</div>
+    <textarea id="f-notes" rows="3" placeholder="Tone, music, CTA, lưu ý...">${h(d?.notes||'')}</textarea>
+  </div>`;
+}
+
+/* ── SPEC ROWS ── */
+const DEFAULT_SPEC_BANNER = { label:'Hero Desktop', w:1464, h:625, fmt:'JPG/PNG', files:1 };
+const DEFAULT_SPEC_VIDEO  = { label:'TikTok Feed', ratio:'9:16', w:1080, h:1920, dur:'15–30s', fmt:'MP4' };
+
+function addSpec(){
+  const s = currentFormType==='banner'
+    ? {...DEFAULT_SPEC_BANNER, id: formSpecId++}
+    : {...DEFAULT_SPEC_VIDEO,  id: formSpecId++};
+  formSpecs.push(s);
+  renderFormSpecs();
+}
+function removeSpec(id){ formSpecs=formSpecs.filter(s=>s.id!==id); renderFormSpecs(); }
+function renderFormSpecs(){
+  const el=document.getElementById('specList');
+  if(!el) return;
+  if(currentFormType==='banner'){
+    el.innerHTML = formSpecs.map(s=>`
+      <div class="spec-row">
+        <div class="field"><label style="font-size:10px">Tên banner</label><input type="text" value="${h(s.label)}" oninput="formSpecs.find(x=>x.id===${s.id}).label=this.value"></div>
+        <div class="field" style="flex:0 0 70px"><label style="font-size:10px">W px</label><input type="number" value="${s.w}" oninput="formSpecs.find(x=>x.id===${s.id}).w=+this.value"></div>
+        <div class="field" style="flex:0 0 70px"><label style="font-size:10px">H px</label><input type="number" value="${s.h}" oninput="formSpecs.find(x=>x.id===${s.id}).h=+this.value"></div>
+        <div class="field" style="flex:0 0 80px"><label style="font-size:10px">Format</label>
+          <select oninput="formSpecs.find(x=>x.id===${s.id}).fmt=this.value">
+            ${['JPG/PNG','PNG','JPG','WebP'].map(f=>`<option${s.fmt===f?' selected':''}>${f}</option>`).join('')}
+          </select></div>
+        <div class="field" style="flex:0 0 50px"><label style="font-size:10px">Files</label><input type="number" value="${s.files}" min="1" oninput="formSpecs.find(x=>x.id===${s.id}).files=+this.value"></div>
+        <button class="spec-del" onclick="removeSpec(${s.id})">✕</button>
+      </div>`).join('');
+  } else {
+    el.innerHTML = formSpecs.map(s=>`
+      <div class="spec-row">
+        <div class="field"><label style="font-size:10px">Tên format</label><input type="text" value="${h(s.label)}" oninput="formSpecs.find(x=>x.id===${s.id}).label=this.value"></div>
+        <div class="field" style="flex:0 0 60px"><label style="font-size:10px">Ratio</label><input type="text" value="${h(s.ratio||'16:9')}" oninput="formSpecs.find(x=>x.id===${s.id}).ratio=this.value"></div>
+        <div class="field" style="flex:0 0 70px"><label style="font-size:10px">Duration</label><input type="text" value="${h(s.dur||'30s')}" oninput="formSpecs.find(x=>x.id===${s.id}).dur=this.value"></div>
+        <div class="field" style="flex:0 0 80px"><label style="font-size:10px">Format</label>
+          <select oninput="formSpecs.find(x=>x.id===${s.id}).fmt=this.value">
+            ${['MP4','MOV','WebM'].map(f=>`<option${s.fmt===f?' selected':''}>${f}</option>`).join('')}
+          </select></div>
+        <button class="spec-del" onclick="removeSpec(${s.id})">✕</button>
+      </div>`).join('');
+  }
+}
+
+/* ── PRODUCT TAGS ── */
+function addProdTag(){
+  const inp=document.getElementById('f-prod-input');
+  const val=inp.value.trim(); if(!val)return;
+  const parts=val.split(/\s+/); const last=parts[parts.length-1];
+  const isD=/^\d/.test(last)||/^pack/i.test(last);
+  const d=isD?parts.slice(-2).join(' '):'';
+  const n=d?parts.slice(0,parts.length-(d.includes(' ')?2:1)).join(' ')||val:val;
+  formProds.push({n,d}); inp.value=''; renderFormProds();
+}
+function removeFormProd(i){ formProds.splice(i,1); renderFormProds(); }
+function renderFormProds(){
+  const el=document.getElementById('prodTags'); if(!el)return;
+  el.innerHTML=formProds.map((p,i)=>`
+    <div class="tag">
+      <span>${h(p.n)}${p.d?` <small style="opacity:.55">${h(p.d)}</small>`:''}</span>
+      <button class="tag-del" onclick="removeFormProd(${i})">✕</button>
     </div>`).join('');
 }
-function addBanner(){S.banners.push({id:BID++,label:`Banner ${S.banners.length+1}`,w:800,h:600,fmt:'JPG / PNG',files:1,note:'',imgs:[]});renderBanners();upd();}
-function rmBanner(id){if(S.banners.length<=1){toast('Cần ít nhất 1 banner');return;}S.banners=S.banners.filter(b=>b.id!==id);renderBanners();upd();}
 
-/* ══ IMAGES ══ */
-function handleFiles(files,bid){
-  const b=S.banners.find(x=>x.id===bid);if(!b)return;
-  if(!b.imgs)b.imgs=[];
+/* ── REF IMAGES ── */
+function handleImgFiles(files){
   let done=0;
   Array.from(files).forEach(f=>{
     if(!f.type.startsWith('image/'))return;
     const r=new FileReader();
-    r.onload=e=>{b.imgs.push({data:e.target.result,name:f.name});done++;if(done===files.length){renderBanners();upd();}};
+    r.onload=e=>{formImgs.push({data:e.target.result,name:f.name});done++;if(done===files.length)renderFormImgs();};
     r.readAsDataURL(f);
   });
 }
-function handleDrop(e,bid){e.preventDefault();e.currentTarget.style.borderColor='';handleFiles(e.dataTransfer.files,bid);}
-function rmImg(bid,idx){const b=S.banners.find(x=>x.id===bid);if(b&&b.imgs){b.imgs.splice(idx,1);renderBanners();upd();}}
-
-/* ══ PRODUCTS ══ */
-function addProd(){
-  const inp=document.getElementById('f-prod');const val=inp.value.trim();if(!val)return;
-  const parts=val.split(/\s+/);const last=parts[parts.length-1];
-  const isD=/^\d/.test(last)||/^pack/i.test(last);
-  const d=isD?parts.slice(-2).join(' '):'';
-  const n=d?parts.slice(0,parts.length-(d.includes(' ')?2:1)).join(' ')||val:val;
-  S.prods.push({n,d});inp.value='';renderProds();upd();
+function handleImgDrop(e){e.preventDefault();handleImgFiles(e.dataTransfer.files);}
+function removeFormImg(i){formImgs.splice(i,1);renderFormImgs();}
+function renderFormImgs(){
+  const wrap=document.getElementById('refThumbsWrap'); if(!wrap)return;
+  if(!formImgs.length){
+    wrap.innerHTML=`<div class="ref-hint">📎 Kéo thả hình reference<small>JPG · PNG · WebP</small></div>`;
+    return;
+  }
+  wrap.innerHTML=`<div class="thumbs" id="refThumbs">
+    ${formImgs.map((img,i)=>`
+      <div class="thumb">
+        <img src="${img.data}" title="${h(img.name)}">
+        <button class="thumb-del" onclick="event.stopPropagation();removeFormImg(${i})">✕</button>
+      </div>`).join('')}
+    <span style="font-size:10px;color:var(--g7);font-weight:600;align-self:center;background:var(--g1);border-radius:4px;padding:1px 6px;">${formImgs.length} refs</span>
+  </div>`;
 }
-function rmProd(i){S.prods.splice(i,1);renderProds();upd();}
-function renderProds(){
-  document.getElementById('ptags').innerHTML=S.prods.map((p,i)=>`
-    <div class="ptag">
-      <span>${h(p.n)}${p.d?` <span style="opacity:.5;font-size:10px">${h(p.d)}</span>`:''}</span>
-      <button class="ptag-del" onclick="rmProd(${i})">✕</button>
+
+/* ══════════════════════════════════════════════
+   SAVE / PUBLISH BRIEF
+══════════════════════════════════════════════ */
+function readFormData(){
+  return {
+    id         : editingId || genId(),
+    type       : currentFormType,
+    orderNum   : g('f-order'),
+    name       : g('f-name'),
+    platform   : g('f-platform'),
+    theme      : g('f-theme'),
+    subtype    : g('f-subtype'),
+    desc       : g('f-desc'),
+    hook       : g('f-hook')||'',
+    duration   : g('f-duration')||'',
+    orderedBy  : g('f-orderedBy') || user.name,
+    assignTo   : g('f-assignTo'),
+    deadline   : g('f-deadline'),
+    priority   : g('f-priority')||'Normal',
+    status     : g('f-status')||'todo',
+    notes      : g('f-notes'),
+    bannerSpecs: currentFormType==='banner' ? [...formSpecs] : [],
+    videoSpecs : currentFormType==='video'  ? [...formSpecs] : [],
+    products   : [...formProds],
+    refImgs    : [...formImgs],
+    createdAt  : editingId ? (briefs.find(b=>b.id===editingId)?.createdAt || Date.now()) : Date.now(),
+    updatedAt  : Date.now(),
+    published  : false,
+    driveUrl   : editingId ? (briefs.find(b=>b.id===editingId)?.driveUrl || '') : '',
+  };
+}
+
+function saveDraftBrief(){
+  const data = readFormData();
+  if(!data.name){ toast('⚠ Nhập tên campaign'); return; }
+  upsertBrief(data);
+  saveLocal();
+  closeForm();
+  refreshAllLists();
+  toast('✓ Đã lưu nháp!');
+}
+
+async function publishBrief(){
+  const data = readFormData();
+  if(!data.name){ toast('⚠ Nhập tên campaign'); return; }
+  data.published = true;
+
+  const scriptUrl = cfg.scriptUrl;
+
+  if(!scriptUrl){
+    // Save locally only
+    upsertBrief(data);
+    saveLocal();
+    closeForm();
+    refreshAllLists();
+    toast('✓ Đã lưu (chưa có Script URL để upload Drive)');
+    return;
+  }
+
+  spin('🚀 Đang publish brief...');
+  try {
+    // Capture preview card if we can — but for list view just send data
+    const emails = cfg.emails.split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+    const res = await fetch(scriptUrl, {
+      method:'POST', headers:{'Content-Type':'application/json'}, redirect:'follow',
+      body: JSON.stringify({
+        action      : 'publishBrief',
+        briefData   : { ...data, refImgs: [] }, // don't send base64 for data record
+        campaign    : data.name,
+        platform    : data.platform,
+        author      : data.orderedBy,
+        team        : user.team,
+        assign      : data.assignTo,
+        deadline    : data.deadline,
+        banners     : data.bannerSpecs,
+        prods       : data.products,
+        notes       : data.notes,
+        folder      : cfg.driveFolder,
+        teamEmails  : emails,
+      }),
+    });
+    const result = await res.json();
+    if(result.ok){
+      data.driveUrl = result.fileUrl || '';
+      toast('✓ Đã publish + upload Drive!');
+    } else {
+      toast('⚠ ' + (result.error||'Lỗi script'));
+    }
+  } catch(err) {
+    toast('⚠ ' + err.message);
+  } finally {
+    spinHide();
+    upsertBrief(data);
+    saveLocal();
+    closeForm();
+    refreshAllLists();
+  }
+}
+
+function upsertBrief(data){
+  const idx = briefs.findIndex(b=>b.id===data.id);
+  if(idx>=0) briefs[idx]=data;
+  else briefs.unshift(data);
+  updateBadges();
+}
+
+function refreshAllLists(){
+  renderDashboard();
+  renderList('all');
+  renderList('banner');
+  renderList('video');
+  renderStatusLists();
+}
+
+/* ══ ACTIONS ══ */
+function updateStatus(id, status){
+  const b = briefs.find(x=>x.id===id);
+  if(!b) return;
+  b.status = status;
+  b.updatedAt = Date.now();
+  saveLocal();
+  refreshAllLists();
+  toast(`✓ Đã cập nhật → ${STATUS_LABEL[status]}`);
+}
+
+function editBrief(id){
+  const b = briefs.find(x=>x.id===id);
+  if(!b) return;
+  openForm(b.type, b);
+}
+
+function deleteBrief(id){
+  deleteId = id;
+  document.getElementById('deleteModal').classList.add('show');
+}
+function confirmDelete(){
+  briefs = briefs.filter(b=>b.id!==deleteId);
+  saveLocal();
+  closeOverlay('deleteModal');
+  refreshAllLists();
+  toast('✓ Đã xoá brief');
+}
+
+async function exportCard(id){
+  const b = briefs.find(x=>x.id===id);
+  if(!b){ toast('Brief not found'); return; }
+  toast('📸 Đang tạo ảnh...');
+  // Create temp card element
+  const tmp=document.createElement('div');
+  tmp.style.cssText='position:fixed;left:-9999px;top:0;width:700px;background:#fff;padding:20px;font-family:DM Sans,sans-serif;';
+  tmp.innerHTML=buildExportHTML(b);
+  document.body.appendChild(tmp);
+  try{
+    const blob=await domtoimage.toBlob(tmp,{scale:2,bgcolor:'#fff'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;
+    a.download=`brief_${(b.orderNum||b.id)}_${(b.name||'untitled').replace(/\s+/g,'-').toLowerCase()}.png`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    toast('✓ Đã tải PNG!');
+  }catch(e){toast('⚠ '+e.message);}
+  finally{document.body.removeChild(tmp);}
+}
+
+function buildExportHTML(b){
+  const status = b.status||'todo';
+  const statusColor = {todo:'#475569',inprogress:'#1d4ed8',done:'#1a6b1a',revision:'#c2410c'}[status];
+  return `
+  <div style="border:2px solid #e5e7eb;border-radius:14px;overflow:hidden;font-family:sans-serif;">
+    <div style="background:linear-gradient(135deg,#0a3d0a,#1a6b1a,#2a9e2a);padding:20px;color:#fff">
+      <div style="font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">${h(b.type==='banner'?'Banner Brief':'Video Brief')} · ${h(b.platform||'')}</div>
+      <div style="font-size:20px;font-weight:700">${h(b.name||'Brief')}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <span style="background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:11px">#${h(b.orderNum||'—')}</span>
+        ${b.deadline?`<span style="background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:11px">📅 ${h(b.deadline)}</span>`:''}
+        <span style="background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:11px;color:#fff">${STATUS_LABEL[status]||status}</span>
+      </div>
+    </div>
+    <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;background:#f9fafb">
+      ${[['Order by',b.orderedBy],['Assign to',b.assignTo],['Deadline',b.deadline]].map(([k,v])=>`
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">${k}</div>
+          <div style="font-size:12px;font-weight:600;color:#111">${h(v||'—')}</div>
+        </div>`).join('')}
+    </div>
+    ${(b.bannerSpecs||[]).length?`
+    <div style="padding:12px 16px">
+      <div style="font-size:9px;font-weight:700;color:#1a6b1a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Banner Specs</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <tr style="background:#f0fbf0"><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Banner</th><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Size</th><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Format</th><th style="padding:5px 8px;text-align:left;color:#1a6b1a">Files</th></tr>
+        ${(b.bannerSpecs||[]).map((s,i)=>`<tr style="background:${i%2?'#f9fafb':'#fff'}"><td style="padding:5px 8px">${h(s.label)}</td><td style="padding:5px 8px;font-weight:600;color:#1a6b1a">${s.w}×${s.h}px</td><td style="padding:5px 8px">${h(s.fmt)}</td><td style="padding:5px 8px">${s.files}</td></tr>`).join('')}
+      </table>
+    </div>`:''}
+    ${(b.products||[]).length?`
+    <div style="padding:0 16px 12px">
+      <div style="font-size:9px;font-weight:700;color:#1a6b1a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Sản phẩm</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${(b.products||[]).map(p=>`<span style="background:#f0fbf0;border:1px solid #d4f0d4;border-radius:20px;padding:3px 10px;font-size:11px;color:#0a3d0a">${h(p.n)}${p.d?' · '+h(p.d):''}</span>`).join('')}
+      </div>
+    </div>`:''}
+    <div style="padding:8px 16px 12px;border-top:1px solid #f3f4f6;font-size:10px;color:#9ca3af">Brief Manager · ${new Date().toLocaleString('vi-VN')}</div>
+  </div>`;
+}
+
+/* ══ SYNC FROM APPS SCRIPT ══ */
+async function syncBriefs(){
+  const url=cfg.scriptUrl;
+  if(!url){toast('⚠ Cần cấu hình Apps Script URL trong Settings');return;}
+  const btn=document.getElementById('syncBtn');
+  btn.textContent='⏳ Syncing...';btn.disabled=true;
+  try{
+    const res=await fetch(url+'?action=getBriefs',{redirect:'follow'});
+    const data=await res.json();
+    if(data.ok && data.briefs){
+      // Merge: remote wins for shared data, keep local-only entries
+      const remoteIds=new Set(data.briefs.map(b=>b.id));
+      const localOnly=briefs.filter(b=>!remoteIds.has(b.id));
+      briefs=[...data.briefs,...localOnly];
+      saveLocal();refreshAllLists();
+      toast(`✓ Synced ${data.briefs.length} briefs`);
+    } else {
+      toast('⚠ '+(data.error||'Sync failed'));
+    }
+  }catch(e){toast('⚠ '+e.message);}
+  finally{btn.textContent='🔄 Sync';btn.disabled=false;}
+}
+
+/* ══ TEST CONNECTIONS ══ */
+async function testDrive(){
+  const url=g('cfg-scriptUrl');
+  if(!url){setStatus('st-drive','err','⚠ Nhập URL trước');return;}
+  cfg.scriptUrl=url;
+  setStatus('st-drive','idle','⏳ Đang kiểm tra...');
+  try{
+    const res=await fetch(url,{redirect:'follow'});
+    const data=await res.json();
+    setStatus('st-drive',data.ok?'ok':'err',data.ok?'✅ Kết nối thành công! Folder: '+(data.folder||'—'):'❌ '+(data.error||'Lỗi'));
+  }catch(e){setStatus('st-drive','err','❌ '+e.message);}
+}
+async function testEmail(){
+  const url=g('cfg-scriptUrl');
+  const emails=g('cfg-emails').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+  if(!url){setStatus('st-email','err','⚠ Cần Apps Script URL');return;}
+  if(!emails.length){setStatus('st-email','err','⚠ Nhập ít nhất 1 email');return;}
+  setStatus('st-email','idle','⏳ Đang gửi test...');
+  try{
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},redirect:'follow',
+      body:JSON.stringify({action:'test',filename:'test.png',image:'data:image/png;base64,iVBORw0KGgo=',campaign:'[TEST]',teamEmails:emails,folder:cfg.driveFolder})});
+    const data=await res.json();
+    setStatus('st-email',data.ok?'ok':'err',data.ok?`✅ Đã gửi tới ${data.emailsSent||emails.length} email — kiểm tra inbox!`:'❌ '+(data.error||'Lỗi'));
+  }catch(e){setStatus('st-email','err','❌ '+e.message);}
+}
+function setStatus(id,type,msg){
+  const el=document.getElementById(id); if(!el)return;
+  el.className='int-status '+(type==='ok'?'ok':type==='err'?'err':'idle');
+  const btn=el.querySelector('.test-btn');
+  el.innerHTML=msg; if(btn)el.appendChild(btn);
+}
+
+/* ══ PROFILE ══ */
+function showProfileModal(){
+  document.getElementById('prof-name').value  = user.name  ||'';
+  document.getElementById('prof-team').value  = user.team  ||'';
+  document.getElementById('prof-email').value = user.email ||'';
+  document.getElementById('profileModal').classList.add('show');
+}
+function saveProfile(){
+  user.name  = g('prof-name');
+  user.team  = g('prof-team');
+  user.email = g('prof-email');
+  localStorage.setItem('bm_user',JSON.stringify(user));
+  applyProfile(); closeOverlay('profileModal');
+  toast('✓ Đã lưu thông tin!');
+}
+
+/* ══ UTILS ══ */
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function nextOrder(){
+  const nums=briefs.map(b=>parseInt(b.orderNum)||0);
+  return String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function daysUntil(str){
+  const parts=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!parts)return null;
+  const d=new Date(+parts[3],+parts[2]-1,+parts[1]);
+  const today=new Date();today.setHours(0,0,0,0);
+  return Math.round((d-today)/(1000*60*60*24));
+}
+function emptyState(title,sub){ return `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`; }
+function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function capitalize(s){ return s?s.charAt(0).toUpperCase()+s.slice(1):s; }
+function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
+function spin(msg){ document.getElementById('spinMsg').textContent=msg||''; document.getElementById('spinOverlay').classList.add('show'); }
+function spinHide(){ document.getElementById('spinOverlay').classList.remove('show'); }
+/* ══════════════════════════════════════════════
+   SETTINGS — APPEARANCE
+══════════════════════════════════════════════ */
+
+const COLOR_PRESETS = [
+  { id:'green',  label:'Forest',    g9:'#0a3d0a',g7:'#1a6b1a',g5:'#2a9e2a',g3:'#6dcb6d',g1:'#d4f0d4',g0:'#f0fbf0' },
+  { id:'blue',   label:'Ocean',     g9:'#0c2d6b',g7:'#1a4eb5',g5:'#3b82f6',g3:'#93c5fd',g1:'#dbeafe',g0:'#eff6ff' },
+  { id:'purple', label:'Grape',     g9:'#3b0764',g7:'#6d28d9',g5:'#8b5cf6',g3:'#c4b5fd',g1:'#ede9fe',g0:'#f5f3ff' },
+  { id:'rose',   label:'Rose',      g9:'#881337',g7:'#be123c',g5:'#f43f5e',g3:'#fda4af',g1:'#ffe4e6',g0:'#fff1f2' },
+  { id:'amber',  label:'Amber',     g9:'#78350f',g7:'#b45309',g5:'#d97706',g3:'#fcd34d',g1:'#fef3c7',g0:'#fffbeb' },
+  { id:'teal',   label:'Teal',      g9:'#042f2e',g7:'#0f766e',g5:'#14b8a6',g3:'#5eead4',g1:'#ccfbf1',g0:'#f0fdfa' },
+  { id:'slate',  label:'Slate',     g9:'#0f172a',g7:'#334155',g5:'#64748b',g3:'#94a3b8',g1:'#e2e8f0',g0:'#f8fafc' },
+  { id:'orange', label:'Sunset',    g9:'#431407',g7:'#c2410c',g5:'#ea580c',g3:'#fdba74',g1:'#ffedd5',g0:'#fff7ed' },
+];
+
+let activePresetId = 'green';
+let customColors   = { ...COLOR_PRESETS[0] };
+
+function initSettingsUI(){
+  renderColorPresets();
+  renderColorPickers();
+  renderThemePreview();
+  // Restore saved appearance
+  const saved = JSON.parse(localStorage.getItem('bm_appearance')||'{}');
+  if(saved.presetId){
+    activePresetId = saved.presetId;
+    customColors   = saved.colors || COLOR_PRESETS.find(p=>p.id===saved.presetId) || COLOR_PRESETS[0];
+  }
+  if(saved.font)         setVal('cfg-font', saved.font);
+  if(saved.radius)       setVal('cfg-radius', saved.radius);
+  if(saved.density)      setVal('cfg-density', saved.density);
+  if(saved.darkmode)     setVal('cfg-darkmode', saved.darkmode);
+  if(saved.sidebarStyle) setVal('cfg-sidebarStyle', saved.sidebarStyle);
+  if(saved.sidebarWidth) setVal('cfg-sidebarWidth', saved.sidebarWidth);
+  if(saved.appName)      setVal('cfg-appName', saved.appName);
+  if(saved.tagline)      setVal('cfg-tagline', saved.tagline);
+  if(saved.appIcon)      setVal('cfg-appIcon', saved.appIcon);
+  if(saved.companyName)  setVal('cfg-companyName', saved.companyName);
+  if(saved.statusLabels){
+    setVal('cfg-lbl-todo',       saved.statusLabels.todo       || 'To-do');
+    setVal('cfg-lbl-inprogress', saved.statusLabels.inprogress || 'In Progress');
+    setVal('cfg-lbl-done',       saved.statusLabels.done       || 'Done');
+    setVal('cfg-lbl-revision',   saved.statusLabels.revision   || 'Needs Revision');
+  }
+  applyTheme(false); // apply without saving
+}
+
+function renderColorPresets(){
+  const el = document.getElementById('colorPresets'); if(!el) return;
+  el.innerHTML = COLOR_PRESETS.map(p => `
+    <div class="color-preset${activePresetId===p.id?' active':''}" onclick="selectPreset('${p.id}')">
+      <div class="preset-swatch-row">
+        <div class="preset-swatch" style="background:${p.g9}"></div>
+        <div class="preset-swatch" style="background:${p.g7}"></div>
+        <div class="preset-swatch" style="background:${p.g5}"></div>
+        <div class="preset-swatch" style="background:${p.g3}"></div>
+      </div>
+      <div class="preset-label">${p.label}</div>
     </div>`).join('');
 }
 
-/* ══ COLOR ══ */
-function pickColor(el){document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));el.classList.add('on');S.color=el.dataset.c;upd();}
-
-/* ══ VIEW MODE ══ */
-function setMode(m,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
-  const pf=document.getElementById('pf'),pp=document.getElementById('pp');
-  if(m==='split'){pf.style.display='';pp.style.display='';pf.style.width='52%';pp.style.width='48%';}
-  else if(m==='form'){pf.style.display='';pp.style.display='none';pf.style.width='100%';}
-  else{pf.style.display='none';pp.style.display='';pp.style.width='100%';}
+function renderColorPickers(){
+  const el = document.getElementById('colorPickers'); if(!el) return;
+  const c = customColors;
+  const fields = [
+    { key:'g9', label:'Dark (sidebar bg)'  },
+    { key:'g7', label:'Primary (buttons)'  },
+    { key:'g5', label:'Accent'             },
+    { key:'g3', label:'Light accent'       },
+    { key:'g1', label:'Tint'               },
+    { key:'g0', label:'Background tint'    },
+  ];
+  el.innerHTML = fields.map(f => `
+    <div class="color-picker-item">
+      <label>${f.label}</label>
+      <div class="color-picker-row">
+        <input type="color" value="${c[f.key]||'#000'}"
+          oninput="onColorChange('${f.key}',this.value)">
+        <input type="text" value="${c[f.key]||''}"
+          placeholder="#000000" maxlength="9"
+          oninput="onColorTextChange('${f.key}',this.value)">
+        <div style="width:24px;height:24px;border-radius:5px;border:1px solid var(--line);background:${c[f.key]};flex-shrink:0" id="cswatch-${f.key}"></div>
+      </div>
+    </div>`).join('');
 }
 
-/* ══ UPDATE ══ */
-function upd(){readForm();renderPreview();}
+function selectPreset(id){
+  activePresetId = id;
+  const preset = COLOR_PRESETS.find(p=>p.id===id);
+  if(preset) customColors = { ...preset };
+  renderColorPresets();
+  renderColorPickers();
+  applyTheme();
+}
 
-/* ══ RENDER PREVIEW ══ */
-function renderPreview(){
-  const s=S,c=s.color;
-  const cd=darken(c,45),cl=lighten(c,88),cm=lighten(c,55);
-  const totalFiles=s.banners.reduce((a,b)=>a+b.files,0);
-  const defRules=[`Tất cả kích thước là <strong>tối thiểu</strong>.`,`Max <strong>${s.maxpx.toLocaleString()} px</strong> mỗi chiều.`,`Font tối thiểu: <strong>${s.minfont}pt</strong>.`,`PNG nền trong · JPG nền đặc.`];
-  const allRules=[...defRules,...(s.rules?s.rules.split('\n').filter(l=>l.trim()).map(l=>h(l)):[])];
-  const navLinks=s.banners.map(b=>`<a href="#bs${b.id}" style="color:rgba(255,255,255,.75);font-size:10px;font-weight:500;padding:7px 10px;border-right:1px solid rgba(255,255,255,.1);white-space:nowrap;text-decoration:none;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background=''">${h(b.label)}</a>`).join('');
-  const bannersHTML=s.banners.map((b,i)=>{
-    const mW=Math.max(32,Math.min(Math.round(b.w/b.h*56),150)),mH=56;
-    const refHTML=b.imgs&&b.imgs.length?`<div style="margin-top:10px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${c};margin-bottom:6px;">🖼 Reference (${b.imgs.length})</div><div style="display:flex;flex-wrap:wrap;gap:7px;">${b.imgs.map(img=>`<div style="border-radius:7px;overflow:hidden;border:1px solid ${cl}"><img src="${img.data}" style="width:90px;height:70px;object-fit:cover;display:block"><div style="font-size:8px;color:${cd};padding:2px 5px;background:${cl};max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${h(img.name)}</div></div>`).join('')}</div></div>`:
-    `<div style="margin-top:8px;padding:8px;border:1.5px dashed ${cl};border-radius:7px;text-align:center;font-size:10px;color:${cm};">Chưa có reference</div>`;
-    return `<div class="pv-bsec" id="bs${b.id}" style="scroll-margin-top:36px;border-top:1px solid #eee;">
-      <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
-        <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${i+1}</div>
-        <div style="font-size:11.5px;font-weight:700;color:#111;">${h(b.label)}</div>
-        <div style="margin-left:auto;font-size:9.5px;background:#fff;border:1px solid #eee;border-radius:5px;padding:1px 7px;color:#888;">${b.files} file${b.files>1?'s':''}</div>
+function onColorChange(key, val){
+  activePresetId = 'custom';
+  customColors[key] = val;
+  // sync text input
+  const pickers = document.querySelectorAll(`[oninput*="onColorTextChange('${key}"]`);
+  pickers.forEach(p=>p.value=val);
+  const swatch = document.getElementById('cswatch-'+key);
+  if(swatch) swatch.style.background = val;
+  renderColorPresets();
+  applyTheme();
+}
+
+function onColorTextChange(key, val){
+  if(!/^#[0-9a-fA-F]{3,8}$/.test(val)) return;
+  activePresetId = 'custom';
+  customColors[key] = val;
+  // sync color input
+  const pickers = document.querySelectorAll(`[oninput*="onColorChange('${key}"]`);
+  pickers.forEach(p=>p.value=val);
+  const swatch = document.getElementById('cswatch-'+key);
+  if(swatch) swatch.style.background = val;
+  renderColorPresets();
+  applyTheme();
+}
+
+function applyTheme(save=true){
+  const c   = customColors;
+  const r   = g('cfg-radius')||'soft';
+  const den = g('cfg-density')||'default';
+  const dm  = g('cfg-darkmode')||'light';
+  const ss  = g('cfg-sidebarStyle')||'dark';
+  const sw  = g('cfg-sidebarWidth')||'220';
+  const fn  = g('cfg-font')||'DM Sans';
+
+  // Border radius map
+  const radMap = { sharp:'0px,0px,0px', soft:'6px,10px,14px', round:'10px,16px,20px', pill:'20px,24px,28px' };
+  const [rSm,rMd,rLg] = (radMap[r]||radMap.soft).split(',');
+
+  // Density: spacing
+  const denMap = { compact:'0.8', default:'1', comfortable:'1.2' };
+  const denMul = denMap[den]||'1';
+
+  // Dark mode
+  const isDark = dm === 'dark' || (dm === 'auto' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+
+  // Sidebar bg
+  const sbBg = ss==='dark' ? c.g9 : ss==='light' ? '#fff' : c.g7;
+
+  // Apply CSS vars
+  const root = document.documentElement;
+  root.style.setProperty('--g9', c.g9);
+  root.style.setProperty('--g7', c.g7);
+  root.style.setProperty('--g5', c.g5);
+  root.style.setProperty('--g3', c.g3);
+  root.style.setProperty('--g1', c.g1);
+  root.style.setProperty('--g0', c.g0);
+  root.style.setProperty('--r-sm', rSm);
+  root.style.setProperty('--r-md', rMd);
+  root.style.setProperty('--r-lg', rLg);
+  root.style.setProperty('--sidebar', sw+'px');
+
+  // Dark mode bg overrides
+  if(isDark){
+    root.style.setProperty('--bg','#1a1a1e');
+    root.style.setProperty('--white','#25252a');
+    root.style.setProperty('--line','rgba(255,255,255,.08)');
+    root.style.setProperty('--ink','#f0f0ee');
+    root.style.setProperty('--ink2','#c0c0bc');
+    root.style.setProperty('--ink3','#808078');
+    document.body.style.background='#0f0f12';
+  } else {
+    root.style.setProperty('--bg','#f5f5f3');
+    root.style.setProperty('--white','#ffffff');
+    root.style.setProperty('--line','#e8e8e5');
+    root.style.setProperty('--ink','#111110');
+    root.style.setProperty('--ink2','#3d3d3a');
+    root.style.setProperty('--ink3','#6b6b67');
+    document.body.style.background='';
+  }
+
+  // Sidebar bg
+  const sb = document.querySelector('.sidebar');
+  if(sb) sb.style.background = sbBg;
+
+  // Font
+  document.body.style.fontFamily = `'${fn}', system-ui, sans-serif`;
+
+  // Density: content padding
+  const cp = parseFloat(denMul) * 18;
+  const contentEl = document.querySelector('.content');
+  if(contentEl) contentEl.style.padding = cp+'px';
+
+  // App name / icon / tagline
+  const appName = g('cfg-appName') || 'Brief Manager';
+  const appIcon = g('cfg-appIcon') || '🌿';
+  const tagline = g('cfg-tagline') || 'Amazon · Storefront';
+
+  const logoEl = document.querySelector('.sb-logo');
+  if(logoEl) logoEl.innerHTML = `<span class="sb-logo-dot" style="background:${c.g3};box-shadow:0 0 6px ${c.g3}"></span>${appIcon} ${appName}`;
+
+  const verEl = document.querySelector('.sb-version');
+  if(verEl) verEl.textContent = tagline;
+
+  document.title = appName;
+
+  // Update STATUS_LABEL from custom labels
+  const todo = g('cfg-lbl-todo');       if(todo)       STATUS_LABEL.todo       = todo;
+  const inp  = g('cfg-lbl-inprogress'); if(inp)        STATUS_LABEL.inprogress = inp;
+  const done = g('cfg-lbl-done');       if(done)       STATUS_LABEL.done       = done;
+  const rev  = g('cfg-lbl-revision');   if(rev)        STATUS_LABEL.revision   = rev;
+
+  // Sidebar nav badge color
+  document.querySelectorAll('.nav-badge:not(.red):not(.amber)').forEach(b=>{
+    b.style.background = c.g5;
+  });
+
+  renderThemePreview();
+
+  if(save) saveAppearance();
+}
+
+function renderThemePreview(){
+  const el = document.getElementById('themePreview'); if(!el) return;
+  const c  = customColors;
+  const appName = g('cfg-appName') || 'Brief Manager';
+  const appIcon = g('cfg-appIcon') || '🌿';
+  el.innerHTML = `
+    <div style="display:flex;height:110px;border-radius:inherit;overflow:hidden;font-family:inherit">
+      <!-- mini sidebar -->
+      <div style="width:90px;background:${c.g9};padding:8px 7px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:7px">
+          <div style="width:5px;height:5px;border-radius:50%;background:${c.g3};box-shadow:0 0 4px ${c.g3}"></div>
+          <span style="font-size:8px;font-weight:700;color:#fff">${appIcon} ${appName.slice(0,10)}</span>
+        </div>
+        ${['📊 Dashboard','🖼 Banner','🎬 Video'].map((n,i)=>`
+          <div style="font-size:8px;padding:3px 5px;border-radius:3px;color:rgba(255,255,255,${i===0?'.9':'.5'});background:${i===0?'rgba(255,255,255,.14)':'none'};margin-bottom:2px">${n}</div>`).join('')}
       </div>
-      <div style="padding:10px 14px 13px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-          ${[['📐 Kích thước',`${b.w} × ${b.h} px`],['📁 Format',b.fmt],['📄 Files',b.files+' file'+(b.files>1?'s':'')]].map(([k,v])=>`
-            <div style="border:1px solid ${cl};border-radius:8px;overflow:hidden;min-width:100px;">
-              <div style="background:${cl};padding:3px 9px;font-size:9.5px;font-weight:600;color:${cd};border-bottom:1px solid ${cl};">${k}</div>
-              <div style="padding:4px 9px 5px;font-size:14px;font-weight:700;color:#111;">${v}</div>
+      <!-- mini main -->
+      <div style="flex:1;background:var(--bg);padding:8px 10px;overflow:hidden">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          ${[['3','Briefs'],['1','In Progress'],['0','Revision']].map(([n,l])=>`
+            <div style="flex:1;background:var(--white);border:1px solid var(--line);border-radius:${getComputedStyle(document.documentElement).getPropertyValue('--r-sm')};padding:5px 7px;text-align:center">
+              <div style="font-size:13px;font-weight:700;color:${c.g7}">${n}</div>
+              <div style="font-size:7px;color:var(--ink3)">${l}</div>
             </div>`).join('')}
         </div>
-        <div style="display:flex;gap:10px;align-items:flex-end;background:#f6f6f4;border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:10px;">
-          <div style="border:2px dashed ${cm};border-radius:6px;width:${mW}px;height:${mH}px;display:flex;align-items:center;justify-content:center;background:${cl}33;flex-shrink:0;">
-            <div style="font-size:9px;font-weight:600;color:${c};">${b.w}×${b.h}</div>
+        <div style="background:var(--white);border:1.5px solid ${c.g3};border-radius:${getComputedStyle(document.documentElement).getPropertyValue('--r-md')};padding:6px 8px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+            <span style="font-size:8px;font-weight:700;color:var(--ink)">#001 Spring Sales</span>
+            <span style="font-size:7px;font-weight:600;padding:1px 5px;border-radius:10px;background:${c.g0};color:${c.g7}">${STATUS_LABEL.todo||'To-do'}</span>
           </div>
-          <div style="font-size:11px;color:#555;line-height:1.5;">${b.note?h(b.note):`Min ${b.w}×${b.h}px`}</div>
+          <div style="font-size:7px;color:var(--ink3)">→ Designer A · 📅 30/05/2025</div>
         </div>
-        ${refHTML}
       </div>
     </div>`;
-  }).join('');
-  document.getElementById('pcard').innerHTML=`
-    <div style="position:sticky;top:0;z-index:50;background:${cd};display:flex;align-items:center;overflow-x:auto;border-bottom:2px solid ${c};scrollbar-width:none;">
-      <span style="padding:7px 12px;color:#fff;font-size:11px;font-weight:700;border-right:1px solid rgba(255,255,255,.2);flex-shrink:0;">🌿 ${h(s.name||'Brief')}</span>
-      ${navLinks}
-      <a href="#bs-deliv" style="color:rgba(255,255,255,.75);font-size:10px;font-weight:500;padding:7px 10px;white-space:nowrap;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background=''">Deliverables</a>
-    </div>
-    <div style="padding:18px 20px 16px;background:linear-gradient(135deg,${cd} 0%,${c} 55%,${cm} 100%);color:#fff;">
-      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.8px;opacity:.6;margin-bottom:5px;">${h(s.platform)} · Storefront Banner</div>
-      <div style="font-size:19px;font-weight:700;line-height:1.2;">${h(s.name||'—')}${s.theme?` — ${h(s.theme)}`:''}</div>
-      ${s.desc?`<div style="font-size:11.5px;opacity:.8;margin-top:4px;">${h(s.desc)}</div>`:''}
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">
-        ${[[s.platform],[s.theme],[`${s.banners.length} loại banner`],[`${totalFiles} files`],s.dl?[s.dl]:null].filter(Boolean).map(([t])=>`<span style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:2px 9px;font-size:10px;">${h(t)}</span>`)}
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #eee;">
-      ${[[s.banners.length,'Loại banner'],[s.prods.length,'Sản phẩm'],[totalFiles,'Files'],[s.maxpx.toLocaleString()+'px','Max/chiều']].map(([n,l])=>`
-        <div style="padding:10px 8px;text-align:center;border-right:1px solid #eee;">
-          <div style="font-size:18px;font-weight:700;color:${c};line-height:1;">${n}</div>
-          <div style="font-size:9px;color:#bbb;margin-top:2px;">${l}</div>
-        </div>`).join('')}
-    </div>
-    ${bannersHTML}
-    ${s.prods.length?`
-      <div style="border-top:1px solid #eee;">
-        <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
-          <div style="width:18px;height:18px;border-radius:50%;background:${c};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${s.banners.length+1}</div>
-          <div style="font-size:11.5px;font-weight:700;">Sản phẩm</div>
-        </div>
-        <div style="padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px;">
-          ${s.prods.map(p=>`<div style="background:#fff;border:1px solid ${cl};border-left:3px solid ${c};border-radius:6px;padding:6px 8px;"><div style="font-size:11px;font-weight:600;color:${cd};">${h(p.n)}</div>${p.d?`<div style="font-size:9.5px;color:#bbb;">${h(p.d)}</div>`:''}</div>`).join('')}
-        </div>
-      </div>`:''}
-    <div id="bs-deliv" style="border-top:1px solid #eee;scroll-margin-top:36px;">
-      <div style="display:flex;align-items:center;gap:8px;padding:9px 14px 5px;background:#fafafa;">
-        <div style="width:18px;height:18px;border-radius:50%;background:${cd};color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">✓</div>
-        <div style="font-size:11.5px;font-weight:700;">Deliverables — ${totalFiles} files</div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:10.5px;">
-        <thead><tr>${['Banner','Kích thước','Format','Files','Tên file'].map(th=>`<th style="background:${cl};padding:5px 9px;text-align:left;font-size:9px;font-weight:700;color:${cd};text-transform:uppercase;border-bottom:1px solid ${cl};">${th}</th>`).join('')}</tr></thead>
-        <tbody>
-          ${s.banners.map((b,i)=>`<tr style="${i%2?'background:#fafafa':''}"><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;">${h(b.label)}</td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;font-weight:600;">${b.w}×${b.h}px</td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;">${h(b.fmt)}</td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;"><span style="background:${cl};border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;color:${c};">${b.files}</span></td><td style="padding:5px 9px;border-bottom:1px solid #f5f5f5;font-family:monospace;font-size:9.5px;color:#888;">${slug(b.label)}.${b.fmt.toLowerCase().split('/')[0].trim()}</td></tr>`).join('')}
-          <tr style="background:${cl};"><td colspan="3" style="padding:6px 9px;font-weight:700;color:${cd};">TỔNG</td><td style="padding:6px 9px;"><span style="background:${c};border-radius:4px;padding:1px 8px;font-size:10px;font-weight:700;color:#fff;">${totalFiles}</span></td><td></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="border-top:1px solid #eee;padding:10px 14px 14px;">
-      <ul style="list-style:none;">
-        ${allRules.map(r=>`<li style="display:flex;gap:7px;font-size:11px;color:#555;padding:3px 0;border-bottom:1px solid #f5f5f5;line-height:1.5;"><span style="color:${c};font-weight:700;flex-shrink:0;">✓</span><span>${r}</span></li>`).join('')}
-      </ul>
-      ${s.contact||s.notes?`<div style="margin-top:10px;background:${cl};border:1px solid ${cm};border-radius:8px;padding:10px 12px;">${s.contact?`<div style="font-size:11px;color:${cd};">👤 <strong>Liên hệ:</strong> ${h(s.contact)}</div>`:''} ${s.notes?`<div style="font-size:11px;color:${cd};margin-top:3px;">📝 ${h(s.notes)}</div>`:''}</div>`:''}
-    </div>
-    <div style="text-align:center;padding:10px;font-size:9px;color:#ccc;border-top:1px solid #f0f0f0;">
-      ${h(s.platform)} · ${h(s.name||'Brief')} · Brief Builder
-    </div>`;
 }
 
-/* ══════════════════════════════════════════
-   GOOGLE DRIVE OAUTH + UPLOAD
-══════════════════════════════════════════ */
-
-function handleDriveBtn(){
-  const clientId=g('clientId');
-  if(!clientId){toast('⚠ Vui lòng nhập Client ID trước');showSetupModal();return;}
-  if(!driveConnected){initOAuth(clientId);}
-  else{captureAndUpload();}
+function saveAppearance(){
+  const saved = {
+    presetId     : activePresetId,
+    colors       : { ...customColors },
+    font         : g('cfg-font'),
+    radius       : g('cfg-radius'),
+    density      : g('cfg-density'),
+    darkmode     : g('cfg-darkmode'),
+    sidebarStyle : g('cfg-sidebarStyle'),
+    sidebarWidth : g('cfg-sidebarWidth'),
+    appName      : g('cfg-appName'),
+    tagline      : g('cfg-tagline'),
+    appIcon      : g('cfg-appIcon'),
+    companyName  : g('cfg-companyName'),
+    statusLabels : {
+      todo       : g('cfg-lbl-todo'),
+      inprogress : g('cfg-lbl-inprogress'),
+      done       : g('cfg-lbl-done'),
+      revision   : g('cfg-lbl-revision'),
+    },
+  };
+  localStorage.setItem('bm_appearance', JSON.stringify(saved));
 }
 
-function initOAuth(clientId){
-  setDriveBtn('loading','Đang kết nối...');
-  // Build OAuth URL
-  const params=new URLSearchParams({
-    client_id:clientId,
-    redirect_uri:window.location.origin+window.location.pathname,
-    response_type:'token',
-    scope:SCOPES,
-    include_granted_scopes:'true',
-    state:'drive_auth',
-  });
-  const authUrl=`https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-  // Open popup
-  const w=500,ht=650;
-  const left=(screen.width-w)/2,top=(screen.height-ht)/2;
-  const popup=window.open(authUrl,'DriveAuth',`width=${w},height=${ht},left=${left},top=${top}`);
-  // Listen for redirect with token
-  const timer=setInterval(()=>{
-    try{
-      const url=popup.location.href;
-      if(url&&url.includes('access_token')){
-        clearInterval(timer);
-        popup.close();
-        const hash=new URLSearchParams(popup.location.hash.slice(1));
-        accessToken=hash.get('access_token');
-        if(accessToken){onDriveConnected();}
-        else{onDriveError('Không lấy được access token.');}
-      }
-    }catch(e){}
-    if(popup&&popup.closed&&!accessToken){clearInterval(timer);setDriveBtn('idle','Drive');}
-  },300);
+function applyAndSaveCfg(){
+  saveCfg();
+  applyTheme(true);
+  toast('✓ Đã lưu toàn bộ settings!');
+  // Refresh lists so status labels update
+  refreshAllLists();
 }
 
-// Handle redirect back (if same-page redirect)
-window.addEventListener('load',()=>{
-  const hash=new URLSearchParams(window.location.hash.slice(1));
-  const token=hash.get('access_token');
-  const state=hash.get('state');
-  if(token&&state==='drive_auth'){
-    accessToken=token;
-    window.location.hash='';
-    onDriveConnected();
-  }
-});
-
-function onDriveConnected(){
-  driveConnected=true;
-  setDriveBtn('connected','📤 Save to Drive');
-  updateDriveStatus('ok','✅ Đã kết nối Google Drive — nhấn nút Drive để upload brief');
-  toast('✓ Kết nối Google Drive thành công!');
-}
-function onDriveError(msg){
-  driveConnected=false;
-  setDriveBtn('idle','Drive');
-  updateDriveStatus('err','❌ '+msg);
-  toast('⚠ '+msg);
+/* ── Settings tabs ── */
+function setStab(id, el){
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.stab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sc-'+id).classList.add('active');
+  if(id==='appearance') renderThemePreview();
 }
 
-function setDriveBtn(state,label){
-  const btn=document.getElementById('driveBtn');
-  const dot=document.getElementById('driveDot');
-  document.getElementById('driveBtnLabel').textContent=label;
-  btn.className='btn-drive';
-  if(state==='connected'){btn.classList.add('connected');dot.classList.add('on');}
-  else if(state==='loading'){btn.classList.add('loading');dot.classList.remove('on');}
-  else{dot.classList.remove('on');}
+function setVal(id, val){
+  const el = document.getElementById(id);
+  if(el) el.value = val;
 }
 
-function updateDriveStatus(type,msg){
-  const el=document.getElementById('driveStatus');
-  el.className='drive-status'+(type==='ok'?' ok':type==='err'?' err':'');
-  el.innerHTML=msg;
+// Init settings UI after DOM is ready — called from navTo
+const _origNavTo = navTo;
+function navTo(page, el){
+  _origNavTo(page, el);
+  if(page === 'settings') initSettingsUI();
 }
 
-/* ── CAPTURE AND UPLOAD ── */
-async function captureAndUpload(){
-  if(!accessToken){toast('⚠ Chưa kết nối Drive');return;}
-  showCapture('Đang chụp ảnh brief...','html2canvas đang render...');
-  try{
-    // Expand preview to full width for capture
-    const pf=document.getElementById('pf'),pp=document.getElementById('pp');
-    const pfOld=pf.style.display,ppOld=pp.style.width;
-    pf.style.display='none';pp.style.width='100%';
-    await new Promise(r=>setTimeout(r,300));
-
-    const el=document.getElementById('pcard');
-    const canvas=await html2canvas(el,{
-      scale:2,useCORS:true,allowTaint:true,
-      backgroundColor:'#ffffff',
-      scrollX:0,scrollY:-window.scrollY,
-      windowWidth:el.scrollWidth,
-      windowHeight:el.scrollHeight,
-    });
-
-    // Restore layout
-    pf.style.display=pfOld;pp.style.width=ppOld;
-
-    updateCapture('Đang upload lên Google Drive...','Vui lòng chờ...');
-
-    // Convert canvas to blob
-    const blob=await new Promise(res=>canvas.toBlob(res,'image/png',0.95));
-
-    // Build filename
-    const name=S.name||'brief';
-    const date=new Date().toISOString().slice(0,10);
-    const filename=`${name.toLowerCase().replace(/\s+/g,'-')}_${date}.png`;
-
-    // Find or create folder
-    let folderId=g('folderId');
-    const subFolderName=g('driveFolder')||'Brief Builder';
-    if(subFolderName&&!folderId){
-      folderId=await getOrCreateFolder(subFolderName,null);
-    } else if(subFolderName&&folderId){
-      folderId=await getOrCreateFolder(subFolderName,folderId);
-    }
-
-    // Upload file
-    const fileId=await uploadToDrive(blob,filename,folderId);
-    const fileUrl=`https://drive.google.com/file/d/${fileId}/view`;
-
-    hideCapture();
-    updateDriveStatus('ok',`✅ Đã lưu! <a href="${fileUrl}" target="_blank" style="color:var(--blue);font-weight:600;margin-left:4px;">📂 Mở trong Drive →</a>`);
-    toast('✓ Upload thành công!');
-
-  }catch(err){
-    hideCapture();
-    console.error(err);
-    onDriveError('Upload thất bại: '+err.message);
-  }
-}
-
-async function getOrCreateFolder(name,parentId){
-  // Search existing
-  let q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-  if(parentId)q+=` and '${parentId}' in parents`;
-  const res=await gFetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`);
-  if(res.files&&res.files.length)return res.files[0].id;
-  // Create
-  const meta={name,mimeType:'application/vnd.google-apps.folder'};
-  if(parentId)meta.parents=[parentId];
-  const created=await gFetch('https://www.googleapis.com/drive/v3/files',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(meta)
-  });
-  return created.id;
-}
-
-async function uploadToDrive(blob,filename,folderId){
-  const meta={name:filename,mimeType:'image/png'};
-  if(folderId)meta.parents=[folderId];
-  const form=new FormData();
-  form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
-  form.append('file',blob);
-  const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{
-    method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form
-  });
-  if(!res.ok){const err=await res.json();throw new Error(err.error?.message||'Upload failed');}
-  const data=await res.json();
-  return data.id;
-}
-
-async function gFetch(url,opts={}){
-  const res=await fetch(url,{...opts,headers:{...opts.headers,Authorization:`Bearer ${accessToken}`}});
-  if(!res.ok){const err=await res.json();throw new Error(err.error?.message||'API error');}
-  return res.json();
-}
-
-/* ── CAPTURE OVERLAY ── */
-function showCapture(msg,sub){
-  document.getElementById('captureMsg').textContent=msg;
-  document.getElementById('captureSub').textContent=sub;
-  document.getElementById('captureOverlay').classList.add('show');
-}
-function updateCapture(msg,sub){
-  document.getElementById('captureMsg').textContent=msg;
-  document.getElementById('captureSub').textContent=sub;
-}
-function hideCapture(){document.getElementById('captureOverlay').classList.remove('show');}
-
-/* ══ PNG DOWNLOAD ══ */
-async function saveAsPNG(){
-  showCapture('Đang tạo ảnh PNG...','');
-  const pf=document.getElementById('pf'),pp=document.getElementById('pp');
-  pf.style.display='none';pp.style.width='100%';
-  await new Promise(r=>setTimeout(r,300));
-  const el=document.getElementById('pcard');
-  const canvas=await html2canvas(el,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',scrollX:0,scrollY:-window.scrollY,windowWidth:el.scrollWidth,windowHeight:el.scrollHeight});
-  pf.style.display='';pp.style.width='48%';
-  hideCapture();
-  const a=document.createElement('a');
-  a.href=canvas.toDataURL('image/png',0.95);
-  a.download=(S.name||'brief').toLowerCase().replace(/\s+/g,'-')+'-brief.png';
-  a.click();
-  toast('✓ Đã tải PNG!');
-}
-
-/* ══ SETUP MODAL ══ */
-function showSetupModal(){document.getElementById('setupModal').classList.add('show');}
-function closeSetup(){document.getElementById('setupModal').classList.remove('show');}
-
-/* ══ RESET ══ */
-function resetAll(){if(confirm('Reset form?'))location.reload();}
-
-/* ══ HELPERS ══ */
-function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function slug(l){return 'banner_'+l.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').slice(0,30);}
-function darken(hex,p){const n=parseInt(hex.slice(1),16),r=Math.max(0,((n>>16)&0xff)-p),g=Math.max(0,((n>>8)&0xff)-p),b=Math.max(0,(n&0xff)-p);return `rgb(${r},${g},${b})`;}
-function lighten(hex,p){const n=parseInt(hex.slice(1),16),r=Math.min(255,((n>>16)&0xff)+p),g=Math.min(255,((n>>8)&0xff)+p),b=Math.min(255,(n&0xff)+p);return `rgb(${r},${g},${b})`;}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500); }
 </script>
 </body>
 </html>
