@@ -964,6 +964,7 @@ function navTo(page, el){
   document.getElementById('topbarSub').textContent = '';
   if(page==='dashboard') renderDashboard();
   if(['todo','inprogress','revision','done'].includes(page)) renderStatusLists();
+  if(page==='settings') initSettingsUI();
 }
 
 /* ══ BADGES ══ */
@@ -1081,7 +1082,7 @@ function briefCardHTML(b){
     <div class="bc-meta">
       <div class="bc-meta-item">👤 <strong>${h(b.orderedBy||'—')}</strong></div>
       <div class="bc-meta-item">✏️ <strong>${h(b.assignTo||'Unassigned')}</strong></div>
-      ${b.deadline?`<div class="bc-meta-item${dlWarn?' deadline-warn':''}">📅 <strong>${h(b.deadline)}${dl!==null?` (${dl<0?'quá hạn '+Math.abs(dl):dl===0?'hôm nay':dl+' ngày'})`:''}` </strong></div>`:''}
+      ${b.deadline?`<div class="bc-meta-item${dlWarn?' deadline-warn':''}">📅 <strong>${h(b.deadline)}${dl!==null?' ('+(dl<0?'quá hạn '+Math.abs(dl)+' ngày':dl===0?'hôm nay':dl+' ngày')+')':''}</strong></div>`:''}
       ${specsCount?`<div class="bc-meta-item">🖼 ${specsCount} banner${specsCount>1?'s':''}</div>`:''}
       ${prodsCount?`<div class="bc-meta-item">🛒 ${prodsCount} sản phẩm</div>`:''}
     </div>
@@ -2182,13 +2183,6 @@ function setStab(id, el){
 function setVal(id, val){
   const el = document.getElementById(id);
   if(el) el.value = val;
-}
-
-// Init settings UI after DOM is ready — called from navTo
-const _origNavTo = navTo;
-function navTo(page, el){
-  _origNavTo(page, el);
-  if(page === 'settings') initSettingsUI();
 }
 
 function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500); }
