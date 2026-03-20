@@ -1961,8 +1961,15 @@ function readFormData(){
 }
 
 function saveDraftBrief(){
-  const data = readFormData();
-  if(!data.name){ toast('Nhập tên campaign'); return; }
+  let data;
+  try { data = readFormData(); } catch(e){ alert('Lỗi đọc form: '+e.message); return; }
+  if(!data.name || !data.name.trim()){
+    alert('Vui lòng nhập tên campaign.');
+    const el = document.getElementById('f-name');
+    if(el){ el.focus(); el.style.borderColor='var(--red)'; }
+    return;
+  }
+  formDirty = false;
   upsertBrief(data);
   saveLocal();
   closeForm();
@@ -1971,53 +1978,61 @@ function saveDraftBrief(){
 }
 
 async function publishBrief(){
-  const data = readFormData();
-  if(!data.name){ toast('Nhập tên campaign'); return; }
+  // 1. Đọc form data
+  let data;
+  try { data = readFormData(); } catch(e){ alert('Lỗi đọc form: '+e.message); return; }
+
+  // 2. Validate tên
+  if(!data.name || !data.name.trim()){
+    alert('Vui lòng nhập tên campaign trước khi publish.');
+    const el = document.getElementById('f-name');
+    if(el){ el.focus(); el.style.borderColor='var(--red)'; }
+    return;
+  }
   data.published = true;
 
-  const scriptUrl = cfg.scriptUrl;
+  const scriptUrl = cfg.scriptUrl || '';
 
+  // 3. Không có Apps Script → lưu local ngay, xong
   if(!scriptUrl){
-    // Save locally only
+    formDirty = false; // reset trước khi đóng
     upsertBrief(data);
     saveLocal();
     closeForm();
     refreshAllLists();
-    toast('Đã lưu (chưa có Script URL để upload Drive)');
+    toast('Brief đã lưu!');
     return;
   }
 
+  // 4. Có Apps Script → upload
+  formDirty = false; // reset để closeForm không bị chặn
   spin('Đang publish brief...');
   try {
-    // Capture preview card if we can — but for list view just send data
-    const emails = cfg.emails.split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
-    const res = await fetch(scriptUrl, {
-      method:'POST', headers:{'Content-Type':'application/json'}, redirect:'follow',
-      body: JSON.stringify({
-        action      : 'publishBrief',
-        briefData   : { ...data, refImgs: [] }, // don't send base64 for data record
-        campaign    : data.name,
-        platform    : data.platform,
-        author      : data.orderedBy,
-        team        : user.team,
-        assign      : data.assignTo,
-        deadline    : data.deadline,
-        banners     : data.bannerSpecs,
-        prods       : data.products,
-        notes       : data.notes,
-        folder      : cfg.driveFolder,
-        teamEmails  : emails,
-      }),
+    const emails = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+    const payload = JSON.stringify({
+      action     : 'publishBrief',
+      briefData  : { ...data, refImgs: [] },
+      campaign   : data.name,
+      platform   : data.platform,
+      author     : data.orderedBy,
+      team       : user.team,
+      assign     : data.assignTo,
+      deadline   : data.deadline,
+      banners    : data.bannerSpecs,
+      prods      : data.products,
+      notes      : data.notes,
+      folder     : cfg.driveFolder || 'Brief Manager',
+      teamEmails : emails,
     });
-    const result = await res.json();
+    const result = await scriptPost(scriptUrl, payload);
     if(result.ok){
       data.driveUrl = result.fileUrl || '';
-      toast('Đã publish + upload Drive!');
+      toast('Đã publish + lưu Drive!');
     } else {
-      toast('' + (result.error||'Lỗi script'));
+      toast('Script lỗi: ' + (result.error||'Unknown'));
     }
   } catch(err) {
-    toast('' + err.message);
+    toast('Lỗi kết nối: ' + err.message);
   } finally {
     spinHide();
     upsertBrief(data);
@@ -2234,8 +2249,7 @@ async function syncBriefs(){
   const btn=document.getElementById('syncBtn');
   btn.textContent='Syncing...';btn.disabled=true;
   try{
-    const res=await fetch(url+'?action=getBriefs',{redirect:'follow'});
-    const data=await res.json();
+    const data=await scriptGet(url+'?action=getBriefs');
     if(data.ok && data.briefs){
       // Merge: remote wins for shared data, keep local-only entries
       const remoteIds=new Set(data.briefs.map(b=>b.id));
@@ -2257,8 +2271,7 @@ async function testDrive(){
   cfg.scriptUrl=url;
   setStatus('st-drive','idle','Đang kiểm tra...');
   try{
-    const res=await fetch(url,{redirect:'follow'});
-    const data=await res.json();
+    const data=await scriptGet(url);
     setStatus('st-drive',data.ok?'ok':'err',data.ok?'Kết nối thành công! Folder: '+(data.folder||'—'):''+(data.error||'Lỗi'));
   }catch(e){setStatus('st-drive','err',''+e.message);}
 }
@@ -2269,9 +2282,7 @@ async function testEmail(){
   if(!emails.length){setStatus('st-email','err','Nhập ít nhất 1 email');return;}
   setStatus('st-email','idle','Đang gửi test...');
   try{
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},redirect:'follow',
-      body:JSON.stringify({action:'test',filename:'test.png',image:'data:image/png;base64,iVBORw0KGgo=',campaign:'[TEST]',teamEmails:emails,folder:cfg.driveFolder})});
-    const data=await res.json();
+    const data=await scriptPost(url,JSON.stringify({action:'test',filename:'test.png',image:'data:image/png;base64,iVBORw0KGgo=',campaign:'[TEST]',teamEmails:emails,folder:cfg.driveFolder}));
     setStatus('st-email',data.ok?'ok':'err',data.ok?`Đã gửi tới ${data.emailsSent||emails.length} email — kiểm tra inbox!`:''+(data.error||'Lỗi'));
   }catch(e){setStatus('st-email','err',''+e.message);}
 }
@@ -2627,6 +2638,31 @@ function setStab(id, el){
 function setVal(id, val){
   const el = document.getElementById(id);
   if(el) el.value = val;
+}
+
+
+/* ══════════════════════════════════════════════
+   SCRIPT FETCH HELPERS
+   Apps Script không support CORS preflight.
+   Dùng text/plain (no preflight) + parse JSON thủ công.
+══════════════════════════════════════════════ */
+async function scriptPost(url, jsonBody){
+  // text/plain avoids CORS preflight — Apps Script handles it fine
+  const res = await fetch(url, {
+    method  : 'POST',
+    redirect: 'follow',
+    body    : jsonBody,  // raw JSON string, no Content-Type header
+  });
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ return { ok: false, error: 'Invalid response: ' + text.slice(0,100) }; }
+}
+
+async function scriptGet(url){
+  const res = await fetch(url, { redirect: 'follow' });
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ return { ok: false, error: 'Invalid response: ' + text.slice(0,100) }; }
 }
 
 function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500); }
