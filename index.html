@@ -1268,6 +1268,11 @@ let filterStatus = { all:'all', banner:'all', video:'all' };
 let user = { name:'', team:'', email:'' };
 let cfg  = { scriptUrl:'', driveFolder:'Brief Manager', emails:'', designers:'', platforms:'Amazon,Shopee,Lazada,TikTok Shop,Website' };
 
+// ★ HARDCODE SCRIPT URL HERE — paste your Apps Script Web App URL
+// Khi đã set URL này, tất cả thành viên mở link đều tự động đồng bộ,
+// không cần ai vào Settings hay nhập gì cả.
+const SHARED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyadJeLVAALKZ1QpfJJPMsHUPMOrvQMzS2eMFk036hMpg_qJgkBqlMgFahMT1_5z60w/exec';  // VD: 'https://script.google.com/macros/s/AKfy.../exec'
+
 /* ── ROLE / AUTH ── */
 let _adminSession = false; // true while admin is logged in (session only)
 
@@ -1359,6 +1364,8 @@ function loadLocal(){
   briefs = JSON.parse(localStorage.getItem('bm_briefs') || '[]');
   user   = JSON.parse(localStorage.getItem('bm_user')   || '{}');
   cfg    = { ...cfg, ...JSON.parse(localStorage.getItem('bm_cfg') || '{}') };
+  // If no scriptUrl saved locally, use the hardcoded shared URL
+  if(!cfg.scriptUrl && SHARED_SCRIPT_URL) cfg.scriptUrl = SHARED_SCRIPT_URL;
 }
 function saveLocal(){
   localStorage.setItem('bm_briefs', JSON.stringify(briefs));
@@ -1433,6 +1440,7 @@ function navTo(page, el){
   document.getElementById('topbarTitle').textContent = PAGE_TITLES[page] || page;
   document.getElementById('topbarSub').textContent = '';
   if(page==='dashboard') renderDashboard();
+  if(page==='all' || page==='banner' || page==='video') renderList(page);
   if(['todo','inprogress','revision','done'].includes(page)) renderStatusLists();
   if(page==='settings') initSettingsUI();
 }
@@ -1726,7 +1734,8 @@ function briefCardHTML(b){
         <button class="bc-act-btn" onclick="event.stopPropagation();useAsTemplate('${b.id}')">Template</button>
         ${b.driveUrl?`<button class="bc-act-btn" onclick="event.stopPropagation();window.open('${b.driveUrl}','_blank')">Drive</button>`:''}
         <button class="bc-act-btn" onclick="event.stopPropagation();exportCard('${b.id}')">Export HTML</button>
-        ${isAdmin()?`<button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBrief('${b.id}')" style="margin-left:auto">Delete</button>`:''}
+        <button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBriefDirect('${b.id}')"
+          style="margin-left:auto">🗑 Xoá</button>
       </div>
     </div>
   </div>`;
@@ -2690,16 +2699,23 @@ function confirmEditPublished(){
   toast('✏️ Đang chỉnh sửa brief đã publish — nhớ Publish lại sau khi xong!');
 }
 
-function deleteBrief(id){
-  deleteId = id;
-  document.getElementById('deleteModal').classList.add('show');
+function deleteBriefDirect(id){
+  briefs = briefs.filter(b=>b.id!==id);
+  saveLocal();
+  refreshAllLists();
+  // Sync delete to Apps Script silently if configured
+  if(cfg.scriptUrl){
+    scriptPost(cfg.scriptUrl, JSON.stringify({action:'deleteBrief', briefId:id})).catch(()=>{});
+  }
 }
+
+// Keep old modal-based delete for any legacy calls
+function deleteBrief(id){ deleteBriefDirect(id); }
 function confirmDelete(){
   briefs = briefs.filter(b=>b.id!==deleteId);
   saveLocal();
   closeOverlay('deleteModal');
   refreshAllLists();
-  toast('Đã xoá brief');
 }
 
 
@@ -3635,38 +3651,38 @@ function applyCloudConfig(config) {
   }
 }
 
-// Auto-fetch cloud config on app start (silent, only if URL is configured)
+// Auto-fetch cloud config + briefs on app start — silent, no banner needed
 async function autoFetchCloudConfig() {
   const url = cfg.scriptUrl;
   if (!url) return;
 
-  // Throttle: chỉ fetch 1 lần / 30 phút
+  // Throttle config fetch: 1 lần / 10 phút
   const lastFetch = localStorage.getItem('bm_lastConfigFetch');
-  if (lastFetch && Date.now() - parseInt(lastFetch) < 30 * 60 * 1000) return;
+  const configStale = !lastFetch || Date.now() - parseInt(lastFetch) > 10 * 60 * 1000;
 
   try {
-    const data = await scriptGet(url + '?action=getConfig');
-    if (!data.ok || !data.config || !data.config._version) return;
-
-    const config    = data.config;
-    const pushedAt  = config._pushedAt ? new Date(config._pushedAt).getTime() : 0;
-    const myLastPull= parseInt(localStorage.getItem('bm_lastConfigApplied') || '0');
-
-    // Only show banner if cloud has newer config than what we last applied
-    if (pushedAt > myLastPull) {
-      const banner = document.getElementById('cloudConfigBanner');
-      const msg    = document.getElementById('cloudConfigMsg');
-      if (banner && msg) {
-        const pushed = new Date(pushedAt).toLocaleString('vi-VN');
-        msg.textContent = 'Có settings mới từ Admin (push lúc ' + pushed + ')';
-        banner.style.display = 'flex';
-        // Store config for one-click apply
-        banner._pendingConfig = config;
+    // ── 1. Fetch & auto-apply config (appearance + workspace) ──
+    if (configStale) {
+      const cfgData = await scriptGet(url + '?action=getConfig');
+      if (cfgData.ok && cfgData.config && cfgData.config._version) {
+        applyCloudConfig(cfgData.config);
+        localStorage.setItem('bm_lastConfigApplied', Date.now().toString());
+        localStorage.setItem('bm_lastConfigFetch', Date.now().toString());
+        // Update sidebar app name / branding immediately
+        applyTheme(false);
       }
     }
 
-    localStorage.setItem('bm_lastConfigFetch', Date.now().toString());
-  } catch(e) { /* silent — don't bother user if offline */ }
+    // ── 2. Fetch & merge briefs from Sheet ──
+    const briefData = await scriptGet(url + '?action=getBriefs');
+    if (briefData.ok && Array.isArray(briefData.briefs) && briefData.briefs.length) {
+      const remoteIds = new Set(briefData.briefs.map(b => b.id));
+      const localOnly = briefs.filter(b => !remoteIds.has(b.id));
+      briefs = [...briefData.briefs, ...localOnly];
+      saveLocal();
+      refreshAllLists();
+    }
+  } catch(e) { /* silent — offline or misconfigured */ }
 }
 
 function applyPendingCloudConfig() {
