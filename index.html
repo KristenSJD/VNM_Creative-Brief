@@ -510,6 +510,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
       <div class="sec-heading">
         <div><h2>Settings</h2><p>Tùy chỉnh giao diện, thông tin workspace và tích hợp</p></div>
         <button class="tb-btn primary" onclick="applyAndSaveCfg()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M3 3h8l2 2v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3z"/><rect x="6" y="9" width="4" height="4"/><path d="M6 3v3h5"/></svg> Lưu tất cả</button>
+        <button class="tb-btn" onclick="openSettingsShare()" style="margin-left:4px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="12" cy="4" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12" r="2"/><path d="M6 7l4-2M6 9l4 2"/></svg> Share Settings</button>
       </div>
 
       <!-- Settings Tabs -->
@@ -729,8 +730,20 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
       <!-- ── TAB: INTEGRATIONS ── -->
       <div class="stab-content" id="sc-integrations">
 
+        <!-- Cloud Config banner -->
+        <div id="cloudConfigBanner" style="display:none;background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--g7);flex-shrink:0"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
+          <span id="cloudConfigMsg" style="font-size:12px;color:var(--g7);font-weight:500;flex:1"></span>
+          <button onclick="applyPendingCloudConfig()" style="background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap">Áp dụng</button>
+          <button onclick="document.getElementById('cloudConfigBanner').style.display='none'" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:14px;padding:2px 4px">✕</button>
+        </div>
+
+        <!-- Apps Script URL -->
         <div class="settings-card" style="margin-bottom:14px">
-          <div class="settings-card-header"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M4 12l4-7 4 7H4z"/><path d="M2 12h12"/><path d="M9 12l3-5h2l-3 5"/></svg> Google Drive + Apps Script</div>
+          <div class="settings-card-header">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/></svg>
+            Google Drive + Apps Script
+          </div>
           <div class="settings-card-body">
             <div class="field">
               <label>Apps Script Web App URL <span class="req">*</span>
@@ -749,8 +762,12 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
           </div>
         </div>
 
+        <!-- Email -->
         <div class="settings-card" style="margin-bottom:14px">
-          <div class="settings-card-header"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M2 6l6 4 6-4"/></svg> Email thông báo</div>
+          <div class="settings-card-header">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M2 6l6 4 6-4"/></svg>
+            Email thông báo
+          </div>
           <div class="settings-card-body">
             <div class="field">
               <label>Danh sách email nhận thông báo <span class="hint">(mỗi email 1 dòng)</span></label>
@@ -763,14 +780,90 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
           </div>
         </div>
 
-        <div class="settings-card">
-          <div class="settings-card-header"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="8" cy="8" r="5.5"/><path d="M8 7v4M8 5.5v.5"/></svg> Hướng dẫn setup</div>
+        <!-- ★ CLOUD CONFIG — sync settings với team -->
+        <div class="settings-card" style="margin-bottom:14px;border-color:var(--g3)">
+          <div class="settings-card-header" style="background:var(--g0)">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0;color:var(--g7)"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
+            <span style="color:var(--g7);font-weight:700">☁️ Shared Config — Sync settings với team</span>
+          </div>
           <div class="settings-card-body">
-            <div style="font-size:12px;line-height:1.7;color:var(--ink2)">
-              <strong>Bước 1:</strong> Vào <a href="https://script.google.com" target="_blank" style="color:var(--blue)">script.google.com</a> → New project → paste code từ file <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">brief-manager-apps-script.gs</code><br><br>
-              <strong>Bước 2:</strong> Sửa <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">TEAM_EMAILS</code> → chạy <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">testAll()</code> để kiểm tra<br><br>
-              <strong>Bước 3:</strong> Deploy → New deployment → Web app → Execute as: <strong>Me</strong> → Access: <strong>Anyone</strong> → Deploy → copy URL<br><br>
-              <strong>Bước 4:</strong> Paste URL vào ô trên → nhấn <strong>Test kết nối</strong>
+            <p style="font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:14px">
+              Admin push settings lên Google Sheet một lần → mọi người mở app là tự động load về.<br>
+              <strong style="color:var(--ink2)">Không cần ai tự cài lại gì cả.</strong>
+            </p>
+
+            <!-- How it works diagram -->
+            <div style="background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;margin-bottom:14px;font-size:11.5px;color:var(--ink3);line-height:1.8">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span style="background:var(--g7);color:#fff;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap">Admin</span>
+                <span>Lưu settings → nhấn <strong style="color:var(--ink2)">Push to Cloud</strong></span>
+                <span style="color:var(--g3)">→</span>
+                <span>Lưu vào Google Sheet</span>
+                <span style="color:var(--g3)">→</span>
+                <span style="background:var(--blue0);color:var(--blue);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap">Team</span>
+                <span>Mở app → tự động load</span>
+              </div>
+            </div>
+
+            <!-- What gets synced -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink4);margin-bottom:8px">Những gì được sync</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;font-size:11.5px">
+              <div style="display:flex;gap:6px;align-items:center;color:var(--g7)">✅ Danh sách Designers</div>
+              <div style="display:flex;gap:6px;align-items:center;color:var(--g7)">✅ Danh sách Platforms</div>
+              <div style="display:flex;gap:6px;align-items:center;color:var(--g7)">✅ App name & branding</div>
+              <div style="display:flex;gap:6px;align-items:center;color:var(--g7)">✅ Theme / màu sắc</div>
+              <div style="display:flex;gap:6px;align-items:center;color:var(--g7)">✅ Status labels</div>
+              <div style="display:flex;gap:6px;align-items:center;color:var(--ink4)">🔒 Apps Script URL (riêng tư)</div>
+            </div>
+
+            <!-- Last pushed info -->
+            <div id="cloudCfgStatus" style="font-size:11px;color:var(--ink4);margin-bottom:12px">
+              Chưa push lần nào từ máy này
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button onclick="pushCloudConfig()" id="btnPushCfg"
+                style="flex:1;background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 14px;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;min-width:140px"
+                onmouseover="this.style.background='var(--g9)'" onmouseout="this.style.background='var(--g7)'">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 14V8M6 10l2-2 2 2"/></svg>
+                Push to Cloud
+              </button>
+              <button onclick="pullCloudConfig()" id="btnPullCfg"
+                style="flex:1;background:none;border:1.5px solid var(--g3);color:var(--g7);font-family:inherit;font-size:12px;font-weight:600;padding:8px 14px;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;min-width:140px"
+                onmouseover="this.style.background='var(--g0)'" onmouseout="this.style.background='none'">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
+                Pull from Cloud
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hướng dẫn setup -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="8" cy="8" r="5.5"/><path d="M8 7v4M8 5.5v.5"/></svg>
+            Hướng dẫn setup (1 lần duy nhất)
+          </div>
+          <div class="settings-card-body">
+            <div style="font-size:12px;line-height:1.9;color:var(--ink2)">
+              <strong>Bước 1:</strong> Tạo <a href="https://sheets.google.com" target="_blank" style="color:var(--blue)">Google Sheet</a> mới → copy ID từ URL<br>
+              <span style="font-size:10.5px;color:var(--ink4);font-family:monospace;margin-left:12px">https://docs.google.com/spreadsheets/d/<strong style="color:var(--amber)">SPREADSHEET_ID</strong>/edit</span><br><br>
+
+              <strong>Bước 2:</strong> Vào <a href="https://script.google.com" target="_blank" style="color:var(--blue)">script.google.com</a> → New project → paste toàn bộ code từ file <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">brief-manager.gs</code><br><br>
+
+              <strong>Bước 3:</strong> Trong file .gs, sửa dòng đầu:
+              <div style="background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px;margin:6px 0;font-family:monospace;font-size:10.5px;color:var(--ink2)">
+                const SPREADSHEET_ID = '<span style="color:var(--amber)">PASTE_ID_VỪA_COPY</span>';
+              </div>
+
+              <strong>Bước 4:</strong> Chạy <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10.5px">testAll()</code> để kiểm tra (cần cấp quyền lần đầu)<br><br>
+
+              <strong>Bước 5:</strong> Deploy → New deployment → Web app → Execute as: <strong>Me</strong> → Access: <strong>Anyone</strong> → Deploy → copy URL<br><br>
+
+              <strong>Bước 6:</strong> Paste URL vào ô Apps Script URL bên trên → <strong>Test kết nối</strong><br><br>
+
+              <strong>Bước 7 (Admin):</strong> Điền đầy đủ settings → nhấn <strong style="color:var(--g7)">Push to Cloud</strong> → gửi link app cho team → xong! ✅
             </div>
           </div>
         </div>
@@ -995,6 +1088,59 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
   </div>
 </div>
 
+<!-- ── EDIT PUBLISHED MODAL ── -->
+<div class="overlay" id="editPublishedModal">
+  <div class="modal" style="width:440px">
+    <div class="modal-h" style="background:var(--amber)">
+      <h3>✏️ Chỉnh sửa brief đã publish</h3>
+      <button class="modal-x" onclick="closeOverlay('editPublishedModal')">✕</button>
+    </div>
+    <div class="modal-b" style="padding:16px 18px">
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px">
+        Brief <strong id="editPublishedName" style="color:var(--ink)"></strong> đã được publish.
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-sm);padding:10px 12px;font-size:11.5px;color:#78350f;line-height:1.8">
+        Chỉnh sửa sẽ:<br>
+        • Tạo bản cập nhật mới<br>
+        • Đổi status sang <strong>Needs Revision</strong> nếu đang Done<br>
+        • Gửi email thông báo cho designer nếu đã cấu hình Apps Script
+      </div>
+    </div>
+    <div class="modal-f">
+      <button style="font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--r-sm);cursor:pointer;border:1.5px solid var(--line);background:var(--bg);color:var(--ink2)" onclick="closeOverlay('editPublishedModal')">Huỷ</button>
+      <button style="font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--r-sm);cursor:pointer;border:1.5px solid var(--amber);background:var(--amber);color:#fff" onclick="confirmEditPublished()">Tiếp tục chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS SHARE MODAL ── -->
+<div class="overlay" id="settingsShareModal">
+  <div class="modal" style="width:480px">
+    <div class="modal-h">
+      <h3>📤 Chia sẻ Settings với team</h3>
+      <button class="modal-x" onclick="closeOverlay('settingsShareModal')">✕</button>
+    </div>
+    <div class="modal-b" style="padding:16px 18px">
+      <p style="font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:12px">
+        Copy đoạn JSON bên dưới → gửi cho thành viên khác → họ paste vào ô "Import" để sync settings.
+      </p>
+      <div class="field">
+        <label>Export Settings JSON</label>
+        <textarea id="settingsExportBox" rows="5" style="font-family:'DM Mono',monospace;font-size:10.5px" readonly></textarea>
+      </div>
+      <button onclick="copySettingsExport()" style="width:100%;background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px;border-radius:var(--r-sm);cursor:pointer;margin-bottom:16px">📋 Copy JSON</button>
+      <div class="field">
+        <label>Import Settings JSON <span class="hint">— paste JSON từ người khác</span></label>
+        <textarea id="settingsImportBox" rows="4" style="font-family:'DM Mono',monospace;font-size:10.5px" placeholder='Paste JSON vào đây...'></textarea>
+      </div>
+      <button onclick="importSettingsJSON()" style="width:100%;background:none;border:1.5px solid var(--g3);color:var(--g7);font-family:inherit;font-size:12px;font-weight:600;padding:8px;border-radius:var(--r-sm);cursor:pointer">✅ Apply Settings</button>
+    </div>
+    <div class="modal-f">
+      <button style="font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--r-sm);cursor:pointer;border:1.5px solid var(--line);background:var(--bg);color:var(--ink2)" onclick="closeOverlay('settingsShareModal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
 <div class="spin-overlay" id="spinOverlay">
   <div class="spinner"></div>
   <div class="spin-msg" id="spinMsg">Đang xử lý...</div>
@@ -1041,19 +1187,16 @@ window.onload = () => {
   loadLocal();
   applyProfile();
   applyCfgToForm();
-  initSettingsUI();   // restore appearance from localStorage
+  initSettingsUI();
   updateBadges();
   renderDashboard();
   renderList('all');
   renderList('banner');
   renderList('video');
   renderStatusLists();
-  checkAutosaveRestore(); // restore draft if browser was closed mid-edit
-  renderDashboard();
-  renderList('all');
-  renderList('banner');
-  renderList('video');
-  renderStatusLists();
+  checkAutosaveRestore();
+  // Auto-fetch cloud config in background (silent)
+  setTimeout(autoFetchCloudConfig, 1500);
 };
 
 function applyProfile(){
@@ -1300,6 +1443,12 @@ function briefCardHTML(b){
           </div>`).join('')}
       </div>
 
+      ${b.desc?`
+      <div style="margin:0 14px 10px;background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink4);margin-bottom:4px">Mô tả / Mục đích</div>
+        <div style="font-size:12px;color:var(--ink2);line-height:1.6">${h(b.desc)}</div>
+      </div>`:''}
+
       ${b.notes?`
       <div style="margin:0 14px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-sm);padding:8px 10px;font-size:11.5px;color:#78350f;line-height:1.55">
         <span style="font-weight:700">Note:</span> ${h(b.notes)}
@@ -1460,14 +1609,16 @@ document.addEventListener('keydown', function(e){
     closeBriefDetail();
   }
 });
-/* ======================================================
+/* ══════════════════════════════════════════════
    DISCARD / DIRTY TRACKING
+══════════════════════════════════════════════ */
 let autosaveTimer = null;
+let formDirty = false;
 const AUTOSAVE_KEY = 'bm_autosave_draft';
 
 // Mark form dirty on any input inside the panel
 document.addEventListener('input', e => {
-  if(e.target.closest('#formPanel')) {
+  if(e.target.closest('#formPanel') || e.target.closest('#fpBody')) {
     formDirty = true;
     scheduleAutosave();
   }
@@ -2164,11 +2315,12 @@ async function publishBrief(){
   // 3. Không có Apps Script → lưu local ngay, xong
   if(!scriptUrl){
     formDirty = false; // reset trước khi đóng
+    const wasPublished = editingId && briefs.find(b=>b.id===editingId)?.published;
     upsertBrief(data);
     saveLocal();
     closeForm();
     refreshAllLists();
-    toast('Brief đã lưu!');
+    toast(wasPublished ? '✅ Đã cập nhật brief!' : '🚀 Brief đã publish!');
     return;
   }
 
@@ -2236,10 +2388,35 @@ function updateStatus(id, status){
   toast(`Đã cập nhật → ${STATUS_LABEL[status]}`);
 }
 
+let pendingEditId = null;
+
 function editBrief(id){
   const b = briefs.find(x=>x.id===id);
   if(!b) return;
+  if(b.published){
+    // Show warning modal for published briefs
+    pendingEditId = id;
+    document.getElementById('editPublishedName').textContent = '#'+(b.orderNum||'?')+' '+b.name;
+    document.getElementById('editPublishedModal').classList.add('show');
+  } else {
+    openForm(b.type, b);
+  }
+}
+
+function confirmEditPublished(){
+  closeOverlay('editPublishedModal');
+  const b = briefs.find(x=>x.id===pendingEditId);
+  if(!b) return;
+  // If status is 'done', bump back to 'revision' to signal re-work
+  if(b.status === 'done'){
+    b.status = 'revision';
+    b.updatedAt = Date.now();
+    saveLocal();
+    refreshAllLists();
+  }
   openForm(b.type, b);
+  pendingEditId = null;
+  toast('✏️ Đang chỉnh sửa brief đã publish — nhớ Publish lại sau khi xong!');
 }
 
 function deleteBrief(id){
@@ -2670,6 +2847,19 @@ function initSettingsUI(){
     setVal('cfg-lbl-revision',   saved.statusLabels.revision   || 'Needs Revision');
   }
   applyTheme(false); // apply without saving
+
+  // Show last push timestamp
+  const lastPush = localStorage.getItem('bm_lastConfigPush');
+  const cfgStatusEl = document.getElementById('cloudCfgStatus');
+  if (cfgStatusEl) {
+    if (lastPush) {
+      cfgStatusEl.textContent = '✅ Push lần cuối từ máy này: ' + lastPush;
+      cfgStatusEl.style.color = 'var(--g7)';
+    } else {
+      cfgStatusEl.textContent = 'Chưa push lần nào từ máy này';
+      cfgStatusEl.style.color = '';
+    }
+  }
 }
 
 function renderColorPresets(){
@@ -2944,6 +3134,283 @@ async function scriptGet(url){
 }
 
 function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ══════════════════════════════════════════════
+   SETTINGS SHARE — Export / Import JSON
+   Cho phép sync settings giữa các máy qua copy-paste JSON.
+   Đây là giải pháp tạm khi chưa có backend chung.
+══════════════════════════════════════════════ */
+function openSettingsShare(){
+  // Build full settings snapshot
+  const snapshot = buildSettingsSnapshot();
+  document.getElementById('settingsExportBox').value = JSON.stringify(snapshot, null, 2);
+  document.getElementById('settingsImportBox').value = '';
+  document.getElementById('settingsShareModal').classList.add('show');
+}
+
+function buildSettingsSnapshot(){
+  // Collect all current settings into one object
+  const appearance = JSON.parse(localStorage.getItem('bm_appearance') || '{}');
+  const cfgRaw     = JSON.parse(localStorage.getItem('bm_cfg')        || '{}');
+  // Strip sensitive data (Apps Script URL, emails) — keep workspace/team/appearance only
+  const { scriptUrl, emails, ...safeCfg } = cfgRaw;
+  return {
+    _version   : '1.0',
+    _exported  : new Date().toISOString(),
+    appearance,
+    workspace  : safeCfg,
+  };
+}
+
+function copySettingsExport(){
+  const box = document.getElementById('settingsExportBox');
+  box.select();
+  try {
+    navigator.clipboard.writeText(box.value).then(()=>toast('Đã copy JSON!'));
+  } catch(e){
+    document.execCommand('copy');
+    toast('Đã copy JSON!');
+  }
+}
+
+function importSettingsJSON(){
+  const raw = document.getElementById('settingsImportBox').value.trim();
+  if(!raw){ toast('Paste JSON vào ô trước!'); return; }
+  try {
+    const snap = JSON.parse(raw);
+    if(!snap._version){ toast('JSON không hợp lệ'); return; }
+
+    // Apply appearance
+    if(snap.appearance){
+      localStorage.setItem('bm_appearance', JSON.stringify(snap.appearance));
+      // Restore colour vars and UI selectors
+      const a = snap.appearance;
+      if(a.presetId){
+        activePresetId = a.presetId;
+        customColors   = a.colors || COLOR_PRESETS.find(p=>p.id===a.presetId) || COLOR_PRESETS[0];
+      }
+      if(a.font)         setVal('cfg-font',         a.font);
+      if(a.radius)       setVal('cfg-radius',        a.radius);
+      if(a.density)      setVal('cfg-density',       a.density);
+      if(a.darkmode)     setVal('cfg-darkmode',      a.darkmode);
+      if(a.sidebarStyle) setVal('cfg-sidebarStyle',  a.sidebarStyle);
+      if(a.sidebarWidth) setVal('cfg-sidebarWidth',  a.sidebarWidth);
+      if(a.appName)      setVal('cfg-appName',       a.appName);
+      if(a.tagline)      setVal('cfg-tagline',       a.tagline);
+      if(a.appIcon)      setVal('cfg-appIcon',       a.appIcon);
+      if(a.companyName)  setVal('cfg-companyName',   a.companyName);
+      if(a.statusLabels){
+        setVal('cfg-lbl-todo',       a.statusLabels.todo       || 'To-do');
+        setVal('cfg-lbl-inprogress', a.statusLabels.inprogress || 'In Progress');
+        setVal('cfg-lbl-done',       a.statusLabels.done       || 'Done');
+        setVal('cfg-lbl-revision',   a.statusLabels.revision   || 'Needs Revision');
+      }
+      applyTheme(false);
+      renderColorPresets();
+      renderColorPickers();
+    }
+
+    // Apply workspace cfg (merge, keep local scriptUrl/emails)
+    if(snap.workspace){
+      const existing = JSON.parse(localStorage.getItem('bm_cfg') || '{}');
+      const merged   = { ...snap.workspace, ...{ scriptUrl: existing.scriptUrl||'', emails: existing.emails||'' } };
+      localStorage.setItem('bm_cfg', JSON.stringify(merged));
+      cfg = { ...cfg, ...merged };
+      applyCfgToForm();
+    }
+
+    closeOverlay('settingsShareModal');
+    toast('✅ Settings đã được import thành công!');
+    refreshAllLists();
+  } catch(e){
+    toast('Lỗi parse JSON: ' + e.message);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   CLOUD CONFIG — Push / Pull settings qua Apps Script
+   Admin push 1 lần → team pull tự động khi mở app
+══════════════════════════════════════════════ */
+
+function buildCloudConfigPayload() {
+  // Thu thập tất cả settings (không gửi scriptUrl / emails — giữ riêng tư)
+  const appearance = JSON.parse(localStorage.getItem('bm_appearance') || '{}');
+  const cfgRaw     = JSON.parse(localStorage.getItem('bm_cfg') || '{}');
+  const { scriptUrl, emails, ...safeCfg } = cfgRaw;
+
+  return {
+    _version   : '1.1',
+    _pushedAt  : new Date().toISOString(),
+    // Workspace
+    appName      : safeCfg.appName    || g('cfg-appName')    || '',
+    tagline      : safeCfg.tagline    || g('cfg-tagline')    || '',
+    appIcon      : safeCfg.appIcon    || g('cfg-appIcon')    || '',
+    companyName  : safeCfg.companyName|| g('cfg-companyName')|| '',
+    designers    : safeCfg.designers  || g('cfg-designers')  || '',
+    teams        : safeCfg.teams      || g('cfg-teams')      || '',
+    platforms    : safeCfg.platforms  || g('cfg-platforms')  || '',
+    bannerTypes  : safeCfg.bannerTypes|| g('cfg-bannerTypes')|| '',
+    videoTypes   : safeCfg.videoTypes || g('cfg-videoTypes') || '',
+    defaultSpecs : safeCfg.defaultSpecs || '',
+    // Status labels
+    lblTodo      : g('cfg-lbl-todo')       || 'To-do',
+    lblInprogress: g('cfg-lbl-inprogress') || 'In Progress',
+    lblDone      : g('cfg-lbl-done')       || 'Done',
+    lblRevision  : g('cfg-lbl-revision')   || 'Needs Revision',
+    // Appearance (stored as one JSON blob)
+    appearance   : appearance,
+  };
+}
+
+async function pushCloudConfig() {
+  const url = cfg.scriptUrl;
+  if (!url) { toast('Cần nhập Apps Script URL trước'); navTo('settings', document.querySelector('[data-page="settings"]')); return; }
+
+  const btn = document.getElementById('btnPushCfg');
+  btn.textContent = 'Đang push...'; btn.disabled = true;
+
+  try {
+    const payload = JSON.stringify({ action: 'saveConfig', config: buildCloudConfigPayload() });
+    const result  = await scriptPost(url, payload);
+    if (result.ok) {
+      const ts = new Date().toLocaleString('vi-VN');
+      localStorage.setItem('bm_lastConfigPush', ts);
+      document.getElementById('cloudCfgStatus').textContent = '✅ Đã push lần cuối: ' + ts;
+      document.getElementById('cloudCfgStatus').style.color = 'var(--g7)';
+      toast('☁️ Settings đã push lên cloud! Team sẽ tự động load khi mở app.');
+    } else {
+      toast('Lỗi push: ' + (result.error || 'Unknown'));
+    }
+  } catch(e) {
+    toast('Lỗi kết nối: ' + e.message);
+  } finally {
+    btn.textContent = 'Push to Cloud'; btn.disabled = false;
+  }
+}
+
+async function pullCloudConfig() {
+  const url = cfg.scriptUrl;
+  if (!url) { toast('Cần nhập Apps Script URL trước'); return; }
+
+  const btn = document.getElementById('btnPullCfg');
+  if (btn) { btn.textContent = 'Đang pull...'; btn.disabled = true; }
+
+  try {
+    const data = await scriptGet(url + '?action=getConfig');
+    if (data.ok && data.config) {
+      applyCloudConfig(data.config);
+      localStorage.setItem('bm_lastConfigApplied', Date.now().toString());
+      toast('☁️ Đã load settings từ cloud!');
+      document.getElementById('cloudConfigBanner').style.display = 'none';
+    } else {
+      toast('Chưa có config trên cloud — Admin hãy Push trước.');
+    }
+  } catch(e) {
+    toast('Lỗi kết nối: ' + e.message);
+  } finally {
+    if (btn) { btn.textContent = 'Pull from Cloud'; btn.disabled = false; }
+  }
+}
+
+function applyCloudConfig(config) {
+  if (!config || !config._version) return;
+
+  // Apply workspace fields to form + cfg object
+  const fields = ['appName','tagline','appIcon','companyName','designers','teams','platforms','bannerTypes','videoTypes','defaultSpecs'];
+  fields.forEach(k => {
+    if (config[k] !== undefined) {
+      setVal('cfg-' + k, config[k]);
+      cfg[k] = config[k];
+    }
+  });
+
+  // Status labels
+  if (config.lblTodo)       { setVal('cfg-lbl-todo',       config.lblTodo);       STATUS_LABEL.todo       = config.lblTodo; }
+  if (config.lblInprogress) { setVal('cfg-lbl-inprogress', config.lblInprogress); STATUS_LABEL.inprogress = config.lblInprogress; }
+  if (config.lblDone)       { setVal('cfg-lbl-done',       config.lblDone);       STATUS_LABEL.done       = config.lblDone; }
+  if (config.lblRevision)   { setVal('cfg-lbl-revision',   config.lblRevision);   STATUS_LABEL.revision   = config.lblRevision; }
+
+  // Appearance
+  if (config.appearance && typeof config.appearance === 'object') {
+    const a = config.appearance;
+    if (a.presetId) { activePresetId = a.presetId; customColors = a.colors || COLOR_PRESETS.find(p=>p.id===a.presetId) || COLOR_PRESETS[0]; }
+    if (a.font)         setVal('cfg-font',         a.font);
+    if (a.radius)       setVal('cfg-radius',        a.radius);
+    if (a.density)      setVal('cfg-density',       a.density);
+    if (a.darkmode)     setVal('cfg-darkmode',      a.darkmode);
+    if (a.sidebarStyle) setVal('cfg-sidebarStyle',  a.sidebarStyle);
+    if (a.sidebarWidth) setVal('cfg-sidebarWidth',  a.sidebarWidth);
+    if (a.statusLabels) {
+      setVal('cfg-lbl-todo',       a.statusLabels.todo       || 'To-do');
+      setVal('cfg-lbl-inprogress', a.statusLabels.inprogress || 'In Progress');
+      setVal('cfg-lbl-done',       a.statusLabels.done       || 'Done');
+      setVal('cfg-lbl-revision',   a.statusLabels.revision   || 'Needs Revision');
+    }
+    applyTheme(false);
+    renderColorPresets();
+    renderColorPickers();
+    localStorage.setItem('bm_appearance', JSON.stringify(a));
+  }
+
+  // Save merged cfg to localStorage
+  saveCfg();
+  refreshAllLists();
+
+  // Update last-push timestamp display
+  if (config._pushedAt) {
+    const pushed = new Date(config._pushedAt).toLocaleString('vi-VN');
+    const el = document.getElementById('cloudCfgStatus');
+    if (el) { el.textContent = '☁️ Config từ cloud — push lúc: ' + pushed; el.style.color = 'var(--g7)'; }
+  }
+}
+
+// Auto-fetch cloud config on app start (silent, only if URL is configured)
+async function autoFetchCloudConfig() {
+  const url = cfg.scriptUrl;
+  if (!url) return;
+
+  // Throttle: chỉ fetch 1 lần / 30 phút
+  const lastFetch = localStorage.getItem('bm_lastConfigFetch');
+  if (lastFetch && Date.now() - parseInt(lastFetch) < 30 * 60 * 1000) return;
+
+  try {
+    const data = await scriptGet(url + '?action=getConfig');
+    if (!data.ok || !data.config || !data.config._version) return;
+
+    const config    = data.config;
+    const pushedAt  = config._pushedAt ? new Date(config._pushedAt).getTime() : 0;
+    const myLastPull= parseInt(localStorage.getItem('bm_lastConfigApplied') || '0');
+
+    // Only show banner if cloud has newer config than what we last applied
+    if (pushedAt > myLastPull) {
+      const banner = document.getElementById('cloudConfigBanner');
+      const msg    = document.getElementById('cloudConfigMsg');
+      if (banner && msg) {
+        const pushed = new Date(pushedAt).toLocaleString('vi-VN');
+        msg.textContent = 'Có settings mới từ Admin (push lúc ' + pushed + ')';
+        banner.style.display = 'flex';
+        // Store config for one-click apply
+        banner._pendingConfig = config;
+      }
+    }
+
+    localStorage.setItem('bm_lastConfigFetch', Date.now().toString());
+  } catch(e) { /* silent — don't bother user if offline */ }
+}
+
+function applyPendingCloudConfig() {
+  const banner = document.getElementById('cloudConfigBanner');
+  if (banner && banner._pendingConfig) {
+    applyCloudConfig(banner._pendingConfig);
+    localStorage.setItem('bm_lastConfigApplied', Date.now().toString());
+    banner.style.display = 'none';
+    toast('☁️ Đã áp dụng settings từ Admin!');
+  } else {
+    pullCloudConfig();
+  }
+}
+
+
 </script>
 </body>
 </html>
