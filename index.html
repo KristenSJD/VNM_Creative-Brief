@@ -778,7 +778,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
       <div class="stab-content" id="sc-integrations">
 
         <!-- Cloud Config banner -->
-        <div id="cloudConfigBanner" style="display:none;background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div id="cloudConfigBanner" style="display:none;background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;align-items:center;gap:10px">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--g7);flex-shrink:0"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
           <span id="cloudConfigMsg" style="font-size:12px;color:var(--g7);font-weight:500;flex:1"></span>
           <button onclick="applyPendingCloudConfig()" style="background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap">Áp dụng</button>
@@ -3224,7 +3224,7 @@ function onColorChange(key, val){
   activePresetId = 'custom';
   customColors[key] = val;
   // sync text input
-  const pickers = document.querySelectorAll(`[oninput*="onColorTextChange('${key}"]`);
+  const pickers = document.querySelectorAll(`[oninput*="onColorTextChange('${key}'"]`);
   pickers.forEach(p=>p.value=val);
   const swatch = document.getElementById('cswatch-'+key);
   if(swatch) swatch.style.background = val;
@@ -3237,7 +3237,7 @@ function onColorTextChange(key, val){
   activePresetId = 'custom';
   customColors[key] = val;
   // sync color input
-  const pickers = document.querySelectorAll(`[oninput*="onColorChange('${key}"]`);
+  const pickers = document.querySelectorAll(`[oninput*="onColorChange('${key}'"]`);
   pickers.forEach(p=>p.value=val);
   const swatch = document.getElementById('cswatch-'+key);
   if(swatch) swatch.style.background = val;
