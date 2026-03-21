@@ -1271,7 +1271,7 @@ let cfg  = { scriptUrl:'', driveFolder:'Brief Manager', emails:'', designers:'',
 // ★ HARDCODE SCRIPT URL HERE — paste your Apps Script Web App URL
 // Khi đã set URL này, tất cả thành viên mở link đều tự động đồng bộ,
 // không cần ai vào Settings hay nhập gì cả.
-const SHARED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyadJeLVAALKZ1QpfJJPMsHUPMOrvQMzS2eMFk036hMpg_qJgkBqlMgFahMT1_5z60w/exec';  // VD: 'https://script.google.com/macros/s/AKfy.../exec'
+const SHARED_SCRIPT_URL = '';  // VD: 'https://script.google.com/macros/s/AKfy.../exec'
 
 /* ── ROLE / AUTH ── */
 let _adminSession = false; // true while admin is logged in (session only)
@@ -1400,10 +1400,33 @@ window.onload = () => {
   renderList('video');
   renderStatusLists();
   checkAutosaveRestore();
-  applyRoleUI(); // apply member/admin UI state
-  // Auto-fetch cloud config in background (silent)
+  applyRoleUI();
+  // Lần đầu load: fetch config + briefs
   setTimeout(autoFetchCloudConfig, 1500);
+  // Polling: sync briefs mỗi 30 giây — bắt xoá/thêm/sửa từ máy khác
+  setInterval(syncBriefsOnly, 30000);
 };
+
+// Chỉ sync briefs (không fetch config) — dùng cho polling
+async function syncBriefsOnly(){
+  const url = cfg.scriptUrl;
+  if(!url) return;
+  try{
+    const data = await scriptGet(url+'?action=getBriefs');
+    if(!data.ok || !Array.isArray(data.briefs)) return;
+    // So sánh — nếu có gì khác mới render lại
+    const remoteIds  = new Set(data.briefs.map(b=>b.id));
+    const localIds   = new Set(briefs.map(b=>b.id));
+    const remoteJson = JSON.stringify(data.briefs.map(b=>b.id+b.updatedAt).sort());
+    const localJson  = JSON.stringify(briefs.map(b=>b.id+(b.updatedAt||0)).sort());
+    if(remoteJson === localJson) return; // không có gì thay đổi, bỏ qua
+    // Có thay đổi → merge: remote thắng, giữ local-only
+    const localOnly = briefs.filter(b=>!remoteIds.has(b.id));
+    briefs = [...data.briefs, ...localOnly];
+    saveLocal();
+    refreshAllLists();
+  }catch(e){ /* silent */ }
+}
 
 function applyProfile(){
   if(user.name){
