@@ -301,7 +301,26 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--g9);color:#fff;font-size:12px;font-weight:500;padding:7px 16px;border-radius:20px;box-shadow:var(--sh-md);z-index:999;transition:transform .25s,opacity .25s;opacity:0;pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-/* ── SECTION HEADING ── */
+/* ── ROLE BADGE in sidebar ── */
+.role-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:auto}
+.role-badge.admin{background:rgba(217,119,6,.25);color:#fcd34d}
+.role-badge.member{background:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+
+/* ── DELIVERABLES ZONE in card ── */
+.deliv-zone{margin:0 14px 12px;border:1.5px dashed var(--g3);border-radius:var(--r-md);padding:10px 12px;background:var(--g0)}
+.deliv-zone.has-link{border-style:solid;background:var(--white)}
+.deliv-input-row{display:flex;gap:7px;margin-top:7px}
+.deliv-input-row input{flex:1;font-size:12px}
+.deliv-submit{background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11.5px;font-weight:600;padding:6px 14px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;transition:all .15s}
+.deliv-submit:hover{background:var(--g9)}
+.deliv-link-display{display:flex;align-items:center;gap:8px;margin-top:6px}
+
+/* ── ADMIN LOGIN MODAL ── */
+.admin-modal{background:var(--white);border-radius:var(--r-lg);width:360px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
+.admin-modal-h{background:var(--ink);color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+.admin-modal-h h3{font-size:13px;font-weight:700}
+.admin-err{background:var(--red0);border:1px solid #fca5a5;color:var(--red);border-radius:var(--r-sm);padding:8px 10px;font-size:12px;margin-bottom:10px;display:none}
+
 .sec-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .sec-heading h2{font-size:15px;font-weight:700;color:var(--ink)}
 .sec-heading p{font-size:11.5px;color:var(--ink3);margin-top:2px}
@@ -422,8 +441,9 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
     </div>
 
     <div class="sb-divider"></div>
-    <div class="nav-item" data-page="settings" onclick="navTo('settings',this)">
+    <div class="nav-item" id="navSettings" data-page="settings" onclick="tryNavSettings(this)">
       <span class="nav-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="8" cy="8" r="2.5"/><path d="M8 2v1M8 13v1M2 8h1M13 8h1M3.5 3.5l.7.7M11.8 11.8l.7.7M3.5 12.5l.7-.7M11.8 4.2l.7-.7"/></svg></span> Settings
+      <span class="role-badge member" id="settingsLockBadge" title="Chỉ Admin mới vào được">🔒</span>
     </div>
   </div>
 
@@ -433,6 +453,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
       <div class="sb-user-name" id="sbUserName">Chưa đăng nhập</div>
       <div class="sb-user-team" id="sbUserTeam">Nhấn để cập nhật</div>
     </div>
+    <div id="sbRoleBadge" class="role-badge member" style="flex-shrink:0">Member</div>
   </div>
 </div>
 
@@ -699,6 +720,32 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
           </div>
         </div>
 
+        <!-- Admin Credentials -->
+        <div class="settings-card" style="margin-bottom:14px;border-color:var(--ink2)">
+          <div class="settings-card-header" style="background:var(--bg)">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><rect x="4" y="7" width="8" height="7" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/><circle cx="8" cy="10.5" r="1"/></svg>
+            Admin Credentials
+          </div>
+          <div class="settings-card-body">
+            <p style="font-size:11.5px;color:var(--ink3);line-height:1.6;margin-bottom:12px">
+              Chỉ Admin mới vào được Settings. Member thường vẫn tạo brief, đổi status bình thường.
+            </p>
+            <div class="row2">
+              <div class="field">
+                <label>Admin username</label>
+                <input type="text" id="cfg-adminUser" placeholder="admin" autocomplete="off" oninput="saveCfg()">
+              </div>
+              <div class="field">
+                <label>Admin password</label>
+                <input type="password" id="cfg-adminPass" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" oninput="saveCfg()">
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--ink4)">
+              Mặc định: <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace">admin</code> / <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace">admin123</code> — đổi ngay sau khi setup!
+            </div>
+          </div>
+        </div>
+
         <!-- Status labels -->
         <div class="settings-card">
           <div class="settings-card-header"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M4 4h8M4 8h8M4 12h5"/></svg> Tuỳ chỉnh Status labels</div>
@@ -874,6 +921,68 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
 
   </div><!-- /content -->
 </div><!-- /main -->
+<!-- ════ ADMIN LOGIN MODAL ════ -->
+<div class="overlay" id="adminLoginModal">
+  <div class="admin-modal">
+    <div class="admin-modal-h">
+      <h3>🔐 Admin Login</h3>
+      <button class="modal-x" onclick="closeOverlay('adminLoginModal')">✕</button>
+    </div>
+    <div class="modal-b" style="padding:18px">
+      <div class="admin-err" id="adminLoginErr">Sai username hoặc password</div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="adminUser" placeholder="admin" autocomplete="username"
+          onkeydown="if(event.key==='Enter')document.getElementById('adminPass').focus()">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <div style="font-size:11px;color:var(--ink4);margin-bottom:14px;line-height:1.5">
+        Admin credentials được cài trong Settings → Workspace.<br>
+        Mặc định: <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace">admin</code> / <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:monospace">admin123</code>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn-cancel" onclick="closeOverlay('adminLoginModal')">Huỷ</button>
+      <button class="btn-ok" onclick="doAdminLogin()">Đăng nhập</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DELIVERABLES SUBMIT MODAL ════ -->
+<div class="overlay" id="delivModal">
+  <div class="modal" style="width:460px">
+    <div class="modal-h" style="background:var(--g7)">
+      <h3>📁 Nộp deliverables</h3>
+      <button class="modal-x" onclick="closeOverlay('delivModal')">✕</button>
+    </div>
+    <div class="modal-b" style="padding:18px">
+      <div style="font-size:12.5px;color:var(--ink2);margin-bottom:4px">
+        Brief: <strong id="delivBriefName"></strong>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink3);margin-bottom:14px">
+        Sau khi submit, brief sẽ tự động chuyển sang <strong>Done</strong> và gửi email cho người tạo.
+      </div>
+      <div class="field">
+        <label>Link Google Drive <span class="req">*</span></label>
+        <input type="url" id="delivLinkInput" placeholder="https://drive.google.com/..."
+          onkeydown="if(event.key==='Enter')submitDeliverables()">
+      </div>
+      <div class="field">
+        <label>Ghi chú thêm <span class="hint">(tuỳ chọn)</span></label>
+        <textarea id="delivNoteInput" rows="2" placeholder="Hoàn thành đúng spec, đã export đủ format..."></textarea>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn-cancel" onclick="closeOverlay('delivModal')">Huỷ</button>
+      <button class="btn-ok" onclick="submitDeliverables()">✅ Nộp & Mark Done</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <!-- ════ NEW BRIEF MENU ════ -->
@@ -1159,6 +1268,93 @@ let filterStatus = { all:'all', banner:'all', video:'all' };
 let user = { name:'', team:'', email:'' };
 let cfg  = { scriptUrl:'', driveFolder:'Brief Manager', emails:'', designers:'', platforms:'Amazon,Shopee,Lazada,TikTok Shop,Website' };
 
+/* ── ROLE / AUTH ── */
+let _adminSession = false; // true while admin is logged in (session only)
+
+function isAdmin(){ return _adminSession; }
+
+function tryNavSettings(el){
+  if(isAdmin()){
+    navTo('settings', el);
+  } else {
+    // Show admin login modal, then navigate after success
+    _pendingNavEl = el;
+    document.getElementById('adminLoginErr').style.display = 'none';
+    document.getElementById('adminUser').value = '';
+    document.getElementById('adminPass').value = '';
+    document.getElementById('adminLoginModal').classList.add('show');
+    setTimeout(()=>document.getElementById('adminUser').focus(), 100);
+  }
+}
+let _pendingNavEl = null;
+
+function doAdminLogin(){
+  const username = document.getElementById('adminUser').value.trim();
+  const password = document.getElementById('adminPass').value;
+  const storedUser = cfg.adminUser || 'admin';
+  const storedPass = cfg.adminPass || 'admin123';
+
+  if(username === storedUser && password === storedPass){
+    _adminSession = true;
+    closeOverlay('adminLoginModal');
+    applyRoleUI();
+    toast('👑 Đã đăng nhập Admin');
+    if(_pendingNavEl){
+      navTo('settings', _pendingNavEl);
+      _pendingNavEl = null;
+    }
+  } else {
+    document.getElementById('adminLoginErr').style.display = 'block';
+    document.getElementById('adminPass').value = '';
+    document.getElementById('adminPass').focus();
+  }
+}
+
+function adminLogout(){
+  _adminSession = false;
+  applyRoleUI();
+  // If currently on settings page, kick back to dashboard
+  const settingsPage = document.getElementById('page-settings');
+  if(settingsPage && settingsPage.classList.contains('active')){
+    const dashNav = document.querySelector('[data-page="dashboard"]');
+    navTo('dashboard', dashNav);
+  }
+  toast('Đã đăng xuất Admin');
+}
+
+function applyRoleUI(){
+  const badge     = document.getElementById('sbRoleBadge');
+  const lockBadge = document.getElementById('settingsLockBadge');
+  const userArea  = document.querySelector('.sb-user');
+
+  if(isAdmin()){
+    badge.textContent = '👑 Admin';
+    badge.className   = 'role-badge admin';
+    lockBadge.textContent = '✓';
+    lockBadge.className   = 'role-badge admin';
+    lockBadge.title   = 'Admin có quyền truy cập';
+    // Add logout button if not already there
+    if(!document.getElementById('adminLogoutBtn')){
+      const btn = document.createElement('button');
+      btn.id        = 'adminLogoutBtn';
+      btn.textContent = 'Logout';
+      btn.onclick   = (e) => { e.stopPropagation(); adminLogout(); };
+      btn.style.cssText = 'background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.6);font-family:inherit;font-size:10px;padding:2px 7px;border-radius:4px;cursor:pointer;margin-left:4px;flex-shrink:0';
+      userArea.appendChild(btn);
+    }
+  } else {
+    badge.textContent = 'Member';
+    badge.className   = 'role-badge member';
+    lockBadge.textContent = '🔒';
+    lockBadge.className   = 'role-badge member';
+    lockBadge.title   = 'Chỉ Admin mới vào được';
+    const logoutBtn = document.getElementById('adminLogoutBtn');
+    if(logoutBtn) logoutBtn.remove();
+  }
+  // Re-render lists so Delete button visibility updates
+  refreshAllLists();
+}
+
 function loadLocal(){
   briefs = JSON.parse(localStorage.getItem('bm_briefs') || '[]');
   user   = JSON.parse(localStorage.getItem('bm_user')   || '{}');
@@ -1177,6 +1373,8 @@ function saveCfg(){
   cfg.bannerTypes  = g('cfg-bannerTypes')  || cfg.bannerTypes  || '';
   cfg.videoTypes   = g('cfg-videoTypes')   || cfg.videoTypes   || '';
   cfg.defaultSpecs = g('cfg-defaultSpecs') || cfg.defaultSpecs || 'amazon';
+  cfg.adminUser    = g('cfg-adminUser')    || cfg.adminUser    || 'admin';
+  cfg.adminPass    = g('cfg-adminPass')    || cfg.adminPass    || 'admin123';
   localStorage.setItem('bm_cfg', JSON.stringify(cfg));
 }
 
@@ -1195,6 +1393,7 @@ window.onload = () => {
   renderList('video');
   renderStatusLists();
   checkAutosaveRestore();
+  applyRoleUI(); // apply member/admin UI state
   // Auto-fetch cloud config in background (silent)
   setTimeout(autoFetchCloudConfig, 1500);
 };
@@ -1216,6 +1415,8 @@ function applyCfgToForm(){
   if(cfg.bannerTypes)  setVal('cfg-bannerTypes',  cfg.bannerTypes);
   if(cfg.videoTypes)   setVal('cfg-videoTypes',   cfg.videoTypes);
   if(cfg.defaultSpecs) setVal('cfg-defaultSpecs', cfg.defaultSpecs);
+  if(cfg.adminUser)    setVal('cfg-adminUser',     cfg.adminUser);
+  // Don't pre-fill password for security — show placeholder only
 }
 
 /* ══ NAVIGATION ══ */
@@ -1479,6 +1680,36 @@ function briefCardHTML(b){
         </div>
       </div>`:''}
 
+      <!-- ── DELIVERABLES ZONE ── -->
+      <div style="margin:0 14px 10px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:6px">
+          📁 Deliverables
+        </div>
+        ${b.delivLink ? `
+        <div style="background:var(--g0);border:1.5px solid var(--g3);border-radius:var(--r-md);padding:9px 12px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <a href="${h(b.delivLink)}" target="_blank" rel="noopener"
+              style="color:var(--g7);font-size:12px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
+              ${h(b.delivLink)}
+            </a>
+            <span style="font-size:10px;color:var(--ink4);flex-shrink:0">${b.delivAt ? new Date(b.delivAt).toLocaleDateString('vi-VN') : ''}</span>
+          </div>
+          ${b.delivNote ? `<div style="font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.5">${h(b.delivNote)}</div>` : ''}
+          <button onclick="event.stopPropagation();openDelivModal('${b.id}')"
+            style="margin-top:7px;background:none;border:1px solid var(--g3);color:var(--g7);font-family:inherit;font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-sm);cursor:pointer">
+            Cập nhật link
+          </button>
+        </div>` : `
+        <div style="border:1.5px dashed var(--line);border-radius:var(--r-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--white)">
+          <div style="font-size:12px;color:var(--ink4)">Designer chưa nộp deliverables</div>
+          <button onclick="event.stopPropagation();openDelivModal('${b.id}')"
+            style="background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;flex-shrink:0">
+            📁 Nộp link
+          </button>
+        </div>`}
+      </div>
+
       <!-- Action bar -->
       <div style="display:flex;align-items:center;gap:6px;padding:10px 14px 12px;border-top:1px solid var(--line);flex-wrap:wrap">
         <select onchange="updateStatus('${b.id}',this.value)" onclick="event.stopPropagation()"
@@ -1495,8 +1726,7 @@ function briefCardHTML(b){
         <button class="bc-act-btn" onclick="event.stopPropagation();useAsTemplate('${b.id}')">Template</button>
         ${b.driveUrl?`<button class="bc-act-btn" onclick="event.stopPropagation();window.open('${b.driveUrl}','_blank')">Drive</button>`:''}
         <button class="bc-act-btn" onclick="event.stopPropagation();exportCard('${b.id}')">Export HTML</button>
-        <button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBrief('${b.id}')"
-          style="margin-left:auto">Delete</button>
+        ${isAdmin()?`<button class="bc-act-btn danger" onclick="event.stopPropagation();deleteBrief('${b.id}')" style="margin-left:auto">Delete</button>`:''}
       </div>
     </div>
   </div>`;
@@ -2308,14 +2538,15 @@ async function publishBrief(){
     if(el){ el.focus(); el.style.borderColor='var(--red)'; }
     return;
   }
+
+  const wasPublished = editingId && briefs.find(b=>b.id===editingId)?.published;
   data.published = true;
 
   const scriptUrl = cfg.scriptUrl || '';
 
-  // 3. Không có Apps Script → lưu local ngay, xong
+  // 3. Không có Apps Script → lưu local, không gửi email
   if(!scriptUrl){
-    formDirty = false; // reset trước khi đóng
-    const wasPublished = editingId && briefs.find(b=>b.id===editingId)?.published;
+    formDirty = false;
     upsertBrief(data);
     saveLocal();
     closeForm();
@@ -2324,30 +2555,31 @@ async function publishBrief(){
     return;
   }
 
-  // 4. Có Apps Script → upload
-  formDirty = false; // reset để closeForm không bị chặn
-  spin('Đang publish brief...');
+  // 4. Có Apps Script → upload + gửi email
+  formDirty = false;
+  spin(wasPublished ? 'Đang cập nhật brief...' : 'Đang publish brief...');
+
   try {
-    const emails = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+    const emails   = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+
+    // Tách refImgs ra khỏi briefData để tránh payload quá lớn khi stringify
+    const refImages = [...formImgs]; // array of {name, data (base64)}
+    const briefData = { ...data, refImgs: [] }; // gửi brief không kèm ảnh base64
+
     const payload = JSON.stringify({
-      action     : 'publishBrief',
-      briefData  : { ...data, refImgs: [] },
-      campaign   : data.name,
-      platform   : data.platform,
-      author     : data.orderedBy,
-      team       : user.team,
-      assign     : data.assignTo,
-      deadline   : data.deadline,
-      banners    : data.bannerSpecs,
-      prods      : data.products,
-      notes      : data.notes,
+      action     : wasPublished ? 'updateBrief' : 'publishBrief',
+      briefData,
+      refImages,                          // ← ảnh reference thực sự
       folder     : cfg.driveFolder || 'Brief Manager',
       teamEmails : emails,
     });
+
     const result = await scriptPost(scriptUrl, payload);
+
     if(result.ok){
-      data.driveUrl = result.fileUrl || '';
-      toast('Đã publish + lưu Drive!');
+      data.driveUrl = result.driveUrl || result.fileUrl || data.driveUrl || '';
+      const emailNote = emails.length ? ` · Đã gửi ${emails.length} email` : '';
+      toast((wasPublished ? '✅ Đã cập nhật brief!' : '🚀 Brief đã publish!') + emailNote);
     } else {
       toast('Script lỗi: ' + (result.error||'Unknown'));
     }
@@ -2381,11 +2613,50 @@ function refreshAllLists(){
 function updateStatus(id, status){
   const b = briefs.find(x=>x.id===id);
   if(!b) return;
-  b.status = status;
+  const oldStatus = b.status;
+  b.status    = status;
   b.updatedAt = Date.now();
   saveLocal();
   refreshAllLists();
-  toast(`Đã cập nhật → ${STATUS_LABEL[status]}`);
+  toast(`Đã cập nhật → ${STATUS_LABEL[status]||status}`);
+
+  // Gửi email notify nếu có Apps Script và status thay đổi có ý nghĩa
+  const notifyOn = ['done','revision','inprogress'];
+  if(cfg.scriptUrl && notifyOn.includes(status) && status !== oldStatus && b.published){
+    notifyStatusChange(b, oldStatus, status);
+  }
+}
+
+async function notifyStatusChange(brief, oldStatus, newStatus){
+  const emails = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+  if(!emails.length) return;
+
+  const labelMap = {
+    todo      : 'To-do',
+    inprogress: 'In Progress',
+    revision  : 'Needs Revision',
+    done      : 'Done ✅',
+  };
+  const payload = JSON.stringify({
+    action    : 'notifyStatus',
+    briefId   : brief.id,
+    briefName : brief.name,
+    orderNum  : brief.orderNum,
+    platform  : brief.platform,
+    assignTo  : brief.assignTo,
+    orderedBy : brief.orderedBy,
+    deadline  : brief.deadline,
+    oldStatus : labelMap[oldStatus] || oldStatus,
+    newStatus : labelMap[newStatus] || newStatus,
+    updatedBy : user.name || 'Unknown',
+    driveUrl  : brief.driveUrl || '',
+    teamEmails: emails,
+  });
+
+  try {
+    await scriptPost(cfg.scriptUrl, payload);
+    // Silent — don't disturb user with extra toast
+  } catch(e) { /* silent */ }
 }
 
 let pendingEditId = null;
@@ -3407,6 +3678,79 @@ function applyPendingCloudConfig() {
     toast('☁️ Đã áp dụng settings từ Admin!');
   } else {
     pullCloudConfig();
+  }
+}
+
+/* ══════════════════════════════════════════════
+   DELIVERABLES — Designer nộp link → auto Done + email
+══════════════════════════════════════════════ */
+let _delivBriefId = null;
+
+function openDelivModal(id){
+  const b = briefs.find(x=>x.id===id);
+  if(!b) return;
+  _delivBriefId = id;
+  document.getElementById('delivBriefName').textContent = '#'+(b.orderNum||'?')+' '+b.name;
+  document.getElementById('delivLinkInput').value  = b.delivLink || '';
+  document.getElementById('delivNoteInput').value  = b.delivNote || '';
+  document.getElementById('delivModal').classList.add('show');
+  setTimeout(()=>document.getElementById('delivLinkInput').focus(), 100);
+}
+
+async function submitDeliverables(){
+  const link = document.getElementById('delivLinkInput').value.trim();
+  const note = document.getElementById('delivNoteInput').value.trim();
+
+  if(!link){ toast('Vui lòng nhập link Drive'); return; }
+  if(!link.startsWith('http')){ toast('Link không hợp lệ — phải bắt đầu bằng http'); return; }
+
+  const b = briefs.find(x=>x.id===_delivBriefId);
+  if(!b) return;
+
+  b.delivLink = link;
+  b.delivNote = note;
+  b.delivAt   = Date.now();
+  b.delivBy   = user.name || 'Designer';
+  b.status    = 'done';
+  b.updatedAt = Date.now();
+
+  saveLocal();
+  closeOverlay('delivModal');
+  refreshAllLists();
+  toast('✅ Đã nộp deliverables — brief chuyển sang Done!');
+
+  // Sync brief lên Apps Script
+  if(cfg.scriptUrl && b.published){
+    try {
+      await scriptPost(cfg.scriptUrl, JSON.stringify({
+        action   : 'updateBrief',
+        briefData: { ...b, refImgs:[] },
+        refImages: [],
+        teamEmails: [],
+      }));
+    } catch(e){ /* silent */ }
+  }
+
+  // Gửi email notify người tạo
+  if(cfg.scriptUrl){
+    const emails = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+    if(emails.length){
+      try {
+        await scriptPost(cfg.scriptUrl, JSON.stringify({
+          action    : 'notifyDeliverables',
+          briefId   : b.id,
+          briefName : b.name,
+          orderNum  : b.orderNum,
+          platform  : b.platform,
+          orderedBy : b.orderedBy,
+          assignTo  : b.assignTo,
+          delivLink : link,
+          delivNote : note,
+          delivBy   : user.name || 'Designer',
+          teamEmails: emails,
+        }));
+      } catch(e){ /* silent */ }
+    }
   }
 }
 
