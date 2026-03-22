@@ -778,7 +778,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
       <div class="stab-content" id="sc-integrations">
 
         <!-- Cloud Config banner -->
-        <div id="cloudConfigBanner" style="display:none;background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div id="cloudConfigBanner" style="display:none;background:var(--g0);border:1.5px solid var(--g1);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;align-items:center;gap:10px">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--g7);flex-shrink:0"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
           <span id="cloudConfigMsg" style="font-size:12px;color:var(--g7);font-weight:500;flex:1"></span>
           <button onclick="applyPendingCloudConfig()" style="background:var(--g7);border:none;color:#fff;font-family:inherit;font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap">Áp dụng</button>
@@ -883,43 +883,6 @@ textarea{resize:vertical;min-height:60px;line-height:1.55}
                 Pull from Cloud
               </button>
             </div>
-          </div>
-        </div>
-
-        <!-- Cloudinary Image Storage -->
-        <div class="settings-card" style="margin-bottom:14px">
-          <div class="settings-card-header">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M13 10a3 3 0 0 0-3-5.2A5 5 0 1 0 4 10"/><path d="M8 10v4M6 12l2 2 2-2"/></svg>
-            🖼 Cloudinary — Image Storage (tuỳ chọn)
-          </div>
-          <div class="settings-card-body">
-            <div style="font-size:11.5px;color:var(--ink3);line-height:1.6;margin-bottom:12px">
-              Lưu reference images lên Cloudinary CDN — mọi thành viên đều thấy ảnh, tốc độ cao, miễn phí 25GB.<br>
-              <strong style="color:var(--ink2)">Nếu không cấu hình</strong> → ảnh lưu Google Drive qua Apps Script (chậm hơn).
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Cloud Name <span class="req">*</span></label>
-                <input type="text" id="cfg-cloudName" placeholder="your-cloud-name" oninput="saveCfg()">
-              </div>
-              <div class="field">
-                <label>Upload Preset <span class="req">*</span> <span class="hint">(unsigned)</span></label>
-                <input type="text" id="cfg-cloudPreset" placeholder="brief_manager_preset" oninput="saveCfg()">
-              </div>
-            </div>
-            <div class="int-status idle" id="st-cloudinary">
-              Chưa cấu hình
-              <button class="test-btn" onclick="testCloudinary()">Test upload</button>
-            </div>
-            <details style="margin-top:10px">
-              <summary style="font-size:11px;color:var(--blue);cursor:pointer;user-select:none">Hướng dẫn lấy credentials</summary>
-              <div style="font-size:11px;color:var(--ink3);line-height:1.8;margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r-sm)">
-                1. Đăng ký free tại <a href="https://cloudinary.com" target="_blank" style="color:var(--blue)">cloudinary.com</a><br>
-                2. Dashboard → copy <b>Cloud name</b><br>
-                3. Settings → Upload → Add upload preset → Mode: <b>Unsigned</b> → Save → copy preset name<br>
-                4. Paste vào 2 ô bên trên → Test upload
-              </div>
-            </details>
           </div>
         </div>
 
@@ -1419,8 +1382,6 @@ function saveCfg(){
   cfg.defaultSpecs = g('cfg-defaultSpecs') || cfg.defaultSpecs || 'amazon';
   cfg.adminUser    = g('cfg-adminUser')    || cfg.adminUser    || 'admin';
   cfg.adminPass    = g('cfg-adminPass')    || cfg.adminPass    || 'admin123';
-  cfg.cloudName    = g('cfg-cloudName')    || cfg.cloudName    || '';
-  cfg.cloudPreset  = g('cfg-cloudPreset')  || cfg.cloudPreset  || '';
   localStorage.setItem('bm_cfg', JSON.stringify(cfg));
 }
 
@@ -1485,8 +1446,6 @@ function applyCfgToForm(){
   if(cfg.videoTypes)   setVal('cfg-videoTypes',   cfg.videoTypes);
   if(cfg.defaultSpecs) setVal('cfg-defaultSpecs', cfg.defaultSpecs);
   if(cfg.adminUser)    setVal('cfg-adminUser',     cfg.adminUser);
-  if(cfg.cloudName)    setVal('cfg-cloudName',     cfg.cloudName);
-  if(cfg.cloudPreset)  setVal('cfg-cloudPreset',   cfg.cloudPreset);
   // Don't pre-fill password for security — show placeholder only
 }
 
@@ -1725,31 +1684,6 @@ function briefCardHTML(b){
       ${b.notes?`
       <div style="margin:0 14px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-sm);padding:8px 10px;font-size:11.5px;color:#78350f;line-height:1.55">
         <span style="font-weight:700">Note:</span> ${h(b.notes)}
-      </div>`:''}
-
-      ${(b.refImgs&&b.refImgs.length)||(b.refDriveUrls&&b.refDriveUrls.length)||(b.refCloudUrls&&b.refCloudUrls.length)?`
-      <div style="margin:0 14px 10px">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:6px">
-          Reference Images (${Math.max((b.refImgs||[]).length,(b.refCloudUrls||[]).length,(b.refDriveUrls||[]).length)})
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">
-          ${/* Cloudinary URLs — best quality, always accessible */ ''}
-          ${(b.refCloudUrls||[]).map(url=>`
-            <div style="border-radius:5px;overflow:hidden;border:1px solid var(--line)">
-              <img src="${h(url)}" style="width:64px;height:48px;object-fit:cover;display:block" loading="lazy">
-            </div>`).join('')}
-          ${/* base64 fallback — chỉ hiện nếu chưa có Cloudinary URLs */ ''}
-          ${!(b.refCloudUrls&&b.refCloudUrls.length)?(b.refImgs||[]).slice(0,8).map(img=>`
-            <div style="border-radius:5px;overflow:hidden;border:1px solid var(--line)">
-              <img src="${img.data}" style="width:64px;height:48px;object-fit:cover;display:block" loading="lazy" title="${h(img.name||'')}">
-            </div>`).join(''):''}
-          ${/* Drive URLs fallback */ ''}
-          ${!(b.refCloudUrls&&b.refCloudUrls.length)&&!(b.refImgs&&b.refImgs.length)?(b.refDriveUrls||[]).map((url,i)=>`
-            <a href="${h(url)}" target="_blank" onclick="event.stopPropagation()"
-              style="display:inline-flex;align-items:center;gap:4px;background:var(--g0);border:1px solid var(--g1);border-radius:var(--r-sm);padding:4px 10px;font-size:11px;color:var(--g7);text-decoration:none">
-              📎 Ref ${i+1}
-            </a>`).join(''):''}
-        </div>
       </div>`:''}
 
       ${specsCount?`
@@ -2639,145 +2573,60 @@ async function publishBrief(){
 
   const wasPublished = editingId && briefs.find(b=>b.id===editingId)?.published;
   data.published = true;
-  // ★ GIỮ refImgs base64 trong data để hiện trên trang chi tiết
-  data.refImgs = [...formImgs];
 
   const scriptUrl = cfg.scriptUrl || '';
 
-  // 3. Lưu local NGAY — không chờ Apps Script
-  formDirty = false;
-  upsertBrief(data);
-  saveLocal();
-  closeForm();
-  refreshAllLists();
-  toast(wasPublished ? '✅ Đã cập nhật brief!' : '🚀 Brief đã publish!');
-
-  // 4. Nếu không có Apps Script → xong
-  if(!scriptUrl) return;
-
-  // 5. Sync lên cloud ASYNC ở background — không block UI
-  const emails     = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
-  const refImages  = [...formImgs]; // base64 images
-
-  (async () => {
-    try {
-      let uploadedUrls = [];
-
-      // ── A. Upload ảnh lên Cloudinary (nhanh, CDN) ──────────
-      if(refImages.length && cfg.cloudName && cfg.cloudPreset){
-        uploadedUrls = await uploadToCloudinary(refImages, data.id);
-      }
-
-      // ── B. Sync brief + upload Drive (nếu chưa có Cloudinary) ──
-      const briefData = {
-        ...data,
-        refImgs      : [],
-        refCloudUrls : uploadedUrls,
-      };
-
-      if(scriptUrl){
-        const payload = JSON.stringify({
-          action     : wasPublished ? 'updateBrief' : 'publishBrief',
-          briefData,
-          // Chỉ gửi ảnh base64 lên Drive nếu không có Cloudinary
-          refImages  : uploadedUrls.length ? [] : refImages,
-          folder     : cfg.driveFolder || 'Brief Manager',
-          teamEmails : emails,
-        });
-        const result = await scriptPost(scriptUrl, payload);
-        if(result.ok){
-          const b = briefs.find(x=>x.id===data.id);
-          if(b){
-            if(result.driveUrl)     b.driveUrl     = result.driveUrl;
-            // ★ Lưu toàn bộ Drive thumbnail URLs vào brief
-            if(result.refDriveUrls && result.refDriveUrls.length){
-              b.refDriveUrls = result.refDriveUrls;
-              // Xoá base64 local nếu đã có Drive URLs — tiết kiệm localStorage
-              if(!uploadedUrls.length) b.refImgs = [];
-            }
-          }
-        }
-      }
-
-      // ── C. Cập nhật Cloudinary URLs vào brief local ──────────
-      if(uploadedUrls.length){
-        const b = briefs.find(x=>x.id===data.id);
-        if(b){
-          b.refCloudUrls = uploadedUrls;
-          b.refImgs      = []; // xoá base64 — đã có CDN URL
-        }
-      }
-
-      saveLocal();
-      refreshAllLists(); // re-render để hiện ảnh qua URL thay vì base64
-
-    } catch(e){ /* silent — brief đã lưu local rồi */ }
-  })();
-}
-
-/* ══════════════════════════════════════════════
-   CLOUDINARY — Upload reference images
-   Unsigned upload preset — no server needed
-══════════════════════════════════════════════ */
-async function uploadToCloudinary(images, briefId){
-  const cloudName = cfg.cloudName;
-  const preset    = cfg.cloudPreset;
-  if(!cloudName || !preset) return [];
-
-  const urls = [];
-  const folder = 'brief-manager/' + (briefId || 'misc');
-
-  for(const img of images){
-    try {
-      const fd = new FormData();
-      fd.append('file',            img.data);          // base64 data URL
-      fd.append('upload_preset',   preset);
-      fd.append('folder',          folder);
-      fd.append('public_id',       (img.name||'ref').replace(/[^a-z0-9_-]/gi,'_').slice(0,60) + '_' + Date.now());
-
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method : 'POST',
-        body   : fd,
-      });
-      const json = await res.json();
-      if(json.secure_url) urls.push(json.secure_url);
-    } catch(e){ /* skip failed image */ }
-  }
-  return urls;
-}
-
-async function testCloudinary(){
-  const cloudName = g('cfg-cloudName');
-  const preset    = g('cfg-cloudPreset');
-  if(!cloudName || !preset){
-    setStatus('st-cloudinary','err','Nhập Cloud name và Upload preset trước');
+  // 3. Không có Apps Script → lưu local, không gửi email
+  if(!scriptUrl){
+    formDirty = false;
+    upsertBrief(data);
+    saveLocal();
+    closeForm();
+    refreshAllLists();
+    toast(wasPublished ? '✅ Đã cập nhật brief!' : '🚀 Brief đã publish!');
     return;
   }
-  setStatus('st-cloudinary','idle','Đang test upload...');
+
+  // 4. Có Apps Script → upload + gửi email
+  formDirty = false;
+  spin(wasPublished ? 'Đang cập nhật brief...' : 'Đang publish brief...');
+
   try {
-    // Upload 1x1 pixel PNG test
-    const fd = new FormData();
-    fd.append('file',          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
-    fd.append('upload_preset', preset);
-    fd.append('folder',        'brief-manager/test');
-    const res  = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method:'POST', body:fd
+    const emails   = (cfg.emails||'').split('\n').map(e=>e.trim()).filter(e=>e.includes('@'));
+
+    // Tách refImgs ra khỏi briefData để tránh payload quá lớn khi stringify
+    const refImages = [...formImgs]; // array of {name, data (base64)}
+    const briefData = { ...data, refImgs: [] }; // gửi brief không kèm ảnh base64
+
+    const payload = JSON.stringify({
+      action     : wasPublished ? 'updateBrief' : 'publishBrief',
+      briefData,
+      refImages,                          // ← ảnh reference thực sự
+      folder     : cfg.driveFolder || 'Brief Manager',
+      teamEmails : emails,
     });
-    const json = await res.json();
-    if(json.secure_url){
-      cfg.cloudName   = cloudName;
-      cfg.cloudPreset = preset;
-      saveCfg();
-      setStatus('st-cloudinary','ok','✅ Kết nối thành công! Ảnh sẽ upload lên Cloudinary khi publish.');
+
+    const result = await scriptPost(scriptUrl, payload);
+
+    if(result.ok){
+      data.driveUrl = result.driveUrl || result.fileUrl || data.driveUrl || '';
+      const emailNote = emails.length ? ` · Đã gửi ${emails.length} email` : '';
+      toast((wasPublished ? '✅ Đã cập nhật brief!' : '🚀 Brief đã publish!') + emailNote);
     } else {
-      setStatus('st-cloudinary','err', json.error?.message || 'Upload thất bại — kiểm tra lại Cloud name và preset');
+      toast('Script lỗi: ' + (result.error||'Unknown'));
     }
-  } catch(e){
-    setStatus('st-cloudinary','err','Lỗi: '+e.message);
+  } catch(err) {
+    toast('Lỗi kết nối: ' + err.message);
+  } finally {
+    spinHide();
+    upsertBrief(data);
+    saveLocal();
+    closeForm();
+    refreshAllLists();
   }
 }
 
-
+function upsertBrief(data){
   const idx = briefs.findIndex(b=>b.id===data.id);
   if(idx>=0) briefs[idx]=data;
   else briefs.unshift(data);
@@ -3046,30 +2895,16 @@ function buildExportHTML(b){
       +'</table>'
       +'</div>';
 
-    // Reference images — priority: Cloudinary > base64 > Drive URLs
+    // Reference images
     var refHTML = '';
-    var allRefs      = (b.refImgs||[]);
-    var cloudRefs    = (b.refCloudUrls||[]);
-    var driveRefs    = (b.refDriveUrls||[]);
-    var hasAnyRef    = cloudRefs.length > 0 || allRefs.length > 0 || driveRefs.length > 0;
-    if(hasAnyRef){
+    if(b.refImgs && b.refImgs.length > 0){
       refHTML = '<div style="margin-top:10px;padding:10px;background:'+c0+';border:1px solid '+c1+';border-radius:8px">'
-        +'<div style="font-size:10px;font-weight:700;color:'+c7+';text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Reference ('+(cloudRefs.length||allRefs.length||driveRefs.length)+')</div>'
+        +'<div style="font-size:10px;font-weight:700;color:'+c7+';text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Reference ('+b.refImgs.length+')</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-        // Cloudinary (best — URL-based, always accessible)
-        +cloudRefs.slice(0,6).map(function(url){
+        +(b.refImgs||[]).slice(0,6).map(function(img){
           return '<div style="border-radius:6px;overflow:hidden;border:1px solid '+c1+'">'
-            +'<img src="'+url+'" style="width:72px;height:56px;object-fit:cover;display:block" loading="lazy"></div>';
+            +'<img src="'+img.data+'" style="width:72px;height:56px;object-fit:cover;display:block"></div>';
         }).join('')
-        // base64 fallback
-        +(cloudRefs.length===0 ? allRefs.slice(0,6).map(function(img){
-          return '<div style="border-radius:6px;overflow:hidden;border:1px solid '+c1+'">'
-            +'<img src="'+img.data+'" style="width:72px;height:56px;object-fit:cover;display:block" loading="lazy"></div>';
-        }).join('') : '')
-        // Drive links fallback
-        +(cloudRefs.length===0&&allRefs.length===0 ? driveRefs.map(function(url,i){
-          return '<a href="'+url+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid '+c1+';border-radius:6px;padding:5px 10px;font-size:11px;color:'+c7+';text-decoration:none">📎 Ref '+(i+1)+'</a>';
-        }).join('') : '')
         +'</div></div>';
     }
 
@@ -3159,41 +2994,6 @@ function buildExportHTML(b){
     'Tổng: '+totalFiles+' files',
   ].filter(Boolean).map(function(t){return '<span class="tag">'+h_(t)+'</span>';}).join('');
 
-  // ── Top-level Reference Images section ──────────────────
-  var topRefHTML  = '';
-  var topRefs     = b.refImgs      || [];
-  var topCloud    = b.refCloudUrls || [];
-  var topDrive    = b.refDriveUrls || [];
-  var hasTopRef   = topCloud.length > 0 || topRefs.length > 0 || topDrive.length > 0;
-  if(hasTopRef){
-    topRefHTML = '<div class="divider"></div>'
-      +'<div class="section-title">Reference Images</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px">'
-      // Cloudinary — primary
-      +topCloud.map(function(url){
-        return '<div style="border-radius:8px;overflow:hidden;border:1px solid #e0ece0;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
-          +'<img src="'+url+'" style="width:120px;height:90px;object-fit:cover;display:block" loading="lazy"></div>';
-      }).join('')
-      // base64 fallback
-      +(topCloud.length===0 ? topRefs.map(function(img,i){
-        return '<div style="border-radius:8px;overflow:hidden;border:1px solid #e0ece0;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
-          +'<img src="'+img.data+'" style="width:120px;height:90px;object-fit:cover;display:block" loading="lazy" title="'+(img.name||'ref '+(i+1))+'"></div>';
-      }).join('') : '')
-      // Drive links fallback
-      +(topCloud.length===0&&topRefs.length===0 ? topDrive.map(function(url,i){
-        return '<a href="'+url+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:#f0f9f0;border:1px solid #c8e8c8;border-radius:8px;padding:8px 14px;font-size:12px;color:'+c7+';text-decoration:none;font-weight:600">📎 Xem Reference '+(i+1)+'</a>';
-      }).join('') : '')
-      +'</div>';
-  }
-
-  // ── Desc section ─────────────────────────────────────────
-  var descHTML = '';
-  if(b.desc){
-    descHTML = '<div class="divider"></div>'
-      +'<div class="section-title">Mô Tả / Mục Đích</div>'
-      +'<div style="background:#fff;border:1px solid #e5ece5;border-radius:10px;padding:12px 16px;font-size:13px;color:#333;line-height:1.7">'+h_(b.desc)+'</div>';
-  }
-
   // ── Final HTML ───────────────────────────────────────────
   return '<!DOCTYPE html><html lang="vi"><head>'
     +'<meta charset="UTF-8">'
@@ -3217,10 +3017,6 @@ function buildExportHTML(b){
         +'<div class="meta-val">'+h_(kv[1]||'—')+'</div></div>';
     }).join('')
     +'</div>'
-
-    // Desc + refs at top
-    +descHTML
-    +topRefHTML
 
     // Spec sections
     +(specs.length?'<div class="section-title">Chi Tiết Từng Loại Banner</div>':'')
@@ -3428,7 +3224,7 @@ function onColorChange(key, val){
   activePresetId = 'custom';
   customColors[key] = val;
   // sync text input
-  const pickers = document.querySelectorAll(`[oninput*="onColorTextChange('${key}"]`);
+  const pickers = document.querySelectorAll(`[oninput*="onColorTextChange('${key}'"]`);
   pickers.forEach(p=>p.value=val);
   const swatch = document.getElementById('cswatch-'+key);
   if(swatch) swatch.style.background = val;
@@ -3441,7 +3237,7 @@ function onColorTextChange(key, val){
   activePresetId = 'custom';
   customColors[key] = val;
   // sync color input
-  const pickers = document.querySelectorAll(`[oninput*="onColorChange('${key}"]`);
+  const pickers = document.querySelectorAll(`[oninput*="onColorChange('${key}'"]`);
   pickers.forEach(p=>p.value=val);
   const swatch = document.getElementById('cswatch-'+key);
   if(swatch) swatch.style.background = val;
@@ -3766,8 +3562,6 @@ function buildCloudConfigPayload() {
     bannerTypes  : safeCfg.bannerTypes|| g('cfg-bannerTypes')|| '',
     videoTypes   : safeCfg.videoTypes || g('cfg-videoTypes') || '',
     defaultSpecs : safeCfg.defaultSpecs || '',
-    cloudName    : safeCfg.cloudName   || g('cfg-cloudName')   || '',
-    cloudPreset  : safeCfg.cloudPreset || g('cfg-cloudPreset') || '',
     // Status labels
     lblTodo      : g('cfg-lbl-todo')       || 'To-do',
     lblInprogress: g('cfg-lbl-inprogress') || 'In Progress',
@@ -3832,7 +3626,7 @@ function applyCloudConfig(config) {
   if (!config || !config._version) return;
 
   // Apply workspace fields to form + cfg object
-  const fields = ['appName','tagline','appIcon','companyName','designers','teams','platforms','bannerTypes','videoTypes','defaultSpecs','cloudName','cloudPreset'];
+  const fields = ['appName','tagline','appIcon','companyName','designers','teams','platforms','bannerTypes','videoTypes','defaultSpecs'];
   fields.forEach(k => {
     if (config[k] !== undefined) {
       setVal('cfg-' + k, config[k]);
